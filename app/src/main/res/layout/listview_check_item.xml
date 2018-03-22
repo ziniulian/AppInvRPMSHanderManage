@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal" >
+
+    <TextView
+        android:id="@+id/txvSqeNo"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_marginLeft="5dp"
+        android:layout_weight="0.18"
+        android:gravity="center_vertical"
+        android:textColor="#313031" />
+
+    <RelativeLayout
+        android:layout_width="260dp"
+        android:layout_height="80dp"
+        android:gravity="left"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_weight="0.82"
+                android:gravity="left"
+                android:singleLine="true"
+                android:text="盘点单号："/>
+
+            <TextView
+                android:id="@+id/txvCheckCode"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_weight="0.82"
+                android:gravity="left"
+                android:singleLine="true" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:gravity="left"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/txvCheckInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_weight="0.82"
+                android:gravity="left"
+                android:singleLine="true" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:gravity="left"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_weight="0.82"
+                android:gravity="left"
+                android:singleLine="true"
+                android:text="状态：" />
+
+            <TextView
+                android:id="@+id/txvCheckStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_weight="0.82"
+                android:gravity="left"
+                android:singleLine="true"
+                android:textColor="#ff4500" />
+        </LinearLayout>
+    </RelativeLayout>
+ <ImageView
+        android:id="@+id/delImage"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center_vertical" />
+</LinearLayout>

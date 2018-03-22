@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/black"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/app_name"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+        
+          <Button
+            android:id="@+id/btnBack"
+            android:layout_width="50dp"
+            android:layout_height="26dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/yellow"
+            android:text="@string/exit" >
+        </Button>
+
+        <Button
+            android:id="@+id/btnConfig"
+            android:layout_width="50dp"
+            android:layout_height="26dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/yellow"
+            android:text="@string/menu_settings" >
+          
+        </Button>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="456dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:orientation="vertical" >
+
+            <GridView
+                android:id="@+id/gridview"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:columnWidth="70dp"
+                android:gravity="center"
+                android:horizontalSpacing="10dp"
+                android:numColumns="auto_fit"
+                android:stretchMode="columnWidth"
+                android:verticalSpacing="10dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#000000"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="当前用户："
+                android:textColor="#ffffff" />
+
+            <TextView
+                android:id="@+id/txtUserInfo"
+                android:layout_width="210dp"
+                android:layout_height="wrap_content"
+                android:text="管理员"
+                android:textColor="#ffffff" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

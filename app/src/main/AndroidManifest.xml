@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.invengo.rpms"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="17" />
+    <!--
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:name=".MyApp"
+        android:allowBackup="true"
+        android:icon="@drawable/soft"
+        android:label="@string/app_name"
+        android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen" >
+        <activity
+            android:name="com.invengo.rpms.LoginActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.MainActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.QueryTagActivity"
+            android:label="@string/tagQuety"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.StockInActivity"
+            android:label="@string/pairsStockIn"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.StockOutActivity"
+            android:label="@string/pairsStockOut"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.SendOutActivity"
+            android:label="@string/sendOut"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.CheckActivity"
+            android:label="@string/check"
+            android:launchMode="standard"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+         <activity
+            android:name="com.invengo.rpms.CheckCreateActivity"
+            android:label="@string/checkCreate"
+            android:launchMode="standard"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.CheckDetailActivity"
+            android:label="@string/checkDetail"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.RunActivity"
+            android:label="@string/pairsRun"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.StopActivity"
+            android:label="@string/pairsStop"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+          <activity
+            android:name="com.invengo.rpms.BackActivity"
+            android:label="@string/pairsBack"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.SendRepairActivity"
+            android:label="@string/pairsSendRepair"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.RepairActivity"
+            android:label="@string/RepairCheck"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.BackFactoryActivity"
+            android:label="@string/pairsBackFactory"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+         <activity
+            android:name="com.invengo.rpms.ScrapActivity"
+            android:label="@string/pairsScrap"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+         <activity
+            android:name="com.invengo.rpms.SysSetActivity"
+            android:label="@string/SysSet"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.AboutActivity"
+            android:label="@string/About"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+          <activity
+            android:name="com.invengo.rpms.SendCardActivity"
+            android:label="@string/pairsSendCard"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+         <activity
+            android:name="com.invengo.rpms.FindActivity"
+            android:label="@string/pairsFind"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+    </application>
+
+</manifest>
