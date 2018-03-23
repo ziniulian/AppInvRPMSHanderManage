@@ -67,6 +67,9 @@ public class SqliteHelper {
 				String sql_table9 = "Create TABLE PartsStorageLocation(PartsCode varchar(20) PRIMARY KEY,StorageLocationCode varchar(4),StockinTime datetime)";
 				listSql.add(sql_table9);
 
+				// TODO: 2018/3/23 加入配件信息表
+				// TODO: 2018/3/23 新增查询：获取配件信息表中同类型的数量
+
 				db.beginTransaction();
 				for (String sql : listSql) {
 					db.execSQL(sql);
@@ -114,7 +117,6 @@ public class SqliteHelper {
 			cursor.close();
 			db.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -155,7 +157,6 @@ public class SqliteHelper {
 				cursor.close();
 				db.close();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -182,7 +183,6 @@ public class SqliteHelper {
 			cursor.close();
 			db.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -221,7 +221,6 @@ public class SqliteHelper {
 			cursor.close();
 			db.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -271,7 +270,6 @@ public class SqliteHelper {
 			cursor.close();
 			db.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -323,7 +321,6 @@ public class SqliteHelper {
 			cursor.close();
 			db.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -382,7 +379,6 @@ public class SqliteHelper {
 			cursor.close();
 			db.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -418,7 +414,6 @@ public class SqliteHelper {
 			cursor.close();
 			db.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -460,7 +455,6 @@ public class SqliteHelper {
 			cursor.close();
 			db.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -500,7 +494,6 @@ public class SqliteHelper {
 			cursor.close();
 			db.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -661,7 +654,6 @@ public class SqliteHelper {
 			}
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -704,7 +696,6 @@ public class SqliteHelper {
 			cursor.close();
 			db.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -742,7 +733,6 @@ public class SqliteHelper {
 			cursor.close();
 			db.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -865,7 +855,6 @@ public class SqliteHelper {
 			cursor.close();
 			db.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -907,7 +896,6 @@ public class SqliteHelper {
 			cursor.close();
 			db.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -966,7 +954,6 @@ public class SqliteHelper {
 				db.setTransactionSuccessful();
 				return true;
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 
 			} finally {

@@ -127,7 +127,6 @@ public class UtilityHelper {
 
 				return codeStr=codeStr.trim();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

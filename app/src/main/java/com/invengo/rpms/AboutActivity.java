@@ -20,7 +20,6 @@ public class AboutActivity extends BaseActivity {
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
 		btnBack.setOnTouchListener( new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
 				switch (event.getAction()) {
 
 				case MotionEvent.ACTION_DOWN: {

@@ -88,7 +88,7 @@ public class SendRepairActivity extends BaseActivity {
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
 		btnBack.setOnTouchListener( new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
+
 				switch (event.getAction()) {
 
 				case MotionEvent.ACTION_DOWN: {
@@ -151,7 +151,6 @@ public class SendRepairActivity extends BaseActivity {
 
 	private OnTouchListener btnConfigTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {
@@ -354,7 +353,6 @@ public class SendRepairActivity extends BaseActivity {
 
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -480,19 +478,16 @@ public class SendRepairActivity extends BaseActivity {
 
 		@Override
 		public int getCount() {
-			// TODO Auto-generated method stub
 			return mdata.size();
 		}
 
 		@Override
 		public Map<String, Object> getItem(int position) {
-			// TODO Auto-generated method stub
 			return mdata.get(position);
 		}
 
 		@Override
 		public long getItemId(int position) {
-			// TODO Auto-generated method stub
 			return position;
 		}
 

@@ -84,7 +84,6 @@ public class RepairActivity extends BaseActivity {
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
 		btnBack.setOnTouchListener( new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
 				switch (event.getAction()) {
 
 				case MotionEvent.ACTION_DOWN: {
@@ -149,7 +148,6 @@ public class RepairActivity extends BaseActivity {
 
 					@Override
 					public void onCheckedChanged(RadioGroup arg0, int arg1) {
-						// TODO Auto-generated method stub
 						// 获取变更后的选中项的ID
 						int radioButtonId = arg0.getCheckedRadioButtonId();
 						// 根据ID获取RadioButton的实例
@@ -168,7 +166,6 @@ public class RepairActivity extends BaseActivity {
 	
 	private OnTouchListener btnConfigTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {
@@ -322,7 +319,6 @@ public class RepairActivity extends BaseActivity {
 					}
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

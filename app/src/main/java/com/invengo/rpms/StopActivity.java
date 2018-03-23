@@ -78,7 +78,6 @@ public class StopActivity extends BaseActivity {
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
 		btnBack.setOnTouchListener( new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
 				switch (event.getAction()) {
 
 				case MotionEvent.ACTION_DOWN: {
@@ -135,7 +134,6 @@ public class StopActivity extends BaseActivity {
 	
 	private OnTouchListener btnConfigTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {
@@ -267,7 +265,6 @@ public class StopActivity extends BaseActivity {
 					}
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

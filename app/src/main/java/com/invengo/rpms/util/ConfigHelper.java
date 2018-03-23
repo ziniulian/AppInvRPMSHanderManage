@@ -72,11 +72,9 @@ public class ConfigHelper {
 					out.write(str.getBytes());
 					out.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

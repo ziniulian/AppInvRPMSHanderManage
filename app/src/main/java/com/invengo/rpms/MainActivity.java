@@ -95,7 +95,6 @@ public class MainActivity extends BaseActivity {
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
 		btnBack.setOnTouchListener(new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
 				switch (event.getAction()) {
 
 				case MotionEvent.ACTION_DOWN: {
@@ -175,12 +174,25 @@ public class MainActivity extends BaseActivity {
 				getResources().getString(R.string.pairsScrap),
 				getResources().getString(R.string.pairsSendCard),
 				getResources().getString(R.string.pairsFind),
-				getResources().getString(R.string.About) };
-		int[] resIds = { R.drawable.query, R.drawable.stockin,
-				R.drawable.stockout, R.drawable.sendout, R.drawable.check,
-				R.drawable.use, R.drawable.stop, R.drawable.fault,
-				R.drawable.sendrepair, R.drawable.repair,
-				R.drawable.backfactory, R.drawable.scrap, R.drawable.about, R.drawable.about, R.drawable.about };
+				getResources().getString(R.string.About)
+		};
+		int[] resIds = {
+				R.drawable.query,
+				R.drawable.stockin,
+				R.drawable.stockout,
+				R.drawable.sendout,
+				R.drawable.check,
+				R.drawable.use,
+				R.drawable.stop,
+				R.drawable.fault,
+				R.drawable.sendrepair,
+				R.drawable.repair,
+				R.drawable.backfactory,
+				R.drawable.scrap,
+				R.drawable.about,
+				R.drawable.about,
+				R.drawable.about
+		};
 
 		String roleStr = "";
 		ConfigHelper config = new ConfigHelper();
@@ -425,7 +437,6 @@ public class MainActivity extends BaseActivity {
 				}
 
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				System.out.println("exception...");
 			}
@@ -527,7 +538,6 @@ public class MainActivity extends BaseActivity {
 
 	private OnTouchListener btnConfigTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {

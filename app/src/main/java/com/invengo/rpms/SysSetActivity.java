@@ -86,7 +86,6 @@ public class SysSetActivity extends Activity {
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
 		btnBack.setOnTouchListener( new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
 				switch (event.getAction()) {
 
 				case MotionEvent.ACTION_DOWN: {
@@ -221,7 +220,6 @@ public class SysSetActivity extends Activity {
 
 	private OnTouchListener btnTestTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {
@@ -271,7 +269,6 @@ public class SysSetActivity extends Activity {
 
 	private OnTouchListener btnSaveTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {
@@ -315,7 +312,6 @@ public class SysSetActivity extends Activity {
 				editor.commit();
 				showToast("保存成功");
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				showToast("保存失败");
 			}
@@ -324,7 +320,6 @@ public class SysSetActivity extends Activity {
 
 	private OnTouchListener btnDownloadStationTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {
@@ -372,7 +367,6 @@ public class SysSetActivity extends Activity {
 
 	private OnTouchListener btnDownloadCodeTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {
@@ -421,7 +415,6 @@ public class SysSetActivity extends Activity {
 
 	private OnTouchListener btnDownloadUserTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {
@@ -469,7 +462,6 @@ public class SysSetActivity extends Activity {
 
 	private OnTouchListener btnDownloadStoragelocationTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {
@@ -521,7 +513,6 @@ public class SysSetActivity extends Activity {
 
 	private OnTouchListener btnDownloadCheckTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {
@@ -569,7 +560,6 @@ public class SysSetActivity extends Activity {
 
 	private OnTouchListener btnDownloadSendRepairTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {
@@ -621,7 +611,6 @@ public class SysSetActivity extends Activity {
 
 	private OnTouchListener btnDownloadStorageTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {

@@ -65,7 +65,6 @@ public class CheckActivity extends Activity {
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
 		btnBack.setOnTouchListener( new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
 				switch (event.getAction()) {
 
 				case MotionEvent.ACTION_DOWN: {
@@ -105,7 +104,6 @@ public class CheckActivity extends Activity {
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
 
-				// TODO Auto-generated method stub
 				Map<String, Object> entity = listCheckData.get(arg2);
 				final String checkCodeSelected = entity.get("checkCode")
 						.toString();
@@ -174,7 +172,6 @@ public class CheckActivity extends Activity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// TODO Auto-generated method stub
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode== 0) {
 			loadData();
@@ -205,7 +202,6 @@ public class CheckActivity extends Activity {
 	
 	private OnTouchListener btnConfigTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {
@@ -264,19 +260,16 @@ public class CheckActivity extends Activity {
 
 		@Override
 		public int getCount() {
-			// TODO Auto-generated method stub
 			return mdata.size();
 		}
 
 		@Override
 		public Map<String, Object> getItem(int position) {
-			// TODO Auto-generated method stub
 			return mdata.get(position);
 		}
 
 		@Override
 		public long getItemId(int position) {
-			// TODO Auto-generated method stub
 			return position;
 		}
 

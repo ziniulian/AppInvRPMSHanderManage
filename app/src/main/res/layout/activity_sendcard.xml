@@ -143,13 +143,10 @@
                     android:layout_height="wrap_content"
                     android:text="序列号：" />
 
-                <EditText
-                    android:id="@+id/edtSqe"
-                    android:layout_width="160dp"
-                    android:layout_height="36dp"
-                    android:background="@drawable/editsharp"
-                    android:maxLength="5" >
-                </EditText>
+                <TextView
+                    android:id="@+id/txtSqe"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
             </LinearLayout>
 
             <LinearLayout
@@ -180,6 +177,12 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/txtRemark"
                     android:text="库位:" />
+
+                <TextView
+                    android:id="@+id/txtRemarkV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="" />
 
                 <EditText
                     android:id="@+id/edtRemark"

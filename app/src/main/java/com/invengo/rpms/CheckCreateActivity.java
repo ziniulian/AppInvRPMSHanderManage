@@ -63,7 +63,6 @@ public class CheckCreateActivity extends Activity {
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
 		btnBack.setOnTouchListener( new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
 				switch (event.getAction()) {
 
 				case MotionEvent.ACTION_DOWN: {
@@ -128,7 +127,6 @@ public class CheckCreateActivity extends Activity {
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView,
 						boolean isChecked) {
-					// TODO Auto-generated method stub
 					if (isChecked) {
 						String sortCodeSelected = buttonView.getTag()
 								.toString();
@@ -161,7 +159,6 @@ public class CheckCreateActivity extends Activity {
 				@Override
 				public void onCheckedChanged(CompoundButton buttonView,
 						boolean isChecked) {
-					// TODO Auto-generated method stub
 					if (isChecked) {
 						String hostCodeSelected = buttonView.getTag()
 								.toString();
@@ -233,7 +230,6 @@ public class CheckCreateActivity extends Activity {
 
 	private OnTouchListener btnCreateTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
-			// TODO Auto-generated method stub
 			switch (event.getAction()) {
 
 			case MotionEvent.ACTION_DOWN: {
