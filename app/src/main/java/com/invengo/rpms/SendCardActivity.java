@@ -74,15 +74,16 @@ public class SendCardActivity extends BaseActivity {
 	Spinner sprPartsHost;
 	Spinner sprPartsName;
 	Spinner sprPartsStatus;
+	Spinner sprDw;
 	Button btnConfig;
 	TextView txtSqe;
 	TextView txtInfo;
 	TextView txtRemark;
 	TextView txtRemarkV;
-	EditText edtRemark;
 
 	private String partsCode;
-	private boolean isTiped = false;
+	private String code;
+	private String typ;
 	private boolean lockRd = false;
 	private String tid;
 
@@ -96,6 +97,7 @@ public class SendCardActivity extends BaseActivity {
 	private List<String> listPartsSort = new ArrayList<String>();
 	private ArrayAdapter<String> adapterPartsName;
 	private ArrayAdapter<String> adapterPartsSort;
+	private ArrayAdapter adapterDw;
 	private String factoryCodeSelected;
 	private String sortCodeSelected;
 	private String hostCodeSelected;
@@ -112,7 +114,6 @@ public class SendCardActivity extends BaseActivity {
 		txtInfo = (TextView) findViewById(R.id.txtInfo);
 		txtRemark = (TextView) findViewById(R.id.txtRemark);
 		txtRemarkV = (TextView) findViewById(R.id.txtRemarkV);
-		edtRemark = (EditText) findViewById(R.id.edtRemark);
 
 		btnConfig = (Button) findViewById(R.id.btnConfig);
 		btnConfig.setOnTouchListener(btnConfigTouchListener);
@@ -329,7 +330,25 @@ public class SendCardActivity extends BaseActivity {
 		adapterPartsName.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
 		sprPartsName.setAdapter(adapterPartsName);
 
-		// TODO: 2018/3/23 单位选项改为下拉列表，从数据库中读取所有单位选项 单位类型编号：01
+		// 单位选项改为下拉列表，从数据库中读取所有单位选项 单位类型编号：01
+		sprDw = (Spinner) findViewById(R.id.sprDw);
+		List<TbCodeEntity> listDw = SqliteHelper.queryDbCodeByType("01");
+		List<String> listDwStr = new ArrayList<String>();
+		for (TbCodeEntity e : listDw) {
+			listDwStr.add(e.dbCode + " " + e.dbName);
+		}
+		adapterDw = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, listDwStr);
+		adapterDw.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
+		sprDw.setAdapter(adapterDw);
+		sprDw.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+				code = adapterDw.getItem(i).toString().split(" ")[0];
+			}
+			@Override
+			public void onNothingSelected(AdapterView<?> adapterView) {
+			}
+		});
 
 		sprPartsStatus = (Spinner) findViewById(R.id.sprPartsStatus);
 		List<String> listStatus = new ArrayList<String>();
@@ -346,25 +365,25 @@ public class SendCardActivity extends BaseActivity {
 					View view, int position, long id) {
 				if (position == 0) {
 					txtRemark.setText("库位：");
-					edtRemark.setVisibility(View.GONE);
+					sprDw.setVisibility(View.GONE);
 					txtRemarkV.setVisibility(View.VISIBLE);
 					txtRemarkV.setText("");
 					cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STORAGE_LOCATION));
 				} else if (position == 1) {
 					txtRemark.setText("单位：");
 					txtRemarkV.setVisibility(View.GONE);
-					edtRemark.setVisibility(View.VISIBLE);
+					sprDw.setVisibility(View.VISIBLE);
 					cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
 				} else if (position == 2) {
 					txtRemark.setText("站点：");
-					edtRemark.setVisibility(View.GONE);
+					sprDw.setVisibility(View.GONE);
 					txtRemarkV.setVisibility(View.VISIBLE);
 					txtRemarkV.setText("");
 					cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STATION));
 				} else if (position == 3) {
 					txtRemark.setText("");
 					txtRemarkV.setVisibility(View.GONE);
-					edtRemark.setVisibility(View.GONE);
+					sprDw.setVisibility(View.GONE);
 					cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
 				}
 			}
@@ -462,58 +481,27 @@ public class SendCardActivity extends BaseActivity {
 		}
 //Log.i("---", sb.toString());
 
-		// TODO: 2018/3/23 待数据库功能完善后，再回来继续完善此处功能
 		// 根据epc头部查询数据库的匹配数量
-		// 生成序列号
+		int n = SqliteHelper.queryPartsNumByType(sb.toString()) + 1;
+
+		// 生成序列号，界面显示序列号
+		String sn = UtilityHelper.getSnStr(n);
+		txtSqe.setText(sn);
+		sb.append(sn);
+		sn = sb.toString();
+
+		// TODO: 2018/3/26 写标签
 		// 写epc。例子：500101424B5A314746000002
 		// 将状态写入用户区
 		// 修改密码
 		// 锁密码
-		// 将创建或修改的信息写入数据库
+
+		// 将创建的信息写入数据库
+		SqliteHelper.savOnePart(typ, sn, code);
 
 		// 释放锁
 		lockRd = false;
-		//txtStatus.setText(getResources().getString(R.string.memo_GET_PAIRS));
-
-//		String epcWrite = "";
-//
-//		// 写epc
-//		WriteEpc msgepc = ReaderMessageHelper.GetWriteEpc_6C(epcWrite, epc);
-//		if (isNewTag) {
-//			msgepc = ReaderMessageHelper.GetWriteEpc_6CForDefaultPsw(epcWrite,
-//					epc);
-//		}
-//		SystemClock.sleep(100);
-//		boolean result = reader.send(msgepc);
-//		if (!result) {
-//			return false;
-//		}
-//
-//		// 写入标签用户数据
-//		WriteUserData_6C msgUserData = ReaderMessageHelper.GetWriteUserData_6C(
-//				epc, OpType.StockOut);
-//		if (isNewTag) {
-//			msgUserData = ReaderMessageHelper.GetWriteUserData_6CForDefaultPsw(
-//					epc, OpType.StockOut);
-//		}
-//		SystemClock.sleep(100);
-//		result = reader.send(msgepc);
-//		if (!result) {
-//			return false;
-//		}
-//
-//		if (isNewTag) {
-//			// 修改密码
-//			AccessPwdConfig_6C msgPwd = ReaderMessageHelper
-//					.GetAccessPwdConfig_6CForDefaultPsw(epc);
-//			SystemClock.sleep(100);
-//			result = reader.send(msgepc);
-//			if (!result) {
-//				return false;
-//			}
-//		}
-//
-//		return true;
+		txtStatus.setText(getResources().getString(R.string.memo_GET_PAIRS));
 	}
 
 	private boolean saveResult() {
@@ -554,6 +542,7 @@ public class SendCardActivity extends BaseActivity {
 
 					switch ((int)sprPartsStatus.getSelectedItemId()) {
 						case 0:	// 库位
+							typ = "W";
 							switch (UtilityHelper.CheckEpc(epc)) {
 								case 1:
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS, 1, 0, epc));
@@ -582,6 +571,7 @@ public class SendCardActivity extends BaseActivity {
 							}
 							break;
 						case 2:	// 站点
+							typ = "U";
 							switch (UtilityHelper.CheckEpc(epc)) {
 								case 2:
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS, 2, 0, epc));
@@ -610,6 +600,7 @@ public class SendCardActivity extends BaseActivity {
 							}
 							break;
 						case 1:	// 单位
+							typ = "D";
 							switch (UtilityHelper.CheckEpc(epc)) {
 								case 0:
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(READY_WRITE, 4, 1, new String[] {tid, epc, userData}));
@@ -623,6 +614,7 @@ public class SendCardActivity extends BaseActivity {
 							}
 							break;
 						case 3:	// 在所
+							typ = "S";
 							switch (UtilityHelper.CheckEpc(epc)) {
 								case 0:
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(READY_WRITE, 3, 1, new String[] {tid, epc, userData}));
@@ -686,10 +678,6 @@ public class SendCardActivity extends BaseActivity {
 			}
 			if (sprPartsName.getSelectedItem() == null) {
 				showToast("请选择部件名称");
-				return;
-			}
-			if (sprPartsStatus.getSelectedItemId() == 1 && edtRemark.getText().toString().length() == 0) {
-				showToast("请输入单位");
 				return;
 			}
 
@@ -760,11 +748,13 @@ public class SendCardActivity extends BaseActivity {
 					case 1:	// 库位
 						s = (String) msg.obj;
 						s = UtilityHelper.GetCodeByEpc(s);
+						code = s;
 						txtRemarkV.setText(UtilityHelper.getStorageLocationInfo(s));
 						break;
 					case 2:	// 站点
 						s = (String) msg.obj;
 						s = UtilityHelper.GetCodeByEpc(s);
+						code = s;
 						StationEntity entity = SqliteHelper.queryStationByCode(s);
 						if (entity != null) {
 							s = entity.StationName;
@@ -796,9 +786,11 @@ public class SendCardActivity extends BaseActivity {
 					AlertDialog.Builder builder = new Builder(SendCardActivity.this, R.style.AppTheme);
 					builder.setTitle("温馨提示");
 					builder.setMessage("该标签已经写入配件信息，确定重新该标签吗?配件信息\n\n" + info);
+					partsCode = entity.PartsCode;
 					builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
+							SqliteHelper.delOnePart(partsCode);
 							writeCard();
 						}
 					});

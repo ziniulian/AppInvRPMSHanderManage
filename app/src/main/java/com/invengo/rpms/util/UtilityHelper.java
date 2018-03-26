@@ -110,8 +110,7 @@ public class UtilityHelper {
 
 						byte[] bs1 = new byte[3];
 						System.arraycopy(dataBytes, 8, bs1, 0, 3);
-						codeStr += Util.convertByteArrayToHexString(bs1)
-								.substring(1, 6);
+						codeStr += Util.convertByteArrayToHexString(bs1).substring(1, 6);
 					}
 				}
 				if (epc.substring(0, 2).equals("4B")) {
@@ -384,4 +383,21 @@ public class UtilityHelper {
 		}
 		return s.toUpperCase();
 	}
+
+	public static String getSnStr (int n) {
+//		String r = Util.convertIntToHexString(n);
+		String r = n + "";
+		n = r.length() - 5;
+		if (n > 0) {
+			return r.substring(n);
+		} else if (n < 0) {
+			for (int i = n; i < 0; i ++) {
+				r = "0" + r;
+			}
+		}
+		return r;
+	}
+
+	// TODO: 2018/3/26 将字符串编码转换成二进制数
+
 }

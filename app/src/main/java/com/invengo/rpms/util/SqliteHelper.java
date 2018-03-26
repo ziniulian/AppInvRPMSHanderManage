@@ -67,8 +67,9 @@ public class SqliteHelper {
 				String sql_table9 = "Create TABLE PartsStorageLocation(PartsCode varchar(20) PRIMARY KEY,StorageLocationCode varchar(4),StockinTime datetime)";
 				listSql.add(sql_table9);
 
-				// TODO: 2018/3/23 加入配件信息表
-				// TODO: 2018/3/23 新增查询：获取配件信息表中同类型的数量
+				// 加入 配件信息表
+				String sql_table10 = "Create TABLE TbParts(PartsCode varchar(20) PRIMARY KEY,Status char(1),LastOpTime datetime,Code varchar(20))";
+				listSql.add(sql_table10);
 
 				db.beginTransaction();
 				for (String sql : listSql) {
@@ -963,4 +964,70 @@ public class SqliteHelper {
 		}
 		return false;
 	}
+
+	// 查询类型相同的配件数目
+	public static int queryPartsNumByType(String code) {
+		int r = 0;
+
+		try {
+			File name = new File(filePath);
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
+			String sql = "select count(*) num from TbParts where PartsCode like '" + code + "%'";
+
+			Cursor cursor = db.rawQuery(sql, null);
+			while (cursor.moveToNext()) {
+				r = cursor.getInt(cursor.getColumnIndex("num"));
+				break;
+			}
+
+			cursor.close();
+			db.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return r;
+	}
+
+	// 添加一条配件信息
+	public static Boolean savOnePart(String status, String partsCode, String code) {
+		List<String> listSql = new ArrayList<String>();
+		String p = "";
+		if (status.equals("S")) {
+			p = ") values('";
+			code = "')";	// 在所
+		} else {
+			p = ",Code) values('";
+			code = "', '" + code + "')";
+		}
+
+		String sql = "insert into TbParts (PartsCode,Status,LastOpTime" + p +
+			partsCode + "', '" + status + "', '" + f.format(new Date()) + code;
+
+		listSql.add(sql);
+
+		if (listSql.size() > 0) {
+			return ExceSql(listSql);
+		}
+
+		return false;
+	}
+
+	// 删除一条配件信息
+	public static Boolean delOnePart(String partsCode) {
+		List<String> listSql = new ArrayList<String>();
+
+		String sql = "insert into TbPartsOp values('" + partsCode + "', 'd', '" + f.format(new Date()) + "')";
+		listSql.add(sql);
+
+		sql = "delete from TbParts where PartsCode='" + partsCode + "'";    // TODO: 2018/3/26 测试能否删除成功
+		listSql.add(sql);
+
+		if (listSql.size() > 0) {
+			return ExceSql(listSql);
+		}
+
+		return false;
+	}
+
 }
