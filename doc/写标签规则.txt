@@ -1,0 +1,186 @@
+写完标签epc后，需要对标签锁定，并且修改密码
+
+
+密码考虑就先固定吧   四字节密码为：0x20，0x26，0x31，0x07
+
+
+另外写epc时，前面再加上类型
+
+配件：P+配件编码
+库位：K+库位编码 用ASCLL码
+站点：Z+站点编码 用ASCLL码
+
+
+配件编码：P+THGHAZJADK00001
+
+P 用ASCLL码   1个字节
+
+TH 5T类型，这个比较少,可用一个字节，0x01代表TH,目前只会有TH
+
+GH 厂家，这个比较少,可用一个字节，0x01代表GH,0X02代表HK
+
+AZJADK 用ASCLL码  6字节
+
+00010 用十六进制字符串（取后面5个字符），3个字节	0x00 0x00 0x10  
+
+总共12个字节
+
+
+
+
+
+
+配件标签用户区写两个字节
+
+第一个字节表示配件状态
+0x01表示新品待入库
+0x02表示已上架入库
+0x03表示已下架出库
+0x04表示已发料
+0x05表示已启用
+0x06表示已停用
+0x07表示已恢复
+0x08表示已送修
+0x09表示已检测，待厂修
+0x0A表示已检测，已经修竣，待入库
+0x0B表示已检测，待报废
+0x0C表示已送厂修
+
+
+
+第二字节表示配件是否报废
+0x00表示未报废
+0x01表示报废
+
+
+---------------- 写标签案例 C# 版 -------------------
+
+
+/// <summary>
+/// 发卡
+/// </summary>
+/// <param name="board">板卡</param>
+/// <param name="password">密码，标签密码固定为20263107</param>
+public bool Write(Board board, string password)
+{
+	if (board == null || board.Label == null)
+	{
+		EventAggregator.Instance.PublishEvent("标签不能为空");
+		return false;
+	}
+
+	StopScan();
+	var result = false;
+	for (var i = 0; i < 6; i++)
+	{
+		if (WriteDataWithLock(board, password))
+		{
+			result = true;
+			Boards.Add(board);
+			break;
+		}
+		if (WriteDataNoLock(board, password))
+		{
+			result = true;
+			Boards.Add(board);
+			break;
+		}
+		Thread.Sleep(200);
+	}
+	if (result)
+	{
+		board.SendCommit();
+		if (LabelChanged != null)
+		{
+			LabelChanged(this, null);
+		}
+	}
+	StartScan();
+	return result;
+}
+
+private bool WriteDataWithLock(Board board, string password)
+{
+	if (!reader.WriteEpc(board.Label.Tid, board.LabelCode, "")) return false;
+	if (board is Parts)
+	{
+		if (!reader.WriteUserData(board.Label.Tid, board.UserData, ""))
+		{
+			return false;
+		}
+	}
+	if (!reader.WritePassword(board.Label.Tid, "", password)) return false;
+	var lockEpcPassword = reader.LockEpcPassword(board.Label.Tid, password);
+	if (board is Parts)
+	{
+		return reader.LockUserPassword(board.Label.Tid, password);
+	}
+	return lockEpcPassword;
+}
+
+private bool WriteDataNoLock(Board board, string password)
+{
+	if (!reader.WriteEpc(board.Label.Tid, board.LabelCode, password)) return false;
+	if (board is Parts)
+	{
+		return reader.WriteUserData(board.Label.Tid, board.UserData, password);
+	}
+	return true;
+}
+
+
+public bool WriteEpc(string id, string data, string password)
+{
+	var msg = new WriteEpc(0x01, GetPwd(password), GetWriteData(data), Util.ConvertHexStringToByteArray(id), MemoryBank.TIDMemory);
+
+	var writeEpc = Reader.Send(msg);
+	if (!writeEpc)
+	{
+		EventAggregator.Instance.PublishEvent(msg.ErrInfo);
+	}
+	return writeEpc;
+}
+
+public bool WriteUserData(string id, string data, string password)
+{
+	var msg = new WriteUserData_6C(0x01, GetPwd(password), 0, GetWriteData(data), Util.ConvertHexStringToByteArray(id), MemoryBank.TIDMemory);
+	var send = Reader.Send(msg);
+	if (!send)
+	{
+		EventAggregator.Instance.PublishEvent(msg.ErrInfo);
+	}
+	return send;
+}
+
+public bool WritePassword(string id, string oldPassword, string newPassword)
+{
+	var msg = new AccessPwdConfig_6C(0x01, GetPwd(oldPassword), GetPwd(newPassword), Util.ConvertHexStringToByteArray(id), MemoryBank.TIDMemory);
+	if (Reader.Send(msg))
+	{
+		return true;
+	}
+	return false;
+}
+
+public bool LockEpcPassword(string id, string password)
+{
+	var pwd = new byte[4];
+	if (password.Trim() != "")
+	{
+		var p = Util.ConvertHexStringToByteArray(password.Trim());
+		if (p.Length < 4 && p.Length > 0)
+			Array.Copy(p, 0, pwd, 4 - p.Length, p.Length);
+		if (p.Length == 4)
+			pwd = p;
+	}
+
+	var msg = new LockMemoryBank_6C(0x01, pwd, 0, 2, Util.ConvertHexStringToByteArray(id), MemoryBank.TIDMemory);
+	var lockEpcPassword = Reader.Send(msg);
+	if (!lockEpcPassword)
+	{
+		EventAggregator.Instance.PublishEvent("锁定EPC失败:" + msg.ErrInfo);
+	}
+	return lockEpcPassword;
+}
+
+
