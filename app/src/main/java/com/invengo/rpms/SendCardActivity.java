@@ -1,6 +1,7 @@
 package com.invengo.rpms;
 
 import invengo.javaapi.core.BaseReader;
+import invengo.javaapi.core.IMessage;
 import invengo.javaapi.core.IMessageNotification;
 import invengo.javaapi.core.Util;
 import invengo.javaapi.protocol.IRP1.AccessPwdConfig_6C;
@@ -64,6 +65,7 @@ import com.invengo.rpms.entity.UserEntity;
 import com.invengo.rpms.util.ReaderMessageHelper;
 import com.invengo.rpms.util.SqliteHelper;
 import com.invengo.rpms.util.UtilityHelper;
+import com.invengo.rpms.util.WrtRa;
 
 public class SendCardActivity extends BaseActivity {
 
@@ -84,6 +86,7 @@ public class SendCardActivity extends BaseActivity {
 	private String partsCode;
 	private String code;
 	private String typ;
+	private byte typCod;
 	private boolean lockRd = false;
 	private String tid;
 
@@ -92,7 +95,6 @@ public class SendCardActivity extends BaseActivity {
 	private static final int GET_PAIRS = 103;	// 读取配件标签
 	private static final int READY_WRITE = 104;	// 准备写入
 
-	private List<PartsStorageLocationEntity> listInfoAll = new ArrayList<PartsStorageLocationEntity>();
 	private List<String> listPartsName = new ArrayList<String>();
 	private List<String> listPartsSort = new ArrayList<String>();
 	private ArrayAdapter<String> adapterPartsName;
@@ -101,7 +103,6 @@ public class SendCardActivity extends BaseActivity {
 	private String factoryCodeSelected;
 	private String sortCodeSelected;
 	private String hostCodeSelected;
-	private List<String> listPartsCodeSucess = new ArrayList<String>();
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -148,7 +149,6 @@ public class SendCardActivity extends BaseActivity {
 		});
 		btnBack.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-//				boolean result = saveResult();
 				if (isReading) {
 					showToast("请先停止读取");
 				} else {
@@ -355,36 +355,46 @@ public class SendCardActivity extends BaseActivity {
 		listStatus.add("在库");
 		listStatus.add("在段");
 		listStatus.add("启用");
+		listStatus.add("在所 - 待厂修");
+		listStatus.add("在所 - 待入库");
+		listStatus.add("在所 - 待报废");
 		listStatus.add("在所");
 		ArrayAdapter<String> adapterStatus = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, listStatus);
 		adapterStatus.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
 		sprPartsStatus.setAdapter(adapterStatus);
 		sprPartsStatus.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
 			@Override
-			public void onItemSelected(AdapterView<?> parent,
-					View view, int position, long id) {
-				if (position == 0) {
-					txtRemark.setText("库位：");
-					sprDw.setVisibility(View.GONE);
-					txtRemarkV.setVisibility(View.VISIBLE);
-					txtRemarkV.setText("");
-					cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STORAGE_LOCATION));
-				} else if (position == 1) {
-					txtRemark.setText("单位：");
-					txtRemarkV.setVisibility(View.GONE);
-					sprDw.setVisibility(View.VISIBLE);
-					cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
-				} else if (position == 2) {
-					txtRemark.setText("站点：");
-					sprDw.setVisibility(View.GONE);
-					txtRemarkV.setVisibility(View.VISIBLE);
-					txtRemarkV.setText("");
-					cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STATION));
-				} else if (position == 3) {
-					txtRemark.setText("");
-					txtRemarkV.setVisibility(View.GONE);
-					sprDw.setVisibility(View.GONE);
-					cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				switch (position) {
+					case 0:
+						txtRemark.setText("库位：");
+						sprDw.setVisibility(View.GONE);
+						txtRemarkV.setVisibility(View.VISIBLE);
+						txtRemarkV.setText("");
+						cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STORAGE_LOCATION));
+						break;
+					case 1:
+						txtRemark.setText("单位：");
+						txtRemarkV.setVisibility(View.GONE);
+						sprDw.setVisibility(View.VISIBLE);
+						cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
+						break;
+					case 2:
+						txtRemark.setText("站点：");
+						sprDw.setVisibility(View.GONE);
+						txtRemarkV.setVisibility(View.VISIBLE);
+						txtRemarkV.setText("");
+						cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STATION));
+						break;
+					case 3:
+					case 4:
+					case 5:
+					case 6:
+						txtRemark.setText("");
+						txtRemarkV.setVisibility(View.GONE);
+						sprDw.setVisibility(View.GONE);
+						cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
+						break;
 				}
 			}
 
@@ -434,7 +444,7 @@ public class SendCardActivity extends BaseActivity {
 		}
 	};
 
-	private void writeCard() {
+	private void writeCard(boolean isNew) {
 		txtStatus.setText("信息写入中，请稍候 ...");
 		StringBuilder sb = new StringBuilder();
 
@@ -481,54 +491,27 @@ public class SendCardActivity extends BaseActivity {
 		}
 //Log.i("---", sb.toString());
 
-		// 根据epc头部查询数据库的匹配数量
-		int n = SqliteHelper.queryPartsNumByType(sb.toString()) + 1;
-
 		// 生成序列号，界面显示序列号
+		int n = SqliteHelper.queryPartsNumByType(sb.toString());
 		String sn = UtilityHelper.getSnStr(n);
 		txtSqe.setText(sn);
 		sb.append(sn);
-		sn = sb.toString();
+		partsCode = sb.toString();
 
-		// TODO: 2018/3/26 写标签
-		// 写epc。例子：500101424B5A314746000002
-		// 将状态写入用户区
-		// 修改密码
-		// 锁密码
-
-		// 将创建的信息写入数据库
-		SqliteHelper.savOnePart(typ, sn, code);
-
-		// 释放锁
-		lockRd = false;
-		txtStatus.setText(getResources().getString(R.string.memo_GET_PAIRS));
-	}
-
-	private boolean saveResult() {
-		if (listPartsCodeSucess.size() > 0) {
-
-			// 保存操作记录
-			String user = myApp.getUserId();
-			String opTime = f.format(new Date());
-			String remark = "";
-			String info = user + "," + opTime + "," + remark;
-			boolean result = SqliteHelper.SaveOpRecord(listPartsCodeSucess,
-					OpType.StockOut, info, listInfoAll);
-
-			if (result) {
-				listPartsCodeSucess.clear();
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		return true;
+		// 写标签
+		WrtRa r = new WrtRa(
+				reader,
+				Util.convertHexStringToByteArray(tid),
+				UtilityHelper.convertEpcP(partsCode),
+				new byte[] {typCod, 0},
+				isNew,
+				cardOperationHandler
+		);
+		new Thread(r).start();
 	}
 
 	@Override
-	public void messageNotificationReceivedHandle(BaseReader reader,
-			IMessageNotification msg) {
+	public void messageNotificationReceivedHandle(BaseReader reader, IMessageNotification msg) {
 		if (isConnected && isReading) {
 			try {
 				if (msg instanceof RXD_TagData) {
@@ -539,10 +522,13 @@ public class SendCardActivity extends BaseActivity {
 							.getReceivedMessage().getUserData());
 					tid = Util.convertByteArrayToHexString(data
 							.getReceivedMessage().getTID());
+//Log.i("----", epc);
 
-					switch ((int)sprPartsStatus.getSelectedItemId()) {
+					int p = (int)sprPartsStatus.getSelectedItemId();
+					switch (p) {
 						case 0:	// 库位
 							typ = "W";
+							typCod = 0x02;
 							switch (UtilityHelper.CheckEpc(epc)) {
 								case 1:
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS, 1, 0, epc));
@@ -572,6 +558,7 @@ public class SendCardActivity extends BaseActivity {
 							break;
 						case 2:	// 站点
 							typ = "U";
+							typCod = 0x05;
 							switch (UtilityHelper.CheckEpc(epc)) {
 								case 2:
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS, 2, 0, epc));
@@ -601,6 +588,7 @@ public class SendCardActivity extends BaseActivity {
 							break;
 						case 1:	// 单位
 							typ = "D";
+							typCod = 0x07;
 							switch (UtilityHelper.CheckEpc(epc)) {
 								case 0:
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(READY_WRITE, 4, 1, new String[] {tid, epc, userData}));
@@ -613,8 +601,12 @@ public class SendCardActivity extends BaseActivity {
 									break;
 							}
 							break;
-						case 3:	// 在所
+						case 3:	// 在所，在所的状态有很多种： 9 - A
+						case 4:
+						case 5:
+						case 6:
 							typ = "S";
+							typCod = (byte)(9 + (p - 3));
 							switch (UtilityHelper.CheckEpc(epc)) {
 								case 0:
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(READY_WRITE, 3, 1, new String[] {tid, epc, userData}));
@@ -639,7 +631,6 @@ public class SendCardActivity extends BaseActivity {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		InvengoLog.i(TAG, "INFO.onKeyDown().");
 		if (keyCode == KeyEvent.KEYCODE_BACK && !backDown) {
-//			boolean result = saveResult();
 			backDown = true;
 		} else if ((keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
 				|| keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT || keyCode == KeyEvent.KEYCODE_SOFT_RIGHT)
@@ -749,7 +740,11 @@ public class SendCardActivity extends BaseActivity {
 						s = (String) msg.obj;
 						s = UtilityHelper.GetCodeByEpc(s);
 						code = s;
-						txtRemarkV.setText(UtilityHelper.getStorageLocationInfo(s));
+						s = UtilityHelper.getStorageLocationInfo(s);
+						if (s.length() == 0) {
+							s = code;
+						}
+						txtRemarkV.setText(s);
 						break;
 					case 2:	// 站点
 						s = (String) msg.obj;
@@ -791,7 +786,7 @@ public class SendCardActivity extends BaseActivity {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							SqliteHelper.delOnePart(partsCode);
-							writeCard();
+							writeCard(false);
 						}
 					});
 					builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -810,8 +805,28 @@ public class SendCardActivity extends BaseActivity {
 					});
 					builder.show();
 				} else {
-					writeCard();
+					writeCard(true);
 				}
+				break;
+			case WrtRa.WRT_PWD_ERR:
+//				showToast("密码修改失败");
+			case WrtRa.WRT_LOCK_ERR:
+//				showToast("密码锁定失败");
+			case WrtRa.WRT_UD_ERR:
+//				showToast("用户区写入失败");
+			case WrtRa.WRT_OK:
+				// 将创建的信息写入数据库
+				SqliteHelper.savOnePart(typ, partsCode, code);
+
+				lockRd = false;
+				txtStatus.setText(getResources().getString(R.string.memo_WRT_OK));
+				break;
+			case WrtRa.WRT_EPC_ERR:
+				txtSqe.setText("");
+
+				// 释放锁
+				lockRd = false;
+				txtStatus.setText(getResources().getString(R.string.memo_WRT_ERR));
 				break;
 			case CONNECT:// 读写器连接
 				boolean result = (Boolean) msg.obj;

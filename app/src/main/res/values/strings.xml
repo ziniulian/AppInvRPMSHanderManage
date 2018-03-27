@@ -142,5 +142,7 @@
     <string name="memo_GET_STATION">先读取站点标签</string>
     <string name="memo_GET_STORAGE_LOCATION">先读取库位标签</string>
     <string name="memo_GET_PAIRS">读取配件标签</string>
+    <string name="memo_WRT_ERR">写入失败</string>
+    <string name="memo_WRT_OK">写入成功</string>
 
 </resources>

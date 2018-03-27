@@ -2,6 +2,8 @@ package com.invengo.rpms.util;
 
 import android.os.Environment;
 import android.os.StatFs;
+import android.util.Log;
+
 import invengo.javaapi.core.Util;
 
 import java.io.UnsupportedEncodingException;
@@ -73,8 +75,15 @@ public class UtilityHelper {
 	// 验证epc码是否有效并获得数据类型,0为配件，1为库位，2为站点
 	public static int CheckEpc(String epc) {
 		if (epc.length() > 1) {
-			if (epc.substring(0, 2).equals("50"))
+			if (epc.length() == 24 && epc.substring(0, 2).equals("50")) {
+				byte[] bs = epc.substring(18, 24).getBytes();
+				for (byte b : bs) {
+					if (b > 0x39 || b < 0x30) {
+						return -1;
+					}
+				}
 				return 0;
+			}
 			if (epc.substring(0, 2).equals("4B"))
 				return 1;
 			if (epc.substring(0, 2).equals("5A"))
@@ -384,6 +393,7 @@ public class UtilityHelper {
 		return s.toUpperCase();
 	}
 
+	// 获取字符串形式的序列号
 	public static String getSnStr (int n) {
 //		String r = Util.convertIntToHexString(n);
 		String r = n + "";
@@ -398,6 +408,28 @@ public class UtilityHelper {
 		return r;
 	}
 
-	// TODO: 2018/3/26 将字符串编码转换成二进制数
+	// 将配件EPC文本转换成二进制数据
+	public static byte[] convertEpcP (String p) {
+		byte[] r = new byte[12];
+		r[0] = 0x50;
+		String s = p.substring(0,2);
+		if (s.equals("TH")) {
+			r[1] = 0x01;
+		}
+
+		s = p.substring(2, 4);
+		if (s.equals("GH")) {
+			r[2] = 0x01;
+		} else if (s.equals("HK")) {
+			r[2] = 0x02;
+		}
+
+		s = p.substring(4, 10);
+		System.arraycopy(s.getBytes(),0,r,3,6);
+
+		s= "0" + p.substring(10, 15);
+		System.arraycopy(Util.convertHexStringToByteArray(s),0,r,9,3);
+		return r;
+	}
 
 }

@@ -965,19 +965,19 @@ public class SqliteHelper {
 		return false;
 	}
 
-	// 查询类型相同的配件数目
+	// 查询类型相同的新序列号
 	public static int queryPartsNumByType(String code) {
 		int r = 0;
 
 		try {
 			File name = new File(filePath);
 			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
-			String sql = "select count(*) num from TbParts where PartsCode like '" + code + "%'";
+			String sql = "select PartsCode from TbParts where PartsCode like '" + code + "%' order by PartsCode desc Limit 1";
 
 			Cursor cursor = db.rawQuery(sql, null);
-			while (cursor.moveToNext()) {
-				r = cursor.getInt(cursor.getColumnIndex("num"));
-				break;
+			if (cursor.moveToNext()) {
+				String s = cursor.getString(0).substring(10, 15);
+				r = Integer.parseInt(s);
 			}
 
 			cursor.close();
@@ -986,6 +986,7 @@ public class SqliteHelper {
 			e.printStackTrace();
 		}
 
+		r ++;
 		return r;
 	}
 
@@ -1020,7 +1021,7 @@ public class SqliteHelper {
 		String sql = "insert into TbPartsOp values('" + partsCode + "', 'd', '" + f.format(new Date()) + "')";
 		listSql.add(sql);
 
-		sql = "delete from TbParts where PartsCode='" + partsCode + "'";    // TODO: 2018/3/26 测试能否删除成功
+		sql = "delete from TbParts where PartsCode='" + partsCode + "'";
 		listSql.add(sql);
 
 		if (listSql.size() > 0) {
