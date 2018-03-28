@@ -145,4 +145,8 @@
     <string name="memo_WRT_ERR">写入失败</string>
     <string name="memo_WRT_OK">写入成功</string>
 
+    <!-- 配件巡检 -->
+    <string name="memo_FIND_STATION">扣动扳机，扫描站点标签</string>
+    <string name="memo_FIND_PAIRS">扣动扳机，扫描配件</string>
+
 </resources>

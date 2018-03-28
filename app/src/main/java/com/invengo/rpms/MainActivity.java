@@ -331,6 +331,9 @@ public class MainActivity extends BaseActivity {
 				} else if (title.equals(getResources().getString(R.string.pairsSendCard))) {
 					Intent intent = new Intent(MainActivity.this, SendCardActivity.class);
 					startActivity(intent);
+				} else if (title.equals(getResources().getString(R.string.pairsFind))) {
+					Intent intent = new Intent(MainActivity.this, FindActivity.class);
+					startActivity(intent);
 				}
 			}
 		});

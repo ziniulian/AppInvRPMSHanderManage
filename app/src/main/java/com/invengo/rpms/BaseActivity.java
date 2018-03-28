@@ -78,6 +78,12 @@ public class BaseActivity extends Activity implements
 
 	private ConnectReaderTask mConnectTask;
 
+	// 断开连接（模块兼容）
+	public static void disCont () {
+		reader.disConnect();
+		isConnected = false;
+	}
+
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// setContentView(R.layout.activity_stockin);
