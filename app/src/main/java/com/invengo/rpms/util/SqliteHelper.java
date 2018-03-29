@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import com.invengo.rpms.entity.CheckDetailEntity;
@@ -1029,6 +1030,31 @@ public class SqliteHelper {
 		}
 
 		return false;
+	}
+
+	// 获取站点里的所有配件
+	public static HashMap<String, HashMap<String, String>> queryPartsInStation(String scode) {
+		HashMap<String, HashMap<String, String>> r = new HashMap<String, HashMap<String, String>>();
+
+		try {
+			File name = new File(filePath);
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
+			String sql = "select PartsCode from TbParts where Code='" + scode + "' and Status='U'";
+
+			Cursor cursor = db.rawQuery(sql, null);
+			HashMap<String, String> m;
+			while (cursor.moveToNext()) {
+				m = new HashMap<String, String>();
+				r.put(cursor.getString(0), m);
+			}
+
+			cursor.close();
+			db.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return r;
 	}
 
 }
