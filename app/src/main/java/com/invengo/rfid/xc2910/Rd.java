@@ -1,11 +1,13 @@
 package com.invengo.rfid.xc2910;
 
 import android.util.Log;
+import android.widget.ProgressBar;
 
 import com.invengo.rfid.Base;
 import com.invengo.rfid.EmCb;
 import com.invengo.rfid.EmPushMod;
 import com.invengo.rfid.tag.T6C;
+import com.invengo.rfid.util.Str;
 import com.invengo.rpms.BaseActivity;
 
 import invengo.javaapi.core.BaseReader;
@@ -18,8 +20,13 @@ import invengo.javaapi.protocol.IRP1.PowerOff;
 import invengo.javaapi.protocol.IRP1.RXD_TagData;
 import invengo.javaapi.protocol.IRP1.ReadTag;
 import invengo.javaapi.protocol.IRP1.Reader;
+import invengo.javaapi.protocol.IRP1.ResetReader_800;
+import invengo.javaapi.protocol.IRP1.SysConfig_800;
+import invengo.javaapi.protocol.IRP1.SysQuery_500;
+import invengo.javaapi.protocol.IRP1.SysQuery_800;
 import invengo.javaapi.protocol.IRP1.WriteEpc;
 import invengo.javaapi.protocol.IRP1.WriteUserData_6C;
+import invengo.javaapi.protocol.receivedInfo.SysQuery800ReceivedInfo;
 
 /**
  * XC2910型标签读写器
@@ -44,6 +51,9 @@ public class Rd extends Base implements IMessageNotificationReceivedHandle {
 			isConnect = rd.connect();
 			cb(EmCb.HidProgress);
 			if (isConnect) {
+//SysQuery_800 sq1 = new SysQuery_800((byte) 0x65, (byte)0);	// 获取天线端口功率
+//SysConfig_800 sq2 = new SysConfig_800((byte) 0x65, new byte[]{2, 0, 10});	// 获取天线端口功率
+//rd.send(sq2);
 				cb(EmCb.Connected);
 			} else {
 				cb(EmCb.ErrConnect);
@@ -239,6 +249,9 @@ public class Rd extends Base implements IMessageNotificationReceivedHandle {
 		if (iMessageNotification instanceof RXD_TagData) {
 //Log.i("---", Str.Bytes2Hexstr(iMessageNotification.getReceivedData()));
 			onReadTag(crtBt((RXD_TagData)iMessageNotification));
+		} else {
+//byte[] bs = iMessageNotification.getReceivedData();
+//Log.i("---", Str.Bytes2Hexstr(bs));
 		}
 	}
 

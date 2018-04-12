@@ -59,6 +59,7 @@ import com.invengo.rpms.entity.ConfigEntity;
 import com.invengo.rpms.entity.TbPartsOpEntity;
 import com.invengo.rpms.util.ConfigHelper;
 import com.invengo.rpms.util.SqliteHelper;
+import com.invengo.rpms.util.SynchroDbRa;
 import com.invengo.rpms.util.UtilityHelper;
 
 public class MainActivity extends BaseActivity {
@@ -338,7 +339,7 @@ public class MainActivity extends BaseActivity {
 			}
 		});
 
-		timer.schedule(task, 1000 * 30, TIME_EXCT); // 1s后执行task,经过TIME_EXCT再次执行
+//		timer.schedule(task, 1000 * 30, TIME_EXCT); // 1s后执行task,经过TIME_EXCT再次执行
 	}
 
 	Timer timer = new Timer();
@@ -638,6 +639,7 @@ public class MainActivity extends BaseActivity {
 				firstTime = currentTime;// 更新firstTime
 				return true;
 			} else { // 两次按键小于2秒时，退出应用
+				SynchroDbRa.oneStop();	// 关闭同步线程
 				System.exit(0);
 			}
 		}

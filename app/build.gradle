@@ -8,8 +8,8 @@ android {
         applicationId "com.invengo.rpms"
         minSdkVersion 11
         targetSdkVersion 17
-        versionCode 5
-        versionName "1.0.5"
+        versionCode 6
+        versionName "1.0.6"
     }
 
     buildTypes {
@@ -27,5 +27,6 @@ dependencies {
     compile files('libs/invengo.system.ctrl.jar')
     compile files('libs/invengo.system.device.jar')
     compile files('libs/invengo.util.jar')
+    compile files('libs/gson-2.8.2.jar')
     compile files('libs/ksoap2-android-assembly-3.6.0-jar-with-dependencies.jar')
 }

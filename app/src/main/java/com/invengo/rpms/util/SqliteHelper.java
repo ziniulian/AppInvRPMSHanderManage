@@ -5,8 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.invengo.rpms.bean.Parts;
 import com.invengo.rpms.entity.CheckDetailEntity;
 import com.invengo.rpms.entity.CheckEntity;
 import com.invengo.rpms.entity.OpType;
@@ -21,6 +24,9 @@ import com.invengo.rpms.entity.UserEntity;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
+import android.util.Log;
+
+import invengo.javaapi.protocol.IRP1.SysConfig_800;
 
 public class SqliteHelper {
 
@@ -68,9 +74,17 @@ public class SqliteHelper {
 				String sql_table9 = "Create TABLE PartsStorageLocation(PartsCode varchar(20) PRIMARY KEY,StorageLocationCode varchar(4),StockinTime datetime)";
 				listSql.add(sql_table9);
 
-				// 加入 配件信息表
+				// 配件信息表
 				String sql_table10 = "Create TABLE TbParts(PartsCode varchar(20) PRIMARY KEY,Status char(1),LastOpTime datetime,Code varchar(20))";
 				listSql.add(sql_table10);
+
+				// 版本表
+				String sql_table11 = "Create TABLE TbTableVersion(TableName varchar(40) PRIMARY KEY,TableVersion int)";
+				listSql.add(sql_table11);
+
+				// 同步时间
+				String sql_table12 = "Create TABLE SynTim(id int PRIMARY KEY, tim datetime)";
+				listSql.add(sql_table12);
 
 				db.beginTransaction();
 				for (String sql : listSql) {
@@ -764,7 +778,6 @@ public class SqliteHelper {
 			String info, String storageLocationStr) {
 		
 		List<String> listSql = new ArrayList<String>();
-		List<String> listSql1 = new ArrayList<String>();
 
 		for (String partsCode : listPartsCode) {
 			String sql = "insert into TbPartsOp values('" + partsCode + "', '"
@@ -775,7 +788,6 @@ public class SqliteHelper {
 				
 				String sql1 = "delete from PartsStorageLocation where PartsCode='"
 						+ partsCode + "'";
-				listSql1.add(sql1);
 				
 				String sql2 = "insert into PartsStorageLocation values('"
 						+ partsCode + "', '" + storageLocationStr + "', '"
@@ -994,7 +1006,7 @@ public class SqliteHelper {
 	// 添加一条配件信息
 	public static Boolean savOnePart(String status, String partsCode, String code) {
 		List<String> listSql = new ArrayList<String>();
-		String p = "";
+		String p;
 		if (status.equals("S")) {
 			p = ") values('";
 			code = "')";	// 在所
@@ -1019,7 +1031,7 @@ public class SqliteHelper {
 	public static Boolean delOnePart(String partsCode) {
 		List<String> listSql = new ArrayList<String>();
 
-		String sql = "insert into TbPartsOp values('" + partsCode + "', 'd', '" + f.format(new Date()) + "')";
+		String sql = "insert into TbPartsOp values('" + partsCode + "', '14', '" + f.format(new Date()) + "')";
 		listSql.add(sql);
 
 		sql = "delete from TbParts where PartsCode='" + partsCode + "'";
@@ -1056,5 +1068,155 @@ public class SqliteHelper {
 
 		return r;
 	}
+
+	// 获取本地数据表版本
+	public static HashMap<String, int[]> getLocalTabVers(HashMap<String, int[]> r) {
+		try {
+			File name = new File(filePath);
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);
+			String sql = "select * from TbTableVersion";
+
+			Cursor cursor = db.rawQuery(sql, null);
+			String k;
+			int v;
+			int[] vs;
+			while (cursor.moveToNext()) {
+				k = cursor.getString(0);
+				v = cursor.getInt(1);
+				if (r.containsKey(k)) {
+					vs = r.get(k);
+					vs[0] = v;
+				} else {
+					vs = new int[] {v, 0};
+				}
+				r.put(k, vs);
+			}
+
+			cursor.close();
+			db.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return r;
+	}
+
+	// 更新本地数据表版本
+	public static Boolean updLocalTabVer(HashMap<String, int[]> dat) {
+		List<String> listSql = new ArrayList<String>();
+		String sql;
+
+		int[] v;
+		for (String k: dat.keySet()) {
+			v = dat.get(k);
+			if (v[0] == 0) {
+				// 新建
+				sql = "insert into TbTableVersion values('" + k + "', " + v[1] + ")";
+//Log.i("---", sql);
+				listSql.add(sql);
+			} else {
+				// 更新
+				sql = "update TbTableVersion set TableVersion=" + v[1] + " where TableName='" + k + "'";
+//Log.i("---", sql);
+				listSql.add(sql);
+			}
+		}
+
+		if (listSql.size() > 0) {
+			return ExceSql(listSql);
+		}
+		return false;
+	}
+
+	// 获取同步时间
+	public static String getSynTim () {
+		String r = "";
+
+		try {
+			File name = new File(filePath);
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
+			String sql = "select tim from SynTim where id = 1";
+
+			Cursor cursor = db.rawQuery(sql, null);
+			if (cursor.moveToNext()) {
+				r = cursor.getString(0);
+			} else {
+				r = f.format(new Date());
+				List<String> listSql = new ArrayList<String>();
+				listSql.add("insert into SynTim values(1, '" + r + "')");
+				ExceSql(listSql);
+			}
+
+			cursor.close();
+			db.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return r;
+	}
+
+	// 设置同步时间
+	public static String setSynTim (String tim) {
+		List<String> listSql = new ArrayList<String>();
+		listSql.add("update SynTim set tim='" + tim + "' where id=1");
+		ExceSql(listSql);
+		return tim;
+	}
+
+	// 获取未同步的已删除配件信息
+	public static String[] getSynDel (String min, String max) {
+		Set<String> r = new HashSet<String>();
+
+		try {
+			File name = new File(filePath);
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
+			String sql = "select PartsCode from TbPartsOp where Info > '" + min + "' and Info <= '" + max + "' and OpType = '14'";
+
+			Cursor cursor = db.rawQuery(sql, null);
+			while (cursor.moveToNext()) {
+				r.add(cursor.getString(0));
+			}
+
+			cursor.close();
+			db.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return r.toArray(new String[] {});
+	}
+
+	// 获取未同步的最后操作配件信息
+	public static List<Parts> getSynAdd (String min, String max) {
+		List<Parts> r = new ArrayList<Parts>();
+
+		try {
+			File name = new File(filePath);
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
+			String sql = "select * from TbParts where LastOpTime > '" + min + "' and LastOpTime <= '" + max + "'";
+
+			Cursor cursor = db.rawQuery(sql, null);
+			while (cursor.moveToNext()) {
+				Parts p = new Parts();
+				p.PartCode = cursor.getString(0);
+				p.Status = cursor.getString(1);
+				p.LastOpTime = cursor.getString(2);
+				p.Location = cursor.getString(3);
+				if (p.Location == null) {
+					p.Location = "";
+				}
+				r.add(p);
+			}
+
+			cursor.close();
+			db.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return r;
+	}
+
 
 }

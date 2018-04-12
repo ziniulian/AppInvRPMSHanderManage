@@ -1,0 +1,83 @@
+ /// <summary>
+        /// 获得数据表版本信息
+        /// </summary>
+        /// <returns></returns>
+        [OperationContract]
+        string GetTableVersion();
+
+        /// <summary>
+        /// 根据表名和版本号获得表对应的修改记录
+        /// </summary>
+        /// <param name="tableName">表名</param>
+        /// <param name="versionsFrom">开始版本号</param>
+        /// <param name="versionsTo">结束版本号</param>
+        /// <returns></returns>
+        [OperationContract]
+        string GetTableVersionOP(string tableName, int versionsFrom, int versionsTo);
+
+
+以上返回的都是json字符，你这边要解析下
+1.在你程序端对应附件的格式创建一样的数据实体
+2.参考实例中的android代码调用
+
+        /// <summary>
+        /// 记录贴标的配件
+        /// </summary>
+        /// <param name="strJson">json格式</param>
+        /// <returns></returns>
+        bool SavePartsTagByJson(string strJson);
+
+  
+        /// <summary>
+        /// 记录配件操作
+        /// </summary>
+        /// <returns>0成功，1失败,-1异常</returns>
+        [OperationContract]
+        int SavaPartsOp(string opInfo);
+
+        /// <summary>
+        /// 分页获得用户信息
+        /// </summary>
+        /// <param name="页数">page</param>
+        /// <param name="每页个数">pageSize</param>
+        /// <returns></returns>
+        [OperationContract]
+        string GetUserByPage(int page, int pageSize);
+
+        /// <summary>
+        /// 分页获得配件信息
+        /// </summary>
+        /// <param name="页数">page</param>
+        /// <param name="每页个数">pageSize</param>
+        /// <returns></returns>
+        [OperationContract]
+        string GetPartsByPage(int page, int pageSize);
+
+        /// <summary>
+        /// 分页获得库位信息
+        /// </summary>
+        /// <param name="页数">page</param>
+        /// <param name="每页个数">pageSize</param>
+        /// <returns></returns>
+        [OperationContract]
+        string GetStorageLocationByPage(int page, int pageSize);
+
+
+        /// <summary>
+        /// 分页获得站点信息
+        /// </summary>
+        /// <param name="页数">page</param>
+        /// <param name="每页个数">pageSize</param>
+        /// <returns></returns>
+        [OperationContract]
+        string GetTHDSByPage(int page, int pageSize);
+
+        /// <summary>
+        /// 分页获得数据字典信息
+        /// </summary>
+        /// <param name="页数">page</param>
+        /// <param name="每页个数">pageSize</param>
+        /// <returns></returns>
+        [OperationContract]
+        string GetCodeByPage(int page, int pageSize);
+

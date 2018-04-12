@@ -1,11 +1,15 @@
 package com.invengo.rpms;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,7 +26,10 @@ import com.invengo.rpms.R;
 import com.invengo.rpms.entity.TbCodeEntity;
 import com.invengo.rpms.entity.UserEntity;
 import com.invengo.rpms.util.SqliteHelper;
+import com.invengo.rpms.util.SynchroDbRa;
 import com.invengo.rpms.util.UtilityHelper;
+
+import java.util.Date;
 
 public class LoginActivity extends Activity {
 
@@ -53,8 +60,10 @@ public class LoginActivity extends Activity {
 		edtUserId = (EditText) findViewById(R.id.edtUserId);
 		edtPassword = (EditText) findViewById(R.id.edtPassword);
 		edtUserId.setText(sp.getString("uname", null));
+
+		checkTim();
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -238,6 +247,7 @@ public class LoginActivity extends Activity {
 				firstTime = currentTime;// 更新firstTime
 				return true;
 			} else { // 两次按键小于2秒时，退出应用
+				SynchroDbRa.oneStop();	// 关闭同步线程
 				finish();
 			}
 		}
@@ -246,6 +256,38 @@ public class LoginActivity extends Activity {
 
 	private void showToast(String msg) {
 		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+	}
+
+	// 时间校验
+	private void checkTim() {
+		Date dt = new Date(SqliteHelper.getSynTim());
+		Date dd = new Date("2018/04/12 12:12:12");	// 标准时间
+		Date dn = new Date();
+//Log.i("---", dt.toString() + " , " + dd.toString() + " , " + dn.toString());
+		if (dd.compareTo(dn) > 0 || dt.compareTo(dn) > 0) {
+			// 时间错误提示
+			AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this, R.style.AppTheme);
+			builder.setTitle("警告：");
+			builder.setMessage("警告：\n\n系统时间出现严重误差！\n\n请修改系统时间后重启软件！\n\n");
+
+			builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					finish();
+					startActivity(new Intent(Settings.ACTION_DATE_SETTINGS));
+				}
+			});
+			builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface dialogInterface) {
+					finish();
+					startActivity(new Intent(Settings.ACTION_DATE_SETTINGS));
+				}
+			});
+			builder.show();
+		} else {
+			SynchroDbRa.oneStart();	// 开启同步线程
+		}
 	}
 
 }
