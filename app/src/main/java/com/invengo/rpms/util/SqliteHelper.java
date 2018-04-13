@@ -1114,7 +1114,7 @@ public class SqliteHelper {
 				sql = "insert into TbTableVersion values('" + k + "', " + v[1] + ")";
 //Log.i("---", sql);
 				listSql.add(sql);
-			} else {
+			} else if (v[0] != v[1]) {
 				// 更新
 				sql = "update TbTableVersion set TableVersion=" + v[1] + " where TableName='" + k + "'";
 //Log.i("---", sql);

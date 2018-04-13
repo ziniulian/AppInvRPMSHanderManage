@@ -639,7 +639,6 @@ public class MainActivity extends BaseActivity {
 				firstTime = currentTime;// 更新firstTime
 				return true;
 			} else { // 两次按键小于2秒时，退出应用
-				SynchroDbRa.oneStop();	// 关闭同步线程
 				System.exit(0);
 			}
 		}
@@ -657,6 +656,8 @@ public class MainActivity extends BaseActivity {
 			reader.disConnect();
 			isConnected = false;
 		}
+
+		SynchroDbRa.oneStop();	// 关闭同步线程
 	}
 
 	/**
