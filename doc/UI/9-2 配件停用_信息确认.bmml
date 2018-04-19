@@ -1,0 +1,48 @@
+<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="678" measuredH="843" mockupW="483" mockupH="796">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::iPhone" x="286" y="47" w="392" h="796" measuredW="282" measuredH="573" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <bgPattern>allWhite</bgPattern>
+        <model>IPhone5</model>
+        <orientation>portrait</orientation>
+        <topBar>false</topBar>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::SubTitle" x="328" y="172" w="-1" h="-1" measuredW="96" measuredH="27" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>%u914D%u4EF6%u505C%u7528</text>
+      </controlProperties>
+    </control>
+    <control controlID="4" controlTypeID="com.balsamiq.mockups::CallOut" x="195" y="84" w="-1" h="-1" measuredW="47" measuredH="40" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>9-2</text>
+      </controlProperties>
+    </control>
+    <control controlID="5" controlTypeID="com.balsamiq.mockups::Button" x="569" y="172" w="-1" h="-1" measuredW="48" measuredH="27" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>9-1%20%u914D%u4EF6%u505C%u7528_%u626B%u63CF%u914D%u4EF6%26bm%3B9-1%20%u914D%u4EF6%u505C%u7528_%u626B%u63CF%u914D%u4EF6.bmml%26bm%3B9-1%20%u914D%u4EF6%u505C%u7528_%u626B%u63CF%u914D%u4EF6.bmml%26bm%3B9-1%20%u914D%u4EF6%u505C%u7528_%u626B%u63CF%u914D%u4EF6.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22374%2C125%2C422%2C152%22%20href%3D%229-1%2520%25E9%2585%258D%25E4%25BB%25B6%25E5%2581%259C%25E7%2594%25A8_%25E6%2589%25AB%25E6%258F%258F%25E9%2585%258D%25E4%25BB%25B6.bmml%22%20alt%3D%229-1%20%u914D%u4EF6%u505C%u7528_%u626B%u63CF%u914D%u4EF6%22%20id%3D%225%22/%3E</map>
+        <text>%u8FD4%u56DE</text>
+      </controlProperties>
+    </control>
+    <control controlID="10" controlTypeID="com.balsamiq.mockups::CheckBoxGroup" x="378" y="284" w="-1" h="-1" measuredW="208" measuredH="193" zOrder="4" locked="false" isInGroup="-1">
+      <controlProperties>
+        <size>24</size>
+        <text>%u7F16%u7801%uFF1Aahsdfh%0A%u5382%u5BB6%uFF1A%u5E7F%u6C49%0A%u578B%u53F7%uFF1A%u5E7F%u6C49THDS-B%0A%u7C7B%u522B%uFF1A%u63A7%u5236%u7BB1%0A%u540D%u79F0%uFF1A%u529F%u653E%u677F%0A%u5E8F%u5217%u53F7%uFF1A00002</text>
+      </controlProperties>
+    </control>
+    <control controlID="11" controlTypeID="com.balsamiq.mockups::ButtonBar" x="328" y="221" w="-1" h="-1" measuredW="304" measuredH="27" zOrder="5" locked="false" isInGroup="-1">
+      <controlProperties>
+        <selectedIndex>1</selectedIndex>
+        <text>%u626B%u63CF%u914D%u4EF6%2C%u4FE1%u606F%u786E%u8BA4%2C%u6545%u969C%u63CF%u8FF0%2C%u786E%u8BA4%u4FDD%u5B58</text>
+      </controlProperties>
+    </control>
+    <control controlID="12" controlTypeID="com.balsamiq.mockups::Button" x="452" y="635" w="61" h="25" measuredW="61" measuredH="27" zOrder="6" locked="false" isInGroup="-1">
+      <controlProperties>
+        <href>9-3%20%u914D%u4EF6%u505C%u7528_%u6545%u969C%u63CF%u8FF0%26bm%3B9-3%20%u914D%u4EF6%u505C%u7528_%u6545%u969C%u63CF%u8FF0.bmml%26bm%3B9-3%20%u914D%u4EF6%u505C%u7528_%u6545%u969C%u63CF%u8FF0.bmml%26bm%3B9-3%20%u914D%u4EF6%u505C%u7528_%u6545%u969C%u63CF%u8FF0.bmml</href>
+        <map>%3Carea%20shape%3D%22rect%22%20coords%3D%22257%2C588%2C318%2C613%22%20href%3D%229-3%2520%25E9%2585%258D%25E4%25BB%25B6%25E5%2581%259C%25E7%2594%25A8_%25E6%2595%2585%25E9%259A%259C%25E6%258F%258F%25E8%25BF%25B0.bmml%22%20alt%3D%229-3%20%u914D%u4EF6%u505C%u7528_%u6545%u969C%u63CF%u8FF0%22%20id%3D%2212%22/%3E</map>
+        <text>%u4E0B%u4E00%u6B65</text>
+      </controlProperties>
+    </control>
+  </controls>
+</mockup>
