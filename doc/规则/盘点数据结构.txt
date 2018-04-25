@@ -1,0 +1,60 @@
+
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace Invengo.RPMS.WcfServices.JsonModel
+{
+    /// <summary>
+    /// 盘点明细信息
+    /// </summary>
+    public class CheckDetailEntity
+    {
+        public String CheckCode;
+        public String PartsCode;
+        public String CheckUser;
+        public String CheckTime;
+        public String IsFind;
+        public String StorageLocation;
+
+    }
+}
+
+/************************************************************/
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace Invengo.RPMS.WcfServices.JsonModel
+{
+    /// <summary>
+    /// 盘点信息
+    /// </summary>
+    public class CheckEntity
+    {
+        public String CheckCode;
+        public String CheckPartsType;
+        public String AddUser;
+        public String AddTime;
+        public String Remark;
+        public String IsFinish;
+
+    }
+}
+
+/***********************************************************/
+
+        /// <summary>
+        /// 记录盘点操作
+        /// </summary>
+        /// <returns>0成功，1失败,-1异常</returns>
+        [OperationContract]
+        int SavaCheckOp(string checkInfo, string checkDetailInfo);
+
+/**************************************************************/
+
+
