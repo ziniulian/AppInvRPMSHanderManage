@@ -1,20 +1,5 @@
 package com.invengo.rpms;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.ksoap2.SoapEnvelope;
-import org.ksoap2.SoapFault;
-import org.ksoap2.serialization.SoapObject;
-import org.ksoap2.serialization.SoapPrimitive;
-import org.ksoap2.serialization.SoapSerializationEnvelope;
-import org.ksoap2.transport.HttpResponseException;
-import org.ksoap2.transport.HttpTransportSE;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -36,9 +21,24 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.invengo.rpms.R;
 import com.invengo.rpms.entity.CheckEntity;
+import com.invengo.rpms.util.Btn001;
 import com.invengo.rpms.util.SqliteHelper;
+
+import org.ksoap2.SoapEnvelope;
+import org.ksoap2.SoapFault;
+import org.ksoap2.serialization.SoapObject;
+import org.ksoap2.serialization.SoapPrimitive;
+import org.ksoap2.serialization.SoapSerializationEnvelope;
+import org.ksoap2.transport.HttpResponseException;
+import org.ksoap2.transport.HttpTransportSE;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SysSetActivity extends Activity {
 
@@ -84,32 +84,7 @@ public class SysSetActivity extends Activity {
 		setContentView(R.layout.activity_sysset);
 		
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
-		btnBack.setOnTouchListener( new OnTouchListener() {
-			public boolean onTouch(View v, MotionEvent event) {
-				switch (event.getAction()) {
-
-				case MotionEvent.ACTION_DOWN: {
-					// 按住事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.lightwhite);
-					break;
-				}
-				case MotionEvent.ACTION_MOVE: {
-					// 移动事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.lightwhite);
-					break;
-				}
-				case MotionEvent.ACTION_UP: {
-					// 松开事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.yellow);
-					break;
-				}
-				default:
-
-					break;
-				}
-				return false;
-			}
-		});
+		btnBack.setOnTouchListener(new Btn001());
 		btnBack.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				

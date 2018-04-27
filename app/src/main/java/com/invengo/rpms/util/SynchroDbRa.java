@@ -96,7 +96,7 @@ public class SynchroDbRa implements Runnable {
 				}
 				Thread.sleep(120000);	// 休眠两分钟
 			} catch (Exception e) {
-				e.printStackTrace();
+				redo = false;
 			}
 		}
 	}

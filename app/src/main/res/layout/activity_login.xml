@@ -2,99 +2,72 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/lightwhite"
+    android:background="@drawable/background"
     android:orientation="vertical" >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@color/black"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/edtUserId"
+            android:layout_width="160dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="50dp"
+            android:hint="@string/userName"
+            android:background="@drawable/editsharp" />
+
+        <EditText
+            android:id="@+id/edtPassword"
+            android:layout_width="160dp"
+            android:layout_height="40dp"
+            android:layout_margin="20dp"
+            android:hint="@string/password"
+            android:background="@drawable/editsharp"
+            android:inputType="textPassword" />
+
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="160dp"
+            android:layout_height="40dp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:background="@color/chinacartred"
+            android:text="@string/button_login" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:src="@drawable/logo"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal" >
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="10dp"
-            android:text="@string/app_name"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/btnConfig"
             android:layout_width="50dp"
             android:layout_height="26dp"
-            android:layout_marginLeft="100dp"
-            android:layout_marginTop="10dp"
-            android:background="@color/yellow"
+            android:layout_margin="10dp"
+            android:background="@color/chinacartred"
+            android:textColor="@color/white"
             android:text="@string/menu_settings" >
         </Button>
-    </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="280dp"
-        android:layout_height="260dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="80dp"
-        android:background="@drawable/bg_shape"
-        android:orientation="vertical" >
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="60dp"
-            android:layout_marginTop="30dp"
-            android:orientation="vertical" >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/userName" />
-
-            <EditText
-                android:id="@+id/edtUserId"
-                android:layout_width="160dp"
-                android:layout_height="40dp"
-                android:background="@drawable/editsharp" >
-            </EditText>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="60dp"
-            android:layout_marginTop="20dp"
-            android:orientation="vertical" >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/password" />
-
-            <EditText
-                android:id="@+id/edtPassword"
-                android:layout_width="160dp"
-                android:layout_height="40dp"
-                android:background="@drawable/editsharp"
-                android:inputType="textPassword" >
-            </EditText>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="20dp"
-            android:orientation="vertical" >
-
-            <Button
-                android:id="@+id/btnLogin"
-                android:layout_width="120dp"
-                android:layout_height="40dp"
-                android:layout_marginLeft="100dp"
-                android:background="@drawable/btnnormal"
-                android:text="@string/button_login" >
-            </Button>
-        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

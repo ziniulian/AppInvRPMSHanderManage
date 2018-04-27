@@ -1,13 +1,8 @@
 package com.invengo.rpms.util;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 
 import com.invengo.rpms.bean.Parts;
 import com.invengo.rpms.entity.CheckDetailEntity;
@@ -21,12 +16,14 @@ import com.invengo.rpms.entity.TbCodeEntity;
 import com.invengo.rpms.entity.TbPartsOpEntity;
 import com.invengo.rpms.entity.UserEntity;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.Environment;
-import android.util.Log;
-
-import invengo.javaapi.protocol.IRP1.SysConfig_800;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class SqliteHelper {
 
@@ -852,7 +849,7 @@ public class SqliteHelper {
 
 			File name = new File(filePath);
 			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
-			String sql = "select * from TbPartsOp";
+			String sql = "select * from TbPartsOp where OpType <> '14'";
 
 			Cursor cursor = db.rawQuery(sql, null);
 			while (cursor.moveToNext()) {

@@ -1,13 +1,6 @@
 package com.invengo.rpms;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,33 +8,33 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.SimpleAdapter;
-import android.widget.SimpleAdapter.ViewBinder;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.SimpleAdapter;
+import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.Toast;
 
-import com.invengo.rpms.R;
-import com.invengo.rpms.StockInActivity.PartsAdapter;
 import com.invengo.rpms.entity.CheckEntity;
-import com.invengo.rpms.entity.PartsEntity;
+import com.invengo.rpms.util.Btn001;
 import com.invengo.rpms.util.SqliteHelper;
-import com.invengo.rpms.util.UtilityHelper;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CheckActivity extends Activity {
 
@@ -59,36 +52,11 @@ public class CheckActivity extends Activity {
 		setContentView(R.layout.activity_check);
 		
 		btnConfig = (Button) findViewById(R.id.btnConfig);
-		btnConfig.setOnTouchListener(btnConfigTouchListener);
+//		btnConfig.setOnTouchListener(btnConfigTouchListener);
 		btnConfig.setOnClickListener(btnConfigClickListener);
 		
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
-		btnBack.setOnTouchListener( new OnTouchListener() {
-			public boolean onTouch(View v, MotionEvent event) {
-				switch (event.getAction()) {
-
-				case MotionEvent.ACTION_DOWN: {
-					// 按住事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.lightwhite);
-					break;
-				}
-				case MotionEvent.ACTION_MOVE: {
-					// 移动事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.lightwhite);
-					break;
-				}
-				case MotionEvent.ACTION_UP: {
-					// 松开事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.yellow);
-					break;
-				}
-				default:
-
-					break;
-				}
-				return false;
-			}
-		});
+		btnBack.setOnTouchListener(new Btn001());
 		btnBack.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				

@@ -1,27 +1,6 @@
 package com.invengo.rpms;
 
-import invengo.javaapi.protocol.IRP1.PowerOff;
-
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import org.ksoap2.SoapEnvelope;
-import org.ksoap2.SoapFault;
-import org.ksoap2.serialization.SoapObject;
-import org.ksoap2.serialization.SoapPrimitive;
-import org.ksoap2.serialization.SoapSerializationEnvelope;
-import org.ksoap2.transport.HttpResponseException;
-import org.ksoap2.transport.HttpTransportSE;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
@@ -40,9 +19,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -50,17 +29,35 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.invengo.rpms.R;
 import com.invengo.rpms.entity.CheckDetailEntity;
 import com.invengo.rpms.entity.CheckEntity;
 import com.invengo.rpms.entity.ConfigEntity;
 import com.invengo.rpms.entity.TbPartsOpEntity;
+import com.invengo.rpms.util.Btn001;
 import com.invengo.rpms.util.ConfigHelper;
 import com.invengo.rpms.util.SqliteHelper;
 import com.invengo.rpms.util.SynchroDbRa;
-import com.invengo.rpms.util.UtilityHelper;
+
+import org.ksoap2.SoapEnvelope;
+import org.ksoap2.SoapFault;
+import org.ksoap2.serialization.SoapObject;
+import org.ksoap2.serialization.SoapPrimitive;
+import org.ksoap2.serialization.SoapSerializationEnvelope;
+import org.ksoap2.transport.HttpResponseException;
+import org.ksoap2.transport.HttpTransportSE;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import invengo.javaapi.protocol.IRP1.PowerOff;
 
 public class MainActivity extends BaseActivity {
 
@@ -94,32 +91,7 @@ public class MainActivity extends BaseActivity {
 		btnConfig.setOnClickListener(btnConfigClickListener);
 
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
-		btnBack.setOnTouchListener(new OnTouchListener() {
-			public boolean onTouch(View v, MotionEvent event) {
-				switch (event.getAction()) {
-
-				case MotionEvent.ACTION_DOWN: {
-					// 按住事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.lightwhite);
-					break;
-				}
-				case MotionEvent.ACTION_MOVE: {
-					// 移动事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.lightwhite);
-					break;
-				}
-				case MotionEvent.ACTION_UP: {
-					// 松开事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.yellow);
-					break;
-				}
-				default:
-
-					break;
-				}
-				return false;
-			}
-		});
+		btnBack.setOnTouchListener(new Btn001());
 		btnBack.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 
@@ -178,21 +150,21 @@ public class MainActivity extends BaseActivity {
 				getResources().getString(R.string.About)
 		};
 		int[] resIds = {
-				R.drawable.query,
-				R.drawable.stockin,
-				R.drawable.stockout,
-				R.drawable.sendout,
-				R.drawable.check,
-				R.drawable.use,
-				R.drawable.stop,
-				R.drawable.fault,
-				R.drawable.sendrepair,
-				R.drawable.repair,
-				R.drawable.backfactory,
-				R.drawable.scrap,
-				R.drawable.about,
-				R.drawable.about,
-				R.drawable.about
+				R.drawable.hom_tagquery,
+				R.drawable.hom_partstockin,
+				R.drawable.hom_partsstockout,
+				R.drawable.hom_parthandout,
+				R.drawable.hom_partscheck,
+				R.drawable.hom_partstart,
+				R.drawable.hom_partstop,
+				R.drawable.hom_partback,
+				R.drawable.hom_partsendrepair,
+				R.drawable.hom_parttest,
+				R.drawable.hom_partbackfactoty,
+				R.drawable.hom_partscrap,
+				R.drawable.hom_partsendcard,
+				R.drawable.hom_partquerycheck,
+				R.drawable.hom_about
 		};
 
 		String roleStr = "";
@@ -339,7 +311,7 @@ public class MainActivity extends BaseActivity {
 			}
 		});
 
-//		timer.schedule(task, 1000 * 30, TIME_EXCT); // 1s后执行task,经过TIME_EXCT再次执行
+		timer.schedule(task, 1000 * 30, TIME_EXCT); // 1s后执行task,经过TIME_EXCT再次执行
 	}
 
 	Timer timer = new Timer();

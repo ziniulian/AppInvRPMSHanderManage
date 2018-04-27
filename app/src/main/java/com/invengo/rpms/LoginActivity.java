@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,7 +21,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.invengo.rpms.R;
 import com.invengo.rpms.entity.TbCodeEntity;
 import com.invengo.rpms.entity.UserEntity;
 import com.invengo.rpms.util.SqliteHelper;
@@ -92,17 +90,17 @@ public class LoginActivity extends Activity {
 
 			case MotionEvent.ACTION_DOWN: {
 				// 按住事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
+				btnConfig.setBackgroundResource(R.color.yellow);
 				break;
 			}
 			case MotionEvent.ACTION_MOVE: {
 				// 移动事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
+				btnConfig.setBackgroundResource(R.color.yellow);
 				break;
 			}
 			case MotionEvent.ACTION_UP: {
 				// 松开事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.yellow);
+				btnConfig.setBackgroundResource(R.color.chinacartred);
 				break;
 			}
 			default:
@@ -129,17 +127,17 @@ public class LoginActivity extends Activity {
 
 			case MotionEvent.ACTION_DOWN: {
 				// 按住事件发生后执行代码的区域
-				btnLogin.setBackgroundResource(R.drawable.btnclick);
+				btnLogin.setBackgroundResource(R.color.yellow);
 				break;
 			}
 			case MotionEvent.ACTION_MOVE: {
 				// 移动事件发生后执行代码的区域
-				btnLogin.setBackgroundResource(R.drawable.btnclick);
+				btnLogin.setBackgroundResource(R.color.yellow);
 				break;
 			}
 			case MotionEvent.ACTION_UP: {
 				// 松开事件发生后执行代码的区域
-				btnLogin.setBackgroundResource(R.drawable.btnnormal);
+				btnLogin.setBackgroundResource(R.color.chinacartred);
 				break;
 			}
 			default:

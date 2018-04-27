@@ -16,17 +16,17 @@ public class Btn001 implements View.OnTouchListener {
 		switch (motionEvent.getAction()) {
 			case MotionEvent.ACTION_DOWN: {
 				// 按住事件发生后执行代码的区域
-				view.setBackgroundResource(R.color.lightwhite);
+				view.setBackgroundResource(R.drawable.backhoverbtn);
 				break;
 			}
 			case MotionEvent.ACTION_MOVE: {
 				// 移动事件发生后执行代码的区域
-				view.setBackgroundResource(R.color.lightwhite);
+				view.setBackgroundResource(R.drawable.backhoverbtn);
 				break;
 			}
 			case MotionEvent.ACTION_UP: {
 				// 松开事件发生后执行代码的区域
-				view.setBackgroundResource(R.color.yellow);
+				view.setBackgroundResource(R.drawable.backbtn);
 				break;
 			}
 		}

@@ -1,24 +1,8 @@
 package com.invengo.rpms;
 
-import invengo.javaapi.core.BaseReader;
-import invengo.javaapi.core.IMessageNotification;
-import invengo.javaapi.core.Util;
-import invengo.javaapi.protocol.IRP1.PowerOff;
-import invengo.javaapi.protocol.IRP1.RXD_TagData;
-import invengo.javaapi.protocol.IRP1.ReadTag;
-import invengo.javaapi.protocol.IRP1.WriteUserData_6C;
-import invengo.javaapi.protocol.IRP1.ReadTag.ReadMemoryBank;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -34,13 +18,26 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.invengo.lib.diagnostics.InvengoLog;
-import com.invengo.rpms.R;
 import com.invengo.rpms.entity.OpType;
 import com.invengo.rpms.entity.PartsEntity;
 import com.invengo.rpms.entity.TbCodeEntity;
+import com.invengo.rpms.util.Btn001;
 import com.invengo.rpms.util.ReaderMessageHelper;
 import com.invengo.rpms.util.SqliteHelper;
 import com.invengo.rpms.util.UtilityHelper;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import invengo.javaapi.core.BaseReader;
+import invengo.javaapi.core.IMessageNotification;
+import invengo.javaapi.core.Util;
+import invengo.javaapi.protocol.IRP1.PowerOff;
+import invengo.javaapi.protocol.IRP1.RXD_TagData;
+import invengo.javaapi.protocol.IRP1.ReadTag;
+import invengo.javaapi.protocol.IRP1.ReadTag.ReadMemoryBank;
+import invengo.javaapi.protocol.IRP1.WriteUserData_6C;
 
 public class StopActivity extends BaseActivity {
 
@@ -72,36 +69,11 @@ public class StopActivity extends BaseActivity {
 		edtRemark = (EditText) findViewById(R.id.edtRemark);
 		
 		btnConfig = (Button) findViewById(R.id.btnConfig);
-		btnConfig.setOnTouchListener(btnConfigTouchListener);
+//		btnConfig.setOnTouchListener(btnConfigTouchListener);
 		btnConfig.setOnClickListener(btnConfigClickListener);
 		
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
-		btnBack.setOnTouchListener( new OnTouchListener() {
-			public boolean onTouch(View v, MotionEvent event) {
-				switch (event.getAction()) {
-
-				case MotionEvent.ACTION_DOWN: {
-					// 按住事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.lightwhite);
-					break;
-				}
-				case MotionEvent.ACTION_MOVE: {
-					// 移动事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.lightwhite);
-					break;
-				}
-				case MotionEvent.ACTION_UP: {
-					// 松开事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.yellow);
-					break;
-				}
-				default:
-
-					break;
-				}
-				return false;
-			}
-		});
+		btnBack.setOnTouchListener(new Btn001());
 		btnBack.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				if (isReading) {

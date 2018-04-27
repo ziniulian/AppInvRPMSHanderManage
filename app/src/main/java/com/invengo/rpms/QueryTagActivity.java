@@ -1,5 +1,23 @@
 package com.invengo.rpms;
 
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.invengo.lib.diagnostics.InvengoLog;
+import com.invengo.rpms.entity.PartsEntity;
+import com.invengo.rpms.entity.PartsStorageLocationEntity;
+import com.invengo.rpms.entity.StationEntity;
+import com.invengo.rpms.util.Btn001;
+import com.invengo.rpms.util.SqliteHelper;
+import com.invengo.rpms.util.UtilityHelper;
+
 import java.util.List;
 
 import invengo.javaapi.core.BaseReader;
@@ -9,26 +27,6 @@ import invengo.javaapi.protocol.IRP1.PowerOff;
 import invengo.javaapi.protocol.IRP1.RXD_TagData;
 import invengo.javaapi.protocol.IRP1.ReadTag;
 import invengo.javaapi.protocol.IRP1.ReadTag.ReadMemoryBank;
-
-import android.annotation.SuppressLint;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
-import android.widget.Button;
-import android.widget.TextView;
-
-import com.invengo.rpms.R;
-import com.invengo.lib.diagnostics.InvengoLog;
-import com.invengo.rpms.entity.PartsEntity;
-import com.invengo.rpms.entity.PartsStorageLocationEntity;
-import com.invengo.rpms.entity.StationEntity;
-import com.invengo.rpms.util.SqliteHelper;
-import com.invengo.rpms.util.UtilityHelper;
 
 public class QueryTagActivity extends BaseActivity {
 
@@ -51,32 +49,7 @@ public class QueryTagActivity extends BaseActivity {
 		reader.onMessageNotificationReceived.add(QueryTagActivity.this);
 		
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
-		btnBack.setOnTouchListener( new OnTouchListener() {
-			public boolean onTouch(View v, MotionEvent event) {
-				switch (event.getAction()) {
-
-				case MotionEvent.ACTION_DOWN: {
-					// 按住事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.lightwhite);
-					break;
-				}
-				case MotionEvent.ACTION_MOVE: {
-					// 移动事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.lightwhite);
-					break;
-				}
-				case MotionEvent.ACTION_UP: {
-					// 松开事件发生后执行代码的区域
-					btnBack.setBackgroundResource(R.color.yellow);
-					break;
-				}
-				default:
-
-					break;
-				}
-				return false;
-			}
-		});
+		btnBack.setOnTouchListener(new Btn001());
 		btnBack.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				if (isReading) {

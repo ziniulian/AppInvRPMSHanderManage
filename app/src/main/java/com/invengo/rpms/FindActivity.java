@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -68,7 +67,7 @@ public class FindActivity extends Activity {
 
 		// 帮助按钮
 		btn = (Button) findViewById(R.id.btnConfig);
-		btn.setOnTouchListener(new Btn001());
+//		btn.setOnTouchListener(new Btn001());
 		btn.setOnClickListener(new HelpClick(con, getResources().getString(R.string.pairsStockOutTipInfo)));
 
 		// 退出按钮
