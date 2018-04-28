@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@drawable/background"
+    android:background="@drawable/background_login"
     android:orientation="vertical" >
 
     <LinearLayout
@@ -14,59 +14,46 @@
 
         <EditText
             android:id="@+id/edtUserId"
-            android:layout_width="160dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="50dp"
-            android:hint="@string/userName"
-            android:background="@drawable/editsharp" />
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="210dp"
+            android:layout_marginLeft="30dp"
+            android:background="@color/open"/>
 
         <EditText
             android:id="@+id/edtPassword"
-            android:layout_width="160dp"
-            android:layout_height="40dp"
-            android:layout_margin="20dp"
-            android:hint="@string/password"
-            android:background="@drawable/editsharp"
-            android:inputType="textPassword" />
-
-        <Button
-            android:id="@+id/btnLogin"
-            android:layout_width="160dp"
-            android:layout_height="40dp"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:textSize="20sp"
-            android:background="@color/chinacartred"
-            android:text="@string/button_login" />
-
-        <ImageView
-            android:layout_width="wrap_content"
+            android:layout_width="180dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:src="@drawable/logo"/>
+            android:layout_marginTop="17dp"
+            android:layout_marginLeft="30dp"
+            android:background="@color/open"
+            android:inputType="textPassword"/>
 
-    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:gravity="center_horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal" >
+            <Button
+                android:id="@+id/btnLogin"
+                android:layout_width="106dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:background="@color/open"
+                android:text="@string/button_login"/>
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/btnConfig"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:background="@color/open"
+                android:text="@string/menu_settings" />
 
-        <Button
-            android:id="@+id/btnConfig"
-            android:layout_width="50dp"
-            android:layout_height="26dp"
-            android:layout_margin="10dp"
-            android:background="@color/chinacartred"
-            android:textColor="@color/white"
-            android:text="@string/menu_settings" >
-        </Button>
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -48,11 +48,11 @@ public class LoginActivity extends Activity {
 		SqliteHelper.InintDatabase();
 
 		btnLogin = (Button) findViewById(R.id.btnLogin);
-		btnLogin.setOnTouchListener(btnLoginTouchListener);
+//		btnLogin.setOnTouchListener(btnLoginTouchListener);
 		btnLogin.setOnClickListener(btnLoginClickListener);
 		
 		btnConfig = (Button) findViewById(R.id.btnConfig);
-		btnConfig.setOnTouchListener(btnConfigTouchListener);
+//		btnConfig.setOnTouchListener(btnConfigTouchListener);
 		btnConfig.setOnClickListener(btnConfigClickListener);
 
 		edtUserId = (EditText) findViewById(R.id.edtUserId);
@@ -83,7 +83,7 @@ public class LoginActivity extends Activity {
 			return super.onOptionsItemSelected(item);
 		}
 	}
-	
+
 	private OnTouchListener btnConfigTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
 			switch (event.getAction()) {
