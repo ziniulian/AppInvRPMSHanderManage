@@ -8,4 +8,7 @@
 <color name="chinacartred">#c70019</color>
 <color name="gray">#424242</color>
 <color name="open">#00000000</color>
+<color name="txtblack">#000000</color>
+<color name="gridview_item_normal">#B2FFFFFF</color>
+<color name="gridview_item_hover">#A90015</color>
 </resources>
