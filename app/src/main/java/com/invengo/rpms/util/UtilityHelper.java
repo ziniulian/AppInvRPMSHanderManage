@@ -2,20 +2,19 @@ package com.invengo.rpms.util;
 
 import android.os.Environment;
 import android.os.StatFs;
-import android.util.Log;
 
-import invengo.javaapi.core.Util;
+import com.invengo.rpms.entity.OpType;
+import com.invengo.rpms.entity.PartsEntity;
+import com.invengo.rpms.entity.StorageLocationEntity;
+import com.invengo.rpms.entity.TbCodeEntity;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.regex.Pattern;
 
-import com.invengo.rpms.entity.OpType;
-import com.invengo.rpms.entity.PartsEntity;
-import com.invengo.rpms.entity.StationEntity;
-import com.invengo.rpms.entity.StorageLocationEntity;
-import com.invengo.rpms.entity.TbCodeEntity;
+import invengo.javaapi.core.Util;
 
 public class UtilityHelper {
 	
@@ -393,6 +392,12 @@ public class UtilityHelper {
 		return s.toUpperCase();
 	}
 
+	// 检查字符串是否全为数字
+	public static boolean isNum(String str){
+		Pattern pattern = Pattern.compile("^\\d*$");
+		return pattern.matcher(str).matches();
+	}
+
 	// 获取字符串形式的序列号
 	public static String getSnStr (int n) {
 //		String r = Util.convertIntToHexString(n);
@@ -432,4 +437,67 @@ public class UtilityHelper {
 		return r;
 	}
 
+	// 数据字典所属是否存在
+	public static boolean IsExsitCodeBeyond(String codeBeyond, String str1) {
+		boolean str1IsExsit=false;
+		for(String str:codeBeyond.split(","))
+		{
+			if(str.equals(str1))
+			{
+				str1IsExsit=true;
+			}
+
+			for(String str0:str.split("-"))
+			{
+				if(str0.equals(str1))
+				{
+					str1IsExsit=true;
+				}
+			}
+		}
+
+		if(str1IsExsit)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	// 数据字典所属是否存在
+	public static boolean IsExsitCodeBeyond(String codeBeyond, String str1,
+											String str2) {
+		boolean str1IsExsit=false;
+		boolean str2IsExsit=false;
+		for(String str:codeBeyond.split(","))
+		{
+			if(str.equals(str1))
+			{
+				str1IsExsit=true;
+			}
+			if(str.equals(str2))
+			{
+				str2IsExsit=true;
+			}
+
+			for(String str0:str.split("-"))
+			{
+				if(str0.equals(str1))
+				{
+					str1IsExsit=true;
+				}
+				if(str0.equals(str2))
+				{
+					str2IsExsit=true;
+				}
+			}
+		}
+
+		if(str1IsExsit && str2IsExsit)
+		{
+			return true;
+		}
+
+		return false;
+	}
 }

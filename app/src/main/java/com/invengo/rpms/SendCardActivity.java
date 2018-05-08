@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -50,7 +51,7 @@ public class SendCardActivity extends BaseActivity {
 	Spinner sprPartsStatus;
 	Spinner sprDw;
 	Button btnConfig;
-	TextView txtSqe;
+	EditText txtSqe;
 	TextView txtInfo;
 	TextView txtRemark;
 	TextView txtRemarkV;
@@ -69,8 +70,10 @@ public class SendCardActivity extends BaseActivity {
 
 	private List<String> listPartsName = new ArrayList<String>();
 	private List<String> listPartsSort = new ArrayList<String>();
+	private List<String> listPartsHost = new ArrayList<String>();
 	private ArrayAdapter<String> adapterPartsName;
 	private ArrayAdapter<String> adapterPartsSort;
+	private ArrayAdapter<String> adapterPartsHost;
 	private ArrayAdapter adapterDw;
 	private String factoryCodeSelected;
 	private String sortCodeSelected;
@@ -104,7 +107,7 @@ public class SendCardActivity extends BaseActivity {
 			}
 		});
 
-		txtSqe = (TextView) findViewById(R.id.txtSqe);
+		txtSqe = (EditText) findViewById(R.id.txtSqe);
 
 		sprPartsT5 = (Spinner) findViewById(R.id.sprPartsT5);
 		List<String> listPartsT5 = new ArrayList<String>();
@@ -195,18 +198,27 @@ public class SendCardActivity extends BaseActivity {
 				String sortSelected = adapterPartsSort.getItem(position).toString();
 				sortCodeSelected = sortSelected.split(" ")[0];
 
+				listPartsHost.clear();
+				List<TbCodeEntity> listCodeHost = SqliteHelper
+						.queryDbCodeByType("08");
+				for (TbCodeEntity entityName : listCodeHost) {
+					if (UtilityHelper.IsExsitCodeBeyond(
+							entityName.dbCodeBeyond, sortCodeSelected)) {
+						listPartsHost.add(entityName.dbCode + " "
+								+ entityName.dbName);
+					}
+				}
+				adapterPartsHost.notifyDataSetChanged();
+
 				listPartsName.clear();
 				List<TbCodeEntity> listCodeName = SqliteHelper
 						.queryDbCodeByType("09");
 				for (TbCodeEntity entityName : listCodeName) {
-
-					if (entityName.dbCodeBeyond.indexOf(hostCodeSelected) == 0) {
-						String s = sortCodeSelected;
-						int d = entityName.dbCodeBeyond.indexOf(s);
-						if (d > 0) {
-							listPartsName.add(entityName.dbCode + " "
-									+ entityName.dbName);
-						}
+					if (UtilityHelper.IsExsitCodeBeyond(
+							entityName.dbCodeBeyond, sortCodeSelected,
+							hostCodeSelected)) {
+						listPartsName.add(entityName.dbCode + " "
+								+ entityName.dbName);
 					}
 				}
 				adapterPartsName.notifyDataSetChanged();
@@ -218,7 +230,7 @@ public class SendCardActivity extends BaseActivity {
 		});
 
 		sprPartsHost = (Spinner) findViewById(R.id.sprPartsHost);
-		List<String> listPartsHost = new ArrayList<String>();
+		listPartsHost.clear();
 		List<TbCodeEntity> listCodeHost = SqliteHelper.queryDbCodeByType("08");
 		for (TbCodeEntity entity : listCodeHost) {
 			listPartsHost.add(entity.dbCode + " " + entity.dbName);
@@ -227,7 +239,7 @@ public class SendCardActivity extends BaseActivity {
 			hostCodeSelected = listCodeHost.get(0).toString().split(" ")[0];
 		}
 
-		final ArrayAdapter<String> adapterPartsHost = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, listPartsHost);
+		adapterPartsHost = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, listPartsHost);
 		adapterPartsHost.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
 		sprPartsHost.setAdapter(adapterPartsHost);
 		sprPartsHost.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -239,14 +251,11 @@ public class SendCardActivity extends BaseActivity {
 				List<TbCodeEntity> listCodeName = SqliteHelper
 						.queryDbCodeByType("09");
 				for (TbCodeEntity entityName : listCodeName) {
-
-					if (entityName.dbCodeBeyond.indexOf(hostCodeSelected) == 0) {
-						String s = sortCodeSelected;
-						int d = entityName.dbCodeBeyond.indexOf(s);
-						if (d > 0) {
-							listPartsName.add(entityName.dbCode + " "
-									+ entityName.dbName);
-						}
+					if (UtilityHelper.IsExsitCodeBeyond(
+							entityName.dbCodeBeyond, sortCodeSelected,
+							hostCodeSelected)) {
+						listPartsName.add(entityName.dbCode + " "
+								+ entityName.dbName);
 					}
 				}
 				adapterPartsName.notifyDataSetChanged();
@@ -302,9 +311,6 @@ public class SendCardActivity extends BaseActivity {
 		listStatus.add("在库");
 		listStatus.add("在段");
 		listStatus.add("启用");
-		listStatus.add("在所 - 待厂修");
-		listStatus.add("在所 - 待入库");
-		listStatus.add("在所 - 待报废");
 		listStatus.add("在所");
 		ArrayAdapter<String> adapterStatus = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, listStatus);
 		adapterStatus.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
@@ -334,9 +340,6 @@ public class SendCardActivity extends BaseActivity {
 						cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STATION));
 						break;
 					case 3:
-					case 4:
-					case 5:
-					case 6:
 						txtRemark.setText("");
 						txtRemarkV.setVisibility(View.GONE);
 						sprDw.setVisibility(View.GONE);
@@ -436,13 +439,26 @@ public class SendCardActivity extends BaseActivity {
 		} else {
 			sb.append(o.toString().substring(0, 3));
 		}
-//Log.i("---", sb.toString());
 
-		// 生成序列号，界面显示序列号
-		int n = SqliteHelper.queryPartsNumByType(sb.toString());
-		String sn = UtilityHelper.getSnStr(n);
-		txtSqe.setText(sn);
-		sb.append(sn);
+		// 检查序列号格式
+		String sn = txtSqe.getText().toString();
+		if (sn.length() == 5 && UtilityHelper.isNum(sn)) {
+			// 检查数据库中有无相同序列号
+			sb.append(sn);
+			if (SqliteHelper.queryOnePart(sb.toString()) != null) {
+				showToast("序列号重名");
+				return;
+			}
+		} else {
+			showToast("序列号必须为5位数字");
+			return;
+		}
+
+//		// 生成序列号，界面显示序列号
+//		int n = SqliteHelper.queryPartsNumByType(sb.toString());
+//		String sn = UtilityHelper.getSnStr(n);
+//		txtSqe.setText(sn);
+//		sb.append(sn);
 		partsCode = sb.toString();
 
 		// 写标签
@@ -478,29 +494,31 @@ public class SendCardActivity extends BaseActivity {
 							typCod = 0x02;
 							switch (UtilityHelper.CheckEpc(epc)) {
 								case 1:
-									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS, 1, 0, epc));
+									if (txtRemarkV.getText().length() == 0) {
+										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS, 1, 0, epc));
+									}
 									break;
 								case 0:
 									if (txtRemarkV.getText().length() == 0) {
-										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STORAGE_LOCATION));
+//										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STORAGE_LOCATION));
 									} else {
 										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(READY_WRITE, 1, 1, new String[] {tid, epc, userData}));
 									}
 									break;
 								case -1:
 									if (txtRemarkV.getText().length() == 0) {
-										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STORAGE_LOCATION));
+//										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STORAGE_LOCATION));
 									} else {
 										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(READY_WRITE, 1, 0, new String[] {tid}));
 									}
 									break;
-								default:
-									if (txtRemarkV.getText().length() == 0) {
-										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STORAGE_LOCATION));
-									} else {
-										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
-									}
-									break;
+//								default:
+//									if (txtRemarkV.getText().length() == 0) {
+//										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STORAGE_LOCATION));
+//									} else {
+//										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
+//									}
+//									break;
 							}
 							break;
 						case 2:	// 站点
@@ -508,29 +526,31 @@ public class SendCardActivity extends BaseActivity {
 							typCod = 0x05;
 							switch (UtilityHelper.CheckEpc(epc)) {
 								case 2:
-									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS, 2, 0, epc));
+									if (txtRemarkV.getText().length() == 0) {
+										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS, 2, 0, epc));
+									}
 									break;
 								case 0:
 									if (txtRemarkV.getText().length() == 0) {
-										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STATION));
+//										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STATION));
 									} else {
 										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(READY_WRITE, 2, 1, new String[] {tid, epc, userData}));
 									}
 									break;
 								case -1:
 									if (txtRemarkV.getText().length() == 0) {
-										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STATION));
+//										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STATION));
 									} else {
 										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(READY_WRITE, 2, 0, new String[] {tid}));
 									}
 									break;
-								default:
-									if (txtRemarkV.getText().length() == 0) {
-										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STATION));
-									} else {
-										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
-									}
-									break;
+//								default:
+//									if (txtRemarkV.getText().length() == 0) {
+//										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_STATION));
+//									} else {
+//										cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
+//									}
+//									break;
 							}
 							break;
 						case 1:	// 单位
@@ -548,12 +568,9 @@ public class SendCardActivity extends BaseActivity {
 									break;
 							}
 							break;
-						case 3:	// 在所，在所的状态有很多种： 9 - A
-						case 4:
-						case 5:
-						case 6:
+						case 3:
 							typ = "S";
-							typCod = (byte)(9 + (p - 3));
+							typCod = 0x0A;
 							switch (UtilityHelper.CheckEpc(epc)) {
 								case 0:
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(READY_WRITE, 3, 1, new String[] {tid, epc, userData}));
@@ -598,30 +615,68 @@ public class SendCardActivity extends BaseActivity {
 
 	private void StartRead() {
 		if (!lockRd) {
-			if (sprPartsT5.getSelectedItem() == null) {
+			StringBuilder sb = new StringBuilder();
+
+			// 组织epc头部
+			Object o;
+			o = sprPartsT5.getSelectedItem();
+			if (o == null) {
 				showToast("请选择编码");
 				return;
+			} else {
+				sb.append(o.toString().substring(0, 2));
 			}
-			if (sprPartsFactory.getSelectedItem() == null) {
+
+			o = sprPartsFactory.getSelectedItem();
+			if (o == null) {
 				showToast("请选择厂家");
 				return;
+			} else {
+				sb.append(o.toString().substring(0, 2));
 			}
-			if (sprPartsSort.getSelectedItem() == null) {
+
+			o = sprPartsSort.getSelectedItem();
+			if (o == null) {
 				showToast("请选择产品型号");
 				return;
+			} else {
+				sb.append(o.toString().substring(0, 1));
 			}
-			if (sprPartsHost.getSelectedItem() == null) {
+
+			o = sprPartsHost.getSelectedItem();
+			if (o == null) {
 				showToast("请选择部件类别");
 				return;
+			} else {
+				sb.append(o.toString().substring(0, 2));
 			}
-			if (sprPartsName.getSelectedItem() == null) {
+
+			o = sprPartsName.getSelectedItem();
+			if (o == null) {
 				showToast("请选择部件名称");
+				return;
+			} else {
+				sb.append(o.toString().substring(0, 3));
+			}
+//Log.i("---", sb.toString());
+
+			// 检查序列号格式
+			String sn = txtSqe.getText().toString();
+			if (sn.length() == 5 && UtilityHelper.isNum(sn)) {
+				// 检查数据库中有无相同序列号
+				sb.append(sn);
+				if (SqliteHelper.queryOnePart(sb.toString()) != null) {
+					showToast("序列号重名");
+					return;
+				}
+			} else {
+				showToast("序列号必须为5位数字");
 				return;
 			}
 
 			isReading = true;
 			listEPCEntity.clear();
-			txtSqe.setText("");
+//			txtSqe.setText("");
 			ReadTag readTag = new ReadTag(ReadMemoryBank.EPC_TID_UserData_6C);
 			boolean result = reader.send(readTag);
 
@@ -769,7 +824,7 @@ public class SendCardActivity extends BaseActivity {
 				txtStatus.setText(getResources().getString(R.string.memo_WRT_OK));
 				break;
 			case WrtRa.WRT_EPC_ERR:
-				txtSqe.setText("");
+//				txtSqe.setText("");
 
 				// 释放锁
 				lockRd = false;

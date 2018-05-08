@@ -74,8 +74,10 @@ public class StockOutActivity extends BaseActivity {
 	private List<PartsStorageLocationEntity> listInfoAll=new ArrayList<PartsStorageLocationEntity>();
 	private List<String> listPartsName = new ArrayList<String>();
 	private List<String> listPartsSort = new ArrayList<String>();
+	private List<String> listPartsHost = new ArrayList<String>();
 	private ArrayAdapter<String> adapterPartsName;
 	private ArrayAdapter<String> adapterPartsSort;
+	private ArrayAdapter<String> adapterPartsHost;
 	private String factoryCodeSelected;
 	private String sortCodeSelected;
 	private String hostCodeSelected;
@@ -85,7 +87,7 @@ public class StockOutActivity extends BaseActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_stockout);
-		
+
 		reader.onMessageNotificationReceived.clear();
 		reader.onMessageNotificationReceived.add(StockOutActivity.this);
 
@@ -219,18 +221,27 @@ public class StockOutActivity extends BaseActivity {
 						.toString();
 				sortCodeSelected = sortSelected.split(" ")[0];
 
+				listPartsHost.clear();
+				List<TbCodeEntity> listCodeHost = SqliteHelper
+						.queryDbCodeByType("08");
+				for (TbCodeEntity entityName : listCodeHost) {
+					if (UtilityHelper.IsExsitCodeBeyond(
+							entityName.dbCodeBeyond, sortCodeSelected)) {
+						listPartsHost.add(entityName.dbCode + " "
+								+ entityName.dbName);
+					}
+				}
+				adapterPartsHost.notifyDataSetChanged();
+
 				listPartsName.clear();
 				List<TbCodeEntity> listCodeName = SqliteHelper
 						.queryDbCodeByType("09");
 				for (TbCodeEntity entityName : listCodeName) {
-
-					if (entityName.dbCodeBeyond.indexOf(hostCodeSelected) == 0) {
-						String s = sortCodeSelected;
-						int d = entityName.dbCodeBeyond.indexOf(s);
-						if (d > 0) {
-							listPartsName.add(entityName.dbCode + " "
-									+ entityName.dbName);
-						}
+					if (UtilityHelper.IsExsitCodeBeyond(
+							entityName.dbCodeBeyond, sortCodeSelected,
+							hostCodeSelected)) {
+						listPartsName.add(entityName.dbCode + " "
+								+ entityName.dbName);
 					}
 				}
 				adapterPartsName.notifyDataSetChanged();
@@ -242,7 +253,7 @@ public class StockOutActivity extends BaseActivity {
 		});
 
 		sprPartsHost = (Spinner) findViewById(R.id.sprPartsHost);
-		List<String> listPartsHost = new ArrayList<String>();
+		listPartsHost.clear();
 		List<TbCodeEntity> listCodeHost = SqliteHelper.queryDbCodeByType("08");
 		for (TbCodeEntity entity : listCodeHost) {
 			listPartsHost.add(entity.dbCode + " " + entity.dbName);
@@ -251,7 +262,7 @@ public class StockOutActivity extends BaseActivity {
 			hostCodeSelected = listCodeHost.get(0).toString().split(" ")[0];
 		}
 
-		final ArrayAdapter<String> adapterPartsHost = new ArrayAdapter<String>(
+		adapterPartsHost = new ArrayAdapter<String>(
 				this, android.R.layout.simple_spinner_item, listPartsHost);
 		adapterPartsHost
 				.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
@@ -268,14 +279,11 @@ public class StockOutActivity extends BaseActivity {
 				List<TbCodeEntity> listCodeName = SqliteHelper
 						.queryDbCodeByType("09");
 				for (TbCodeEntity entityName : listCodeName) {
-
-					if (entityName.dbCodeBeyond.indexOf(hostCodeSelected) == 0) {
-						String s = sortCodeSelected;
-						int d = entityName.dbCodeBeyond.indexOf(s);
-						if (d > 0) {
-							listPartsName.add(entityName.dbCode + " "
-									+ entityName.dbName);
-						}
+					if (UtilityHelper.IsExsitCodeBeyond(
+							entityName.dbCodeBeyond, sortCodeSelected,
+							hostCodeSelected)) {
+						listPartsName.add(entityName.dbCode + " "
+								+ entityName.dbName);
 					}
 				}
 				adapterPartsName.notifyDataSetChanged();
@@ -447,7 +455,7 @@ public class StockOutActivity extends BaseActivity {
 			String key = partsT5Str + partsFactoryStr + partsSortStr
 					+ partsHostStr + partsNameStr;
 			List<PartsStorageLocationEntity> listInfo = SqliteHelper.queryPartsStorageLocation(key, num);
-			if (listInfo.size() > 0) {				
+			if (listInfo.size() > 0) {
 				listPartsEntity.clear();
 				int no = listPartsData.size() + 1;
 				for (PartsStorageLocationEntity partsEntity : listInfo) {
@@ -504,7 +512,7 @@ public class StockOutActivity extends BaseActivity {
 			}
 			//count++;
 		//}
-		
+
 		/*
 		if(isSucess)
 		{
@@ -591,7 +599,7 @@ public class StockOutActivity extends BaseActivity {
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		
+
 		InvengoLog.i(TAG, "INFO.onKeyDown().");
 		if (keyCode == KeyEvent.KEYCODE_BACK && !backDown) {
 			boolean result=saveResult();
@@ -609,7 +617,7 @@ public class StockOutActivity extends BaseActivity {
 
 			return true;
 		}
-		
+
 		return super.onKeyDown(keyCode, event);
 	}
 

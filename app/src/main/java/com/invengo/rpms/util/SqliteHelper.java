@@ -30,7 +30,7 @@ public class SqliteHelper {
 	// 从sd卡中数据库路径
 	private static String filedirPath = Environment
 			.getExternalStorageDirectory().getAbsolutePath() + "/RPMS";
-	private static String filePath = filedirPath + "/RPMSHanderV1000";
+	private static String filePath = filedirPath + "/RPMSHanderV1001";
 
 	private static SimpleDateFormat f = new SimpleDateFormat(
 			"yyyy/MM/dd HH:mm:ss");
@@ -973,6 +973,33 @@ public class SqliteHelper {
 			db.close();
 		}
 		return false;
+	}
+
+	// 获取一个配件
+	public static HashMap<String, String> queryOnePart(String scode) {
+		HashMap<String, String> r = null;
+
+		try {
+			File name = new File(filePath);
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
+			String sql = "select PartsCode from TbParts where PartsCode='" + scode + "'";
+
+			Cursor cursor = db.rawQuery(sql, null);
+			if (cursor.moveToNext()) {
+				r = new HashMap<String, String>();
+				r.put("PartsCode", cursor.getString(0));
+				r.put("Status", cursor.getString(1));
+				r.put("LastOpTime", cursor.getString(2));
+				r.put("Code", cursor.getString(3));
+			}
+
+			cursor.close();
+			db.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return r;
 	}
 
 	// 查询类型相同的新序列号
