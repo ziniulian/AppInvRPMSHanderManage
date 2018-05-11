@@ -4,16 +4,15 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 
-import com.invengo.rpms.bean.Parts;
-import com.invengo.rpms.entity.CheckDetailEntity;
-import com.invengo.rpms.entity.CheckEntity;
+import com.invengo.rpms.bean.TbPartsOpEntity;
+import com.invengo.rpms.bean.CheckDetailEntity;
+import com.invengo.rpms.bean.CheckEntity;
 import com.invengo.rpms.entity.OpType;
 import com.invengo.rpms.entity.PartsStorageLocationEntity;
 import com.invengo.rpms.entity.SendRepairEntity;
 import com.invengo.rpms.entity.StationEntity;
 import com.invengo.rpms.entity.StorageLocationEntity;
 import com.invengo.rpms.entity.TbCodeEntity;
-import com.invengo.rpms.entity.TbPartsOpEntity;
 import com.invengo.rpms.entity.UserEntity;
 
 import java.io.File;
@@ -21,9 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class SqliteHelper {
 
@@ -79,7 +76,7 @@ public class SqliteHelper {
 				String sql_table11 = "Create TABLE TbTableVersion(TableName varchar(40) PRIMARY KEY,TableVersion int)";
 				listSql.add(sql_table11);
 
-				// 同步时间
+				// 其它信息缓存表
 				String sql_table12 = "Create TABLE SynTim(id int PRIMARY KEY, tim datetime)";
 				listSql.add(sql_table12);
 
@@ -103,11 +100,11 @@ public class SqliteHelper {
 
 			File name = new File(filePath);
 			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
-			String sql = "select * from PartsStorageLocation where PartsCode like '%"
+			String sql = "select * from TbParts where PartsCode like '%"
 					+ PartsSort
 					+ "%"
 					+ PartsName
-					+ "%' order by StockinTime desc Limit " + num;
+					+ "%' and Status='W' order by LastOpTime desc Limit " + num;
 
 			Cursor cursor = db.rawQuery(sql, null);
 			while (cursor.moveToNext()) {
@@ -115,9 +112,9 @@ public class SqliteHelper {
 				String PartsCode = cursor.getString(cursor
 						.getColumnIndex("PartsCode"));
 				String StorageLocationCode = cursor.getString(cursor
-						.getColumnIndex("StorageLocationCode"));
+						.getColumnIndex("Code"));
 				String StockinTime = cursor.getString(cursor
-						.getColumnIndex("StockinTime"));
+						.getColumnIndex("LastOpTime"));
 
 				PartsStorageLocationEntity entity = new PartsStorageLocationEntity();
 				entity.PartsCode = PartsCode;
@@ -145,9 +142,9 @@ public class SqliteHelper {
 
 				File name = new File(filePath);
 				SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
-				String sql = "select * from PartsStorageLocation where PartsCode like '%"
+				String sql = "select * from TbParts where PartsCode like '%"
 						+ key
-						+ "%' order by StockinTime desc Limit " + num;
+						+ "%' and Status='W' order by LastOpTime desc Limit " + num;
 
 				Cursor cursor = db.rawQuery(sql, null);
 				while (cursor.moveToNext()) {
@@ -155,9 +152,9 @@ public class SqliteHelper {
 					String PartsCode = cursor.getString(cursor
 							.getColumnIndex("PartsCode"));
 					String StorageLocationCode = cursor.getString(cursor
-							.getColumnIndex("StorageLocationCode"));
+							.getColumnIndex("Code"));
 					String StockinTime = cursor.getString(cursor
-							.getColumnIndex("StockinTime"));
+							.getColumnIndex("LastOpTime"));
 
 					PartsStorageLocationEntity entity = new PartsStorageLocationEntity();
 					entity.PartsCode = PartsCode;
@@ -183,7 +180,7 @@ public class SqliteHelper {
 		try {
 			File name = new File(filePath);
 			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
-			String sql = "select count(*) pairsNum from PartsStorageLocation where StorageLocationCode='"
+			String sql = "select count(*) pairsNum from TbParts where Status='W' and Code='"
 					+ code + "'";
 
 			Cursor cursor = db.rawQuery(sql, null);
@@ -539,7 +536,7 @@ public class SqliteHelper {
 
 			String sql = "insert into TbCheck values('" + entity.CheckCode
 					+ "', '" + entity.CheckPartsType + "', '" + entity.AddUser
-					+ "', '" + f.format(entity.AddTime) + "', '"
+					+ "', '" + entity.AddTime + "', '"
 					+ entity.Remark + "','N')";
 			listSql.add(sql);
 
@@ -630,9 +627,9 @@ public class SqliteHelper {
 
 				}
 
-				sql = "select * from PartsStorageLocation";
+				sql = "select * from TbParts";
 				if (quetyKey.length() > 0) {
-					quetyKey += "1=1";
+					quetyKey += "Status='W'";
 					sql += " where " + quetyKey;
 				}
 
@@ -645,7 +642,7 @@ public class SqliteHelper {
 					String PartsCode = cursor.getString(cursor
 							.getColumnIndex("PartsCode"));
 					String StorageLocationCode = cursor.getString(cursor
-							.getColumnIndex("StorageLocationCode"));
+							.getColumnIndex("Code"));
 
 					sql = "insert into TbCheckDetail(CheckCode,PartsCode,StorageLocation,IsFind) values('"
 							+ entity.CheckCode + "', '" + PartsCode + "', '"
@@ -694,8 +691,8 @@ public class SqliteHelper {
 						.getColumnIndex("CheckCode"));
 				entity.CheckPartsType = cursor.getString(cursor
 						.getColumnIndex("CheckPartsType"));
-				entity.AddTime = f.parse(cursor.getString(cursor
-						.getColumnIndex("AddTime")));
+				entity.AddTime = cursor.getString(cursor
+						.getColumnIndex("AddTime"));
 				entity.AddUser = cursor.getString(cursor
 						.getColumnIndex("AddUser"));
 				entity.IsFinish = cursor.getString(cursor
@@ -731,8 +728,8 @@ public class SqliteHelper {
 				CheckEntity entity = new CheckEntity();
 				entity.CheckCode = cursor.getString(cursor
 						.getColumnIndex("CheckCode"));
-				entity.AddTime = f.parse(cursor.getString(cursor
-						.getColumnIndex("AddTime")));
+				entity.AddTime = cursor.getString(cursor
+						.getColumnIndex("AddTime"));
 				entity.AddUser = cursor.getString(cursor
 						.getColumnIndex("AddUser"));
 				entity.IsFinish = cursor.getString(cursor
@@ -782,15 +779,14 @@ public class SqliteHelper {
 			listSql.add(sql);
 
 			if (opType == OpType.StockIn) {
-				
-				String sql1 = "delete from PartsStorageLocation where PartsCode='"
+				String sql1 = "delete from TbParts where PartsCode='"
 						+ partsCode + "'";
-				
-				String sql2 = "insert into PartsStorageLocation values('"
-						+ partsCode + "', '" + storageLocationStr + "', '"
-						+ f.format(new Date()) + "')";
+				listSql.add(sql1);
+
+				String sql2 = "insert into TbParts values('"
+						+ partsCode + "', 'W', '" + f.format(new Date()) + "', '"
+						+ storageLocationStr + "')";
 				listSql.add(sql2);
-				
 			}
 		}
 		
@@ -828,9 +824,13 @@ public class SqliteHelper {
 			listSql.add(sql);
 
 			if (opType == OpType.StockOut) {
-				String sql1 = "delete from PartsStorageLocation where PartsCode='"
+				String sql1 = "delete from TbParts where PartsCode='"
 						+ partsCode + "'";
 				listSql.add(sql1);
+
+				String sql2 = "insert into TbParts (PartsCode,Status,LastOpTime) values('"
+						+ partsCode + "', 'N', '" + f.format(new Date()) + "')";
+				listSql.add(sql2);
 			}
 		}
 
@@ -849,7 +849,7 @@ public class SqliteHelper {
 
 			File name = new File(filePath);
 			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
-			String sql = "select * from TbPartsOp where OpType <> '14'";
+			String sql = "select * from TbPartsOp";
 
 			Cursor cursor = db.rawQuery(sql, null);
 			while (cursor.moveToNext()) {
@@ -1030,18 +1030,25 @@ public class SqliteHelper {
 	// 添加一条配件信息
 	public static Boolean savOnePart(String status, String partsCode, String code) {
 		List<String> listSql = new ArrayList<String>();
-		String p;
+		String p, info;
 		if (status.equals("S")) {
 			p = ") values('";
+			info = status + ",,";
 			code = "')";	// 在所
 		} else {
 			p = ",Code) values('";
+			info = status + "," + code + ",";
 			code = "', '" + code + "')";
 		}
 
-		String sql = "insert into TbParts (PartsCode,Status,LastOpTime" + p +
-			partsCode + "', '" + status + "', '" + f.format(new Date()) + code;
+		String tim = f.format(new Date());
 
+		String sql = "insert into TbParts (PartsCode,Status,LastOpTime" + p +
+			partsCode + "', '" + status + "', '" + tim + code;
+
+		listSql.add(sql);
+
+		sql = "insert into TbPartsOp values('" + partsCode + "', '15', '" + info + tim + "')";
 		listSql.add(sql);
 
 		if (listSql.size() > 0) {
@@ -1159,7 +1166,7 @@ public class SqliteHelper {
 		try {
 			File name = new File(filePath);
 			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
-			String sql = "select tim from SynTim where id = 1";
+			String sql = "select tim from SynTim where id = 'synTim'";
 
 			Cursor cursor = db.rawQuery(sql, null);
 			if (cursor.moveToNext()) {
@@ -1167,7 +1174,7 @@ public class SqliteHelper {
 			} else {
 				r = f.format(new Date());
 				List<String> listSql = new ArrayList<String>();
-				listSql.add("insert into SynTim values(1, '" + r + "')");
+				listSql.add("insert into SynTim values('synTim', '" + r + "')");
 				ExceSql(listSql);
 			}
 
@@ -1183,54 +1190,23 @@ public class SqliteHelper {
 	// 设置同步时间
 	public static String setSynTim (String tim) {
 		List<String> listSql = new ArrayList<String>();
-		listSql.add("update SynTim set tim='" + tim + "' where id=1");
+		listSql.add("update SynTim set tim='" + tim + "' where id='synTim'");
 		ExceSql(listSql);
 		return tim;
 	}
 
-	// 获取未同步的已删除配件信息
-	public static String[] getSynDel (String min, String max) {
-		Set<String> r = new HashSet<String>();
+	// 获取键值对
+	public static String kvGet (String key) {
+		String r = null;
 
 		try {
 			File name = new File(filePath);
 			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
-			String sql = "select PartsCode from TbPartsOp where Info > '" + min + "' and Info <= '" + max + "' and OpType = '14'";
+			String sql = "select tim from SynTim where id = '" + key + "'";
 
 			Cursor cursor = db.rawQuery(sql, null);
-			while (cursor.moveToNext()) {
-				r.add(cursor.getString(0));
-			}
-
-			cursor.close();
-			db.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return r.toArray(new String[] {});
-	}
-
-	// 获取未同步的最后操作配件信息
-	public static List<Parts> getSynAdd (String min, String max) {
-		List<Parts> r = new ArrayList<Parts>();
-
-		try {
-			File name = new File(filePath);
-			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
-			String sql = "select * from TbParts where LastOpTime > '" + min + "' and LastOpTime <= '" + max + "'";
-
-			Cursor cursor = db.rawQuery(sql, null);
-			while (cursor.moveToNext()) {
-				Parts p = new Parts();
-				p.PartCode = cursor.getString(0);
-				p.Status = cursor.getString(1);
-				p.LastOpTime = cursor.getString(2);
-				p.Location = cursor.getString(3);
-				if (p.Location == null) {
-					p.Location = "";
-				}
-				r.add(p);
+			if (cursor.moveToNext()) {
+				r = cursor.getString(0);
 			}
 
 			cursor.close();
@@ -1242,5 +1218,33 @@ public class SqliteHelper {
 		return r;
 	}
 
+	// 设置键值对
+	public static String kvSet (String key, String v) {
+		String r = null;
+		List<String> listSql = new ArrayList<String>();
+
+
+		try {
+			File name = new File(filePath);
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
+			String sql = "select tim from SynTim where id = '" + key + "'";
+
+			Cursor cursor = db.rawQuery(sql, null);
+			if (cursor.moveToNext()) {
+				listSql.add("update SynTim set tim='" + v + "' where id='" + key + "'");
+			} else {
+				listSql.add("insert into SynTim values('" + key + "', '" + v + "')");
+			}
+
+			cursor.close();
+			db.close();
+
+			ExceSql(listSql);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return r;
+	}
 
 }

@@ -22,7 +22,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.invengo.lib.diagnostics.InvengoLog;
-import com.invengo.rpms.entity.CheckDetailEntity;
+import com.invengo.rpms.bean.CheckDetailEntity;
 import com.invengo.rpms.entity.PartsEntity;
 import com.invengo.rpms.util.Btn001;
 import com.invengo.rpms.util.SqliteHelper;

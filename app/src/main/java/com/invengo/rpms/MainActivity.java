@@ -1,19 +1,13 @@
 package com.invengo.rpms;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,41 +15,22 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.invengo.rpms.entity.CheckDetailEntity;
-import com.invengo.rpms.entity.CheckEntity;
 import com.invengo.rpms.entity.ConfigEntity;
 import com.invengo.rpms.entity.TbPartsOpEntity;
 import com.invengo.rpms.util.Btn001;
 import com.invengo.rpms.util.ConfigHelper;
-import com.invengo.rpms.util.SqliteHelper;
 import com.invengo.rpms.util.SynchroDbRa;
 
-import org.ksoap2.SoapEnvelope;
-import org.ksoap2.SoapFault;
-import org.ksoap2.serialization.SoapObject;
-import org.ksoap2.serialization.SoapPrimitive;
-import org.ksoap2.serialization.SoapSerializationEnvelope;
-import org.ksoap2.transport.HttpResponseException;
-import org.ksoap2.transport.HttpTransportSE;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import invengo.javaapi.protocol.IRP1.PowerOff;
 
@@ -310,183 +285,6 @@ public class MainActivity extends BaseActivity {
 				}
 			}
 		});
-
-		timer.schedule(task, 1000 * 30, TIME_EXCT); // 1s后执行task,经过TIME_EXCT再次执行
-	}
-
-	Timer timer = new Timer();
-	TimerTask task = new TimerTask() {
-		@Override
-		public void run() {
-			try {
-
-				// 上传操作记录
-				if (true) {
-					listTbPartsOp = SqliteHelper.queryOpRecord();
-					String opInfo = "";
-					if (listTbPartsOp.size() > 0) {
-						for (TbPartsOpEntity entity : listTbPartsOp) {
-							String strs = entity.PartsCode + ","
-									+ entity.OpType + "," + entity.Info;
-							strs = strs.replace("-", "===");
-							opInfo += strs + "-";
-						}
-					}
-					if (opInfo.length() > 0) {
-						opInfo = opInfo.substring(0, opInfo.length() - 1);
-
-						what = 1;
-						HashMap<String, String> values = new HashMap<String, String>();
-						values.put("opInfo", opInfo);
-						String keys = "opInfo";
-						Request("SavaPartsOp", values, keys);
-					}
-				}
-
-				// 上传盘点记录
-				if (work == 1) {
-					List<CheckEntity> listCheck = SqliteHelper.queryCheck(true);
-					String opInfo = "";
-					if (listCheck.size() > 0) {
-						for (CheckEntity entity : listCheck) {
-							checkCode = entity.CheckCode;
-							String checkPartsType = entity.CheckPartsType;
-							String addUser = entity.AddUser;
-							String addTime = f.format(entity.AddTime);
-							String remark = entity.Remark;
-							remark = remark.replace(",", "+++");
-							String strs = checkCode + "," + checkPartsType
-									+ "," + addUser + "," + addTime + ","
-									+ remark;
-							strs = strs.replace("-", "===");
-							opInfo += strs + "-";
-
-							List<CheckDetailEntity> listCheckDetail = SqliteHelper
-									.queryCheckDetailByCheckCode(checkCode);
-							for (CheckDetailEntity entityDetail : listCheckDetail) {
-
-								String partsCode = entityDetail.PartsCode;
-								String isFind = entityDetail.IsFind;
-								String checkUser = entityDetail.CheckUser;
-								String checkTime = entityDetail.CheckTime;
-
-								String strs1 = partsCode + "," + isFind + ","
-										+ checkUser + "," + checkTime;
-								strs1 = strs1.replace("-", "===");
-								opInfo += strs1 + "-";
-							}
-						}
-					}
-					if (opInfo.length() > 0) {
-						opInfo = opInfo.substring(0, opInfo.length() - 1);
-
-						what = 2;
-						HashMap<String, String> values = new HashMap<String, String>();
-						values.put("opInfo", opInfo);
-						String keys = "opInfo";
-						Request("SavaCheckOp", values, keys);
-					}
-				}
-
-				// 下载故障信息
-				if (work == 2) {
-					what = 3;
-
-					page = 1;
-					count = 0;
-					listSql.clear();
-					listSql.add("delete from TbSendRepair");
-
-					HashMap<String, Integer> values = new HashMap<String, Integer>();
-					values.put("page", page);
-					values.put("pageSize", pageSize);
-					String keys = "page,pageSize";
-					Request("GetPartsNoRepair", values, keys);
-				}
-
-				work++;
-				if (work == 3) {
-					work = 0;
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.out.println("exception...");
-			}
-		}
-	};
-
-	@SuppressLint("HandlerLeak")
-	private Handler cardOperationHandler = new Handler() {
-		public void handleMessage(android.os.Message msg) {
-			String result = (String) msg.obj;
-			switch (what) {
-			case 1:
-				if (result.equals("0")) {
-					List<String> listSql = new ArrayList<String>();
-					for (TbPartsOpEntity entiry : listTbPartsOp) {
-						listSql.add("delete from TbPartsOp where PartsCode='"
-								+ entiry.PartsCode + "' and OpType='"
-								+ entiry.OpType + "'");
-					}
-					SqliteHelper.ExceSql(listSql);
-					showToast("温馨提醒：上传操作数据成功");
-				} else {
-					showToast("温馨提醒：有操作数据待上传服务器，请及时上传");
-				}
-				break;
-			case 2:
-				if (result.equals("0")) {
-					List<String> listSql = new ArrayList<String>();
-					listSql.add("delete from TbCheck where CheckCode='"
-							+ checkCode + "'");
-					listSql.add("delete from TbCheckDetail where CheckCode='"
-							+ checkCode + "'");
-					SqliteHelper.ExceSql(listSql);
-					showToast("温馨提醒：上传盘点数据成功");
-				} else {
-					showToast("温馨提醒：有盘点数据待上传服务器，请及时上传");
-				}
-				break;
-			case 3:
-				DownLoadPartsNoRepair(result);
-				break;
-			default:
-				break;
-			}
-		};
-	};
-
-	private void DownLoadPartsNoRepair(String result) {
-		if (result.equals("error")) {
-			// showToast("下载故障失败,请检查网络");
-			return;
-		}
-		if (result.length() > 1) {
-			result = result.replace("-", "&**&&");
-			result = result.replace("\r\n\r\n", "-");
-			result = result.replace("\r\n", "-");
-			String[] resutlStrArray = result.split("-");
-			for (String str : resutlStrArray) {
-				String strBack = str.replace("&**&&", "-");
-				String[] strArray = strBack.split(",", -1);
-				if (strArray.length == 5) {
-					String sql = String
-							.format("insert into TbSendRepair values('%s','%s','%s','%s','%s')",
-									strArray[0], strArray[1], strArray[2],
-									strArray[3], strArray[4]);
-					listSql.add(sql);
-					count++;
-				}
-			}
-
-			boolean r = SqliteHelper.ExceSql(listSql);
-			// if (r) {
-			// showToast(String.format("成功下载%s条故障信息", count));
-			// } else {
-			// showToast(String.format("下载故障信息失败", count));
-			// }
-		}
 	}
 
 	@Override
@@ -544,52 +342,6 @@ public class MainActivity extends BaseActivity {
 		}
 	};
 
-	public class ListViewAdapter extends BaseAdapter {
-		View[] itemViews;
-
-		public ListViewAdapter(String[] itemTitles, int[] itemImageRes) {
-			itemViews = new View[itemTitles.length];
-			for (int i = 0; i < itemViews.length; ++i) {
-				itemViews[i] = makeItemView(itemTitles[i], itemImageRes[i]);
-			}
-		}
-
-		public int getCount() {
-			return itemViews.length;
-		}
-
-		public View getItem(int position) {
-			return itemViews[position];
-		}
-
-		public long getItemId(int position) {
-			return position;
-		}
-
-		private View makeItemView(String strTitle, int resId) {
-			LayoutInflater inflater = (LayoutInflater) MainActivity.this
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-			// 使用View的对象itemView与R.layout.item关联
-			View itemView = inflater.inflate(R.layout.listview_menu_item, null);
-
-			// 通过findViewById()方法实例R.layout.item内各组件
-			TextView title = (TextView) itemView
-					.findViewById(R.id.itemMenuTitleName);
-			title.setText(strTitle);
-
-			ImageView image = (ImageView) itemView.findViewById(R.id.itemImage);
-			image.setImageResource(resId);
-			return itemView;
-		}
-
-		public View getView(int position, View convertView, ViewGroup parent) {
-			// if (convertView == null) 此处不做判断，避免listview滚动时显示混乱
-			return itemViews[position];
-			// return convertView;
-		}
-	}
-
 	private boolean backDown;
 	private long firstTime = 0;
 
@@ -630,96 +382,6 @@ public class MainActivity extends BaseActivity {
 		}
 
 		SynchroDbRa.oneStop();	// 关闭同步线程
-	}
-
-	/**
-	 * 调用WebService
-	 * 
-	 * @return WebService的返回值
-	 * 
-	 */
-	public String CallWebService(String MethodName, Map<String, String> Params,
-			String keys) {
-
-		// 1、指定webservice的命名空间和调用的方法名
-		SoapObject request = new SoapObject(Namespace, MethodName);
-		// 2、设置调用方法的参数值，如果没有参数，可以省略，
-		if (Params != null) {
-			String[] keyStrs = keys.split(",");
-			for (int i = 0; i < keyStrs.length; i++) {
-				String key = keyStrs[i];
-				request.addProperty(key, Params.get(key));
-			}
-		}
-
-		// 3、生成调用Webservice方法的SOAP请求信息。该信息由SoapSerializationEnvelope对象描述
-		SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
-				SoapEnvelope.VER11);
-		envelope.bodyOut = request;
-		// c#写的应用程序必须加上这句
-		envelope.dotNet = true;
-
-		HttpTransportSE ht = new HttpTransportSE(WEB_SERVICE_URL);
-		// 使用call方法调用WebService方法
-		try {
-			String soapAction = Namespace + "IService/" + MethodName;
-			ht.call(soapAction, envelope);
-		} catch (HttpResponseException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (XmlPullParserException e) {
-			e.printStackTrace();
-		}
-		try {
-			final SoapPrimitive result = (SoapPrimitive) envelope.getResponse();
-			// Object result = (Object) envelope.getResponse();
-			if (result != null) {
-				Log.d("----收到的回复----", result.toString());
-				return result.toString();
-			}
-
-		} catch (SoapFault e) {
-			Log.e("----发生错误---", e.getMessage());
-			e.printStackTrace();
-		}
-
-		Message message = new Message();
-		message.obj = "error";
-		cardOperationHandler.sendMessage(message);
-		return null;
-	}
-
-	/**
-	 * 执行异步任务
-	 * 
-	 * @param params
-	 *            方法名+参数列表（哈希表形式）
-	 */
-	public void Request(Object... params) {
-		new AsyncTask<Object, Object, String>() {
-
-			@Override
-			protected String doInBackground(Object... params) {
-				if (params != null && params.length == 3) {
-					return CallWebService((String) params[0],
-							(Map<String, String>) params[1], (String) params[2]);
-				} else if (params != null && params.length == 1) {
-					return CallWebService((String) params[0], null, "");
-				} else {
-					return null;
-				}
-			}
-
-			protected void onPostExecute(String result) {
-				if (result != null) {
-					Message message = new Message();
-					message.obj = result;
-					cardOperationHandler.sendMessage(message);
-				}
-			};
-
-		}.execute(params);
 	}
 
 }

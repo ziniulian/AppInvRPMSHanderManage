@@ -258,10 +258,23 @@ public class LoginActivity extends Activity {
 
 	// 时间校验
 	private void checkTim() {
-		Date dt = new Date(SqliteHelper.getSynTim());
+		// 获取同步时间（减两分钟）
+		String [] ts = SqliteHelper.getSynTim().split(":");
+		int m = Integer.parseInt(ts[1]) - 2;
+		StringBuilder tim = new StringBuilder(ts[0]);
+		if (m < 10) {
+			tim.append(":0");
+		} else {
+			tim.append(":");
+		}
+		tim.append(m);
+		tim.append(":");
+		tim.append(ts[2]);
+
+		Date dt = new Date(tim.toString());
 		Date dd = new Date("2018/04/12 12:12:12");	// 标准时间
 		Date dn = new Date();
-//Log.i("---", dt.toString() + " , " + dd.toString() + " , " + dn.toString());
+
 		if (dd.compareTo(dn) > 0 || dt.compareTo(dn) > 0) {
 			// 时间错误提示
 			AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this, R.style.AppTheme);

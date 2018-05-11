@@ -1,14 +1,18 @@
 package com.invengo.rpms.util;
 
+import android.os.Handler;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.invengo.rpms.bean.BaseBean;
+import com.invengo.rpms.bean.CheckDetailEntity;
+import com.invengo.rpms.bean.CheckEntity;
 import com.invengo.rpms.bean.Parts;
 import com.invengo.rpms.bean.THDSEntity;
 import com.invengo.rpms.bean.TableVersion;
 import com.invengo.rpms.bean.TbCodeEntity;
+import com.invengo.rpms.bean.TbPartsOpEntity;
 import com.invengo.rpms.bean.TbStorageLocationEntity;
 import com.invengo.rpms.bean.UserEntity;
 
@@ -23,10 +27,32 @@ import java.util.List;
  */
 
 public class SynchroDbRa implements Runnable {
+	public static final int SYN_OK = 501;		// 同步成功
+	public static final int SYN_ERR = 502;		// 同步失败
+
 	private static SynchroDbRa self = null;
 	private boolean redo = true;
 	private Thread t = null;
-	private Gson gson=new Gson();
+	private Handler hd = null;
+	private Gson gson = new Gson();
+
+	private WebSrv ws = null;
+	private String ip = "192.168.1.131";
+	private String port = "8000";
+	private String srvNam = "Service.svc";
+	private String npc = "http://tempuri.org/";
+
+	private Type clsCode = new TypeToken<List<TbCodeEntity>>(){}.getType();
+	private Type clsPart = new TypeToken<List<Parts>>(){}.getType();
+	private Type clsThds = new TypeToken<List<THDSEntity>>(){}.getType();
+	private Type clsUser = new TypeToken<List<UserEntity>>(){}.getType();
+	private Type clsSl = new TypeToken<List<TbStorageLocationEntity>>(){}.getType();
+	private Type clsTbv = new TypeToken<List<TableVersion>>(){}.getType();
+
+	private String[] GetTableVersionOpKeys = new String[] {"tableName", "versionsFrom", "versionsTo"};
+	private String[] SavaPartsOpKeys = new String[] {"opInfo"};
+	private String[] SavaCheckOpKeys = new String[] {"checkInfo", "checkDetailInfo"};
+	private String[] CoverKeys = new String[] {"page", "pageSize"};
 
 	private SynchroDbRa () {}
 
@@ -44,26 +70,40 @@ public class SynchroDbRa implements Runnable {
 		}
 	}
 
-	private WebSrv ws = new WebSrv(
-		"http://192.168.1.131:8000/Service.svc",
-		"http://tempuri.org/"
-	);
+	// 立即同步数据，并设置URL，返回初次同步的结果
+	public static void reset(String ip, String port, Handler hd) {
+		oneStop();
+		self = new SynchroDbRa();
+		if (ip != null) {
+			self.ip = ip;
+		}
+		if (port != null) {
+			self.port = port;
+		}
+		if (hd != null) {
+			self.hd = hd;
+		}
+		self.start();
+	}
 
-	private Type clsCode = new TypeToken<List<TbCodeEntity>>(){}.getType();
-	private Type clsPart = new TypeToken<List<Parts>>(){}.getType();
-	private Type clsThds = new TypeToken<List<THDSEntity>>(){}.getType();
-	private Type clsUser = new TypeToken<List<UserEntity>>(){}.getType();
-	private Type clsSl = new TypeToken<List<TbStorageLocationEntity>>(){}.getType();
-	private Type clsTbv = new TypeToken<List<TableVersion>>(){}.getType();
+	public static void reset(Handler hd) {
+		if (self == null) {
+			reset(null, null, hd);
+		} else {
+			reset(self.ip, self.port, hd);
+		}
+	}
 
-	private String[] GetTableVersionOpKeys = new String[] {"tableName", "versionsFrom", "versionsTo"};
-	private String[] SavePartsTagByJsonKeys = new String[] {"strJson"};
-	private String[] SavaPartsOpKeys = new String[] {"opInfo"};
-	private String[] CoverKeys = new String[] {"page", "pageSize"};
+	public static void reset() {
+		reset(null);
+	}
 
 	public void start() {
 		if (t == null) {
 			redo = true;
+			if (ws == null) {
+				ws = new WebSrv("http://" + ip + ":" + port + "/" + srvNam, npc);
+			}
 			t = new Thread(this);
 			t.start();
 		}
@@ -89,15 +129,26 @@ public class SynchroDbRa implements Runnable {
 			try {
 				res = ws.qry("HelloWorld");
 				if (res.equals("HelloWorld!")) {
-//Log.i("---", "同步开始");
 					pushSynDat();
 					matchTabVer();
-//Log.i("---", "同步完成");
+					coverSendRepair();
+					sendMsg(SYN_OK);
+				} else {
+					sendMsg(SYN_ERR);
 				}
 				Thread.sleep(120000);	// 休眠两分钟
 			} catch (Exception e) {
 				redo = false;
+				sendMsg(SYN_ERR);
 			}
+		}
+	}
+
+	// 发送消息
+	private void sendMsg (int sta) {
+		if (hd != null) {
+			hd.sendMessage(hd.obtainMessage(sta));
+			hd = null;
 		}
 	}
 
@@ -106,7 +157,6 @@ public class SynchroDbRa implements Runnable {
 		HashMap<String, int[]> r = new HashMap<String, int[]>();
 		String res = ws.qry("GetTableVersion");
 		if (res != null) {
-//Log.i("----", res);
 			List<TableVersion> ls = gson.fromJson(res, clsTbv);
 			for (int i = 0; i < ls.size(); i ++) {
 				TableVersion tv = ls.get(i);
@@ -161,80 +211,51 @@ public class SynchroDbRa implements Runnable {
 
 	// 推送本地数据库的更新内容
 	private void pushSynDat () {
-		// 获取服务器的时间（减两分钟）
-		String [] ts = ws.qry("GetSysTime").split(":");
-		int m = Integer.parseInt(ts[1]) - 2;
-		StringBuilder tim = new StringBuilder(ts[0]);
-		if (m < 10) {
-			tim.append(":0");
-		} else {
-			tim.append(":");
+		String tim = ws.qry("GetSysTime");	// 获取服务器的时间
+		String min = SqliteHelper.getSynTim();	// 获取同步时间
+		String max = SqliteHelper.setSynTim(tim);	// 设置同步时间
+		pushSynOp ();	// 上传操作记录
+		pushSynCheck ();	// 上传盘点记录
+	}
+
+	// 上传盘点记录
+	private void pushSynCheck () {
+		List<CheckEntity> cs = SqliteHelper.queryCheck(true);
+		List<CheckDetailEntity> cds = new ArrayList<CheckDetailEntity>();
+		if (cs.size() > 0) {
+			List<String> sql = new ArrayList<String>();
+			for (CheckEntity c : cs) {
+				List<CheckDetailEntity> t = SqliteHelper.queryCheckDetailByCheckCode(c.CheckCode);
+				for (CheckDetailEntity cd : t) {
+					cds.add(cd);
+				}
+				sql.add("delete from TbCheck where CheckCode='" + c.CheckCode + "'");
+				sql.add("delete from TbCheckDetail where CheckCode='" + c.CheckCode + "'");
+			}
+
+			// 数据上传服务器
+			if (ws.qry("SavaCheckOp", SavaCheckOpKeys, new Object[] {gson.toJson(cs), gson.toJson(cds)}).equals("0")) {
+				SqliteHelper.ExceSql(sql);	// 删除本地数据
+			}
 		}
-		tim.append(m);
-		tim.append(":");
-		tim.append(ts[2]);
+	}
 
-		// 获取同步时间
-		String min = SqliteHelper.getSynTim();
-//Log.i("---", min);
-
-		// 设置同步时间
-		String max = SqliteHelper.setSynTim(tim.toString());
-//Log.i("---", max);
-
-		// 获取未同步的已删除配件信息
-		String[] ds = SqliteHelper.getSynDel(min, max);
-
-		if (ds.length > 0) {
-//			List<TbPartsOpEntity> ds = new ArrayList<TbPartsOpEntity>();
-//			for (int i = 0; i < cds.length; i ++) {
-//				TbPartsOpEntity tpo = new TbPartsOpEntity();
-//				tpo.PartsCode = cds[i];
-//				tpo.OpType = "14";
-//				ds.add(tpo);
-//			}
-//			String json = gson.toJson(ds);
-//Log.i("---", json);
-
-//			StringBuilder sb = new StringBuilder();
-//			sb.append("[{\"OpType\":\"14\",\"PartsCode\":\"");
-//			sb.append(ds[0]);
-//			sb.append("\"}");
-//			for (int i = 1; i < ds.length; i ++) {
-//				sb.append(",{\"OpType\":\"14\",\"PartsCode\":\"");
-//				sb.append(ds[i]);
-//				sb.append("\"}");
-//			}
-//			sb.append("]");
-//Log.i("---", sb.toString());
-
+	// 上传操作记录
+	private void pushSynOp () {
+		List<TbPartsOpEntity> ops = SqliteHelper.queryOpRecord();
+		if (ops.size() > 0) {
 			StringBuilder sb = new StringBuilder();
-			sb.append(ds[0]);
-			sb.append(",14,");
-			for (int i = 1; i < ds.length; i ++) {
+			List<String> sql = new ArrayList<String>();
+			for (TbPartsOpEntity op : ops) {
+				sb.append(op.getPushStr());
 				sb.append("-");
-				sb.append(ds[i]);
-				sb.append(",14,");
+				sql.add(op.getDelSql());
 			}
-//Log.i("---", sb.toString());
+			sb.deleteCharAt(sb.length() - 1);
 
-			// 上传服务器
+			// 数据上传服务器
 			if (ws.qry("SavaPartsOp", SavaPartsOpKeys, new Object[] {sb.toString()}).equals("0")) {
-				// TODO: 2018/4/11 删除本地的冗余数据
-//				Log.i("---", "SavaPartsOp OK!");
-			}
-		}
-
-		// 获取未同步的最后操作配件信息
-		List<Parts> ps = SqliteHelper.getSynAdd(min, max);
-		if (ps.size() > 0) {
-			String json = gson.toJson(ps);
-//Log.i("---", json);
-
-			// 上传服务器
-			if (ws.qry("SavePartsTagByJson", SavePartsTagByJsonKeys, new Object[] {json}).equals("true")) {
-				// TODO: 2018/4/11 删除本地的冗余数据
-//				Log.i("---", "SavePartsTagByJson OK!");
+				SqliteHelper.ExceSql(sql);	// 删除本地数据
 			}
 		}
 	}
@@ -264,11 +285,51 @@ public class SynchroDbRa implements Runnable {
 			}
 		}
 		if (sql != null) {
-//Log.i("---S---", srvNam);
-//for (i = 0; i < sql.size(); i ++) {
-//	Log.i("\t---", sql.get(i));
-//}
-//Log.i("---E---", srvNam);
+			SqliteHelper.ExceSql(sql);
+		}
+	}
+
+	// 覆盖送修记录
+	private void coverSendRepair () {
+		boolean b = true;
+		String res;
+		int i = 1;
+		int j;
+		int n = 100;
+		List<String> sql = null;
+		while (b) {
+			res = ws.qry("GetPartsNoRepair", CoverKeys, new Object[] {i, n});
+			if (res.length() > 1) {
+				if (sql == null) {
+					sql = new ArrayList<String>();
+					sql.add("delete from TbSendRepair");
+				}
+
+				j = 0;
+				res = res.replace("-", "&**&&");
+				res = res.replace("\r\n\r\n", "-");
+				res = res.replace("\r\n", "-");
+				String[] resutlStrArray = res.split("-");
+				for (String str : resutlStrArray) {
+					String strBack = str.replace("&**&&", "-");
+					String[] strArray = strBack.split(",", -1);
+					if (strArray.length == 5) {
+						sql.add(String.format("insert into TbSendRepair values('%s','%s','%s','%s','%s')",
+								strArray[0], strArray[1], strArray[2], strArray[3], strArray[4]));
+						j ++;
+					}
+				}
+
+				if (j < n) {
+					b = false;
+				} else {
+					i ++;
+				}
+			} else {
+				b = false;
+			}
+		}
+		if (sql != null) {
 			SqliteHelper.ExceSql(sql);
 		}
 	}

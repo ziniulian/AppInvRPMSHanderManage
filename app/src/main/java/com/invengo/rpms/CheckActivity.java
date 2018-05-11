@@ -26,7 +26,7 @@ import android.widget.SimpleAdapter;
 import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.Toast;
 
-import com.invengo.rpms.entity.CheckEntity;
+import com.invengo.rpms.bean.CheckEntity;
 import com.invengo.rpms.util.Btn001;
 import com.invengo.rpms.util.SqliteHelper;
 
@@ -123,7 +123,7 @@ public class CheckActivity extends Activity {
 			item.put("sqeNo", no);
 			item.put("checkCode", checkEntity.CheckCode);
 			item.put("checkInfo",
-					String.format("创建时间:%s", f.format(checkEntity.AddTime)));
+					String.format("创建时间:%s", checkEntity.AddTime));
 			String isFinishStr = "未完成";
 			if (checkEntity.IsFinish.equals("Y")) {
 				isFinishStr = "已完成";

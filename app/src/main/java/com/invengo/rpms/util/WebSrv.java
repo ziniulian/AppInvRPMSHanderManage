@@ -1,7 +1,5 @@
 package com.invengo.rpms.util;
 
-import android.util.Log;
-
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapPrimitive;
@@ -46,7 +44,6 @@ public class WebSrv {
 			SoapPrimitive res = (SoapPrimitive) msg.getResponse();
 //			Object res = msg.getResponse();
 			if (res != null) {
-//Log.i("--- " + mnam + " ---", res.toString());
 				r = res.toString();
 			}
 		} catch (Exception e) {

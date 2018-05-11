@@ -115,7 +115,6 @@ public class StockOutActivity extends BaseActivity {
 			}
 		});
 
-
 		edtNum = (EditText) findViewById(R.id.edtNum);
 
 		sprPartsT5 = (Spinner) findViewById(R.id.sprPartsT5);

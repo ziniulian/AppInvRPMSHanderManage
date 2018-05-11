@@ -14,7 +14,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.invengo.rpms.entity.CheckEntity;
+import com.invengo.rpms.bean.CheckEntity;
 import com.invengo.rpms.entity.TbCodeEntity;
 import com.invengo.rpms.util.Btn001;
 import com.invengo.rpms.util.SqliteHelper;
@@ -269,6 +269,7 @@ public class CheckCreateActivity extends Activity {
 			if (partsNameStr.equals(""))
 				partsNameStr = "0";
 
+			SimpleDateFormat tf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			SimpleDateFormat f = new SimpleDateFormat("yyyyMMddHHmmss");
 			String checkCode = f.format(new Date());
 			String checkPartsType = t5Str + "-" + factoryStr + "-"
@@ -282,7 +283,7 @@ public class CheckCreateActivity extends Activity {
 			entity.CheckPartsType = checkPartsType;
 			entity.Remark = remark;
 			entity.IsFinish = "N";
-			entity.AddTime = new Date(System.currentTimeMillis());
+			entity.AddTime = tf.format(new Date(System.currentTimeMillis()));
 			entity.AddUser = user;
 
 			boolean result = SqliteHelper.CreateCheck(entity);

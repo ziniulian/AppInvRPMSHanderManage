@@ -42,6 +42,12 @@ public class THDSEntity extends BaseBean {
 	}
 
 	@Override
+	public String getDelSql() {
+		// TODO: 2018/5/10 删除语句
+		return "";
+	}
+
+	@Override
 	public String getDelAllSql() {
 		return "delete from TbTHDS";
 	}

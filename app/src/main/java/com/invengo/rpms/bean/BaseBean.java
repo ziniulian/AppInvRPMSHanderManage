@@ -6,7 +6,7 @@ package com.invengo.rpms.bean;
  */
 
 public abstract class BaseBean {
-//	public abstract String getDelSql();
+	public abstract String getDelSql();
 	public abstract String getDelAllSql();
 	public abstract String getAddSql();
 }

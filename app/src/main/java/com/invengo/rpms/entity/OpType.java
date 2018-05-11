@@ -15,4 +15,6 @@ public class OpType {
 	public static final int Repair_S = 11;// 维修检测待报废
 	public static final int BackFactory = 12;// 返厂
 	public static final int Scrap =13;// 报废
+	public static final int Del =14;// 删除一个配件标签
+	public static final int New =15;// 新增一个配件标签
 }
