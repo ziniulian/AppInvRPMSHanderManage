@@ -258,7 +258,7 @@ public class StockInActivity extends BaseActivity {
 			String info = storageLocationStr + "," + user + "," + opTime + ","
 					+ remark;
 			boolean result = SqliteHelper.SaveOpRecord(listPartsCodeSucess,
-					OpType.StockIn, info, storageLocationStr);
+					OpType.StockIn, info, storageLocationStr, user);
 			if (result) {
 				listPartsCodeSucess.clear();
 				return true;

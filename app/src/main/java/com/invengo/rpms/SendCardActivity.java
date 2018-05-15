@@ -52,6 +52,7 @@ public class SendCardActivity extends BaseActivity {
 	Spinner sprDw;
 	Button btnConfig;
 	EditText txtSqe;
+	EditText txtFd;
 	TextView txtInfo;
 	TextView txtRemark;
 	TextView txtRemarkV;
@@ -62,6 +63,8 @@ public class SendCardActivity extends BaseActivity {
 	private byte typCod;
 	private boolean lockRd = false;
 	private String tid;
+	private String fc;
+	private String dpc;
 
 	private static final int GET_STATION = 101;		// 先读取站点标签
 	private static final int GET_STORAGE_LOCATION = 102;	// 先读取库位标签
@@ -108,6 +111,8 @@ public class SendCardActivity extends BaseActivity {
 		});
 
 		txtSqe = (EditText) findViewById(R.id.txtSqe);
+		txtFd = (EditText) findViewById(R.id.txtFd);
+
 
 		sprPartsT5 = (Spinner) findViewById(R.id.sprPartsT5);
 		List<String> listPartsT5 = new ArrayList<String>();
@@ -394,74 +399,9 @@ public class SendCardActivity extends BaseActivity {
 		}
 	};
 
+	// 写标签
 	private void writeCard(boolean isNew) {
 		txtStatus.setText("信息写入中，请稍候 ...");
-		StringBuilder sb = new StringBuilder();
-
-		// 组织epc头部
-		Object o;
-		o = sprPartsT5.getSelectedItem();
-		if (o == null) {
-			showToast("请选择编码");
-			return;
-		} else {
-			sb.append(o.toString().substring(0, 2));
-		}
-
-		o = sprPartsFactory.getSelectedItem();
-		if (o == null) {
-			showToast("请选择厂家");
-			return;
-		} else {
-			sb.append(o.toString().substring(0, 2));
-		}
-
-		o = sprPartsSort.getSelectedItem();
-		if (o == null) {
-			showToast("请选择产品型号");
-			return;
-		} else {
-			sb.append(o.toString().substring(0, 1));
-		}
-
-		o = sprPartsHost.getSelectedItem();
-		if (o == null) {
-			showToast("请选择部件类别");
-			return;
-		} else {
-			sb.append(o.toString().substring(0, 2));
-		}
-
-		o = sprPartsName.getSelectedItem();
-		if (o == null) {
-			showToast("请选择部件名称");
-			return;
-		} else {
-			sb.append(o.toString().substring(0, 3));
-		}
-
-		// 检查序列号格式
-		String sn = txtSqe.getText().toString();
-		if (sn.length() == 5 && UtilityHelper.isNum(sn)) {
-			// 检查数据库中有无相同序列号
-			sb.append(sn);
-			if (SqliteHelper.queryOnePart(sb.toString()) != null) {
-				showToast("序列号重名");
-				return;
-			}
-		} else {
-			showToast("序列号必须为5位数字");
-			return;
-		}
-
-//		// 生成序列号，界面显示序列号
-//		int n = SqliteHelper.queryPartsNumByType(sb.toString());
-//		String sn = UtilityHelper.getSnStr(n);
-//		txtSqe.setText(sn);
-//		sb.append(sn);
-		partsCode = sb.toString();
-
-		// 写标签
 		WrtRa r = new WrtRa(
 				reader,
 				Util.convertHexStringToByteArray(tid),
@@ -674,9 +614,18 @@ public class SendCardActivity extends BaseActivity {
 				return;
 			}
 
+			// 检查原厂编码
+			sn = txtFd.getText().toString();
+			if (sn.length() == 0) {
+				showToast("请输入原厂编码");
+				return;
+			} else {
+				fc = sn;
+			}
+
+			partsCode = sb.toString();
 			isReading = true;
 			listEPCEntity.clear();
-//			txtSqe.setText("");
 			ReadTag readTag = new ReadTag(ReadMemoryBank.EPC_TID_UserData_6C);
 			boolean result = reader.send(readTag);
 
@@ -783,11 +732,11 @@ public class SendCardActivity extends BaseActivity {
 					AlertDialog.Builder builder = new Builder(SendCardActivity.this, R.style.AppTheme);
 					builder.setTitle("温馨提示");
 					builder.setMessage("该标签已经写入配件信息，确定重新该标签吗?配件信息\n\n" + info);
-					partsCode = entity.PartsCode;
+					dpc = entity.PartsCode;
 					builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
-							SqliteHelper.delOnePart(partsCode);
+							SqliteHelper.delOnePart(dpc);
 							writeCard(false);
 						}
 					});
@@ -818,16 +767,12 @@ public class SendCardActivity extends BaseActivity {
 //				showToast("用户区写入失败");
 			case WrtRa.WRT_OK:
 				// 将创建的信息写入数据库
-				SqliteHelper.savOnePart(typ, partsCode, code);
-
-				lockRd = false;
+				SqliteHelper.savOnePart(typ, partsCode, code, fc, myApp.getUserId());
+				lockRd = false;		// 释放锁
 				txtStatus.setText(getResources().getString(R.string.memo_WRT_OK));
 				break;
 			case WrtRa.WRT_EPC_ERR:
-//				txtSqe.setText("");
-
-				// 释放锁
-				lockRd = false;
+				lockRd = false;		// 释放锁
 				txtStatus.setText(getResources().getString(R.string.memo_WRT_ERR));
 				break;
 			case CONNECT:// 读写器连接

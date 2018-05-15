@@ -4,9 +4,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 
-import com.invengo.rpms.bean.TbPartsOpEntity;
 import com.invengo.rpms.bean.CheckDetailEntity;
 import com.invengo.rpms.bean.CheckEntity;
+import com.invengo.rpms.bean.TbPartsOpEntity;
 import com.invengo.rpms.entity.OpType;
 import com.invengo.rpms.entity.PartsStorageLocationEntity;
 import com.invengo.rpms.entity.SendRepairEntity;
@@ -27,10 +27,8 @@ public class SqliteHelper {
 	// 从sd卡中数据库路径
 	private static String filedirPath = Environment
 			.getExternalStorageDirectory().getAbsolutePath() + "/RPMS";
-	private static String filePath = filedirPath + "/RPMSHanderV1001";
-
-	private static SimpleDateFormat f = new SimpleDateFormat(
-			"yyyy/MM/dd HH:mm:ss");
+	private static String filePath = filedirPath + "/RPMSHanderV1002";
+	private static SimpleDateFormat f = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
 	// 初始化数据库
 	public static void InintDatabase() {
@@ -69,7 +67,7 @@ public class SqliteHelper {
 				listSql.add(sql_table9);
 
 				// 配件信息表
-				String sql_table10 = "Create TABLE TbParts(PartsCode varchar(20) PRIMARY KEY,Status char(1),LastOpTime datetime,Code varchar(20))";
+				String sql_table10 = "Create TABLE TbParts(PartsCode varchar(20) PRIMARY KEY,Status char(1),LastOpTime datetime,Code varchar(20),FactoryCode varchar(100),OpUser varchar(100))";
 				listSql.add(sql_table10);
 
 				// 版本表
@@ -769,7 +767,7 @@ public class SqliteHelper {
 
 	// 记录操作记录
 	public static Boolean SaveOpRecord(List<String> listPartsCode, int opType,
-			String info, String storageLocationStr) {
+			String info, String storageLocationStr, String user) {
 		
 		List<String> listSql = new ArrayList<String>();
 
@@ -779,14 +777,12 @@ public class SqliteHelper {
 			listSql.add(sql);
 
 			if (opType == OpType.StockIn) {
-				String sql1 = "delete from TbParts where PartsCode='"
-						+ partsCode + "'";
-				listSql.add(sql1);
-
-				String sql2 = "insert into TbParts values('"
-						+ partsCode + "', 'W', '" + f.format(new Date()) + "', '"
-						+ storageLocationStr + "')";
-				listSql.add(sql2);
+				String sql0 = "update TbParts set Status='W',"
+						+ "LastOpTime='" + f.format(new Date())
+						+ "',Code='" + storageLocationStr
+						+ "',OpUser='" + user
+						+ "' where PartsCode='" + partsCode + "'";
+				listSql.add(sql0);
 			}
 		}
 		
@@ -805,7 +801,7 @@ public class SqliteHelper {
 	// 记录操作记录
 	public static Boolean SaveOpRecord(List<String> listPartsCode, int opType,
 			String info,
-			List<PartsStorageLocationEntity> listPartsStorageLocation) {
+			List<PartsStorageLocationEntity> listPartsStorageLocation, String user) {
 		List<String> listSql = new ArrayList<String>();
 
 		for (String partsCode : listPartsCode) {
@@ -824,13 +820,11 @@ public class SqliteHelper {
 			listSql.add(sql);
 
 			if (opType == OpType.StockOut) {
-				String sql1 = "delete from TbParts where PartsCode='"
-						+ partsCode + "'";
-				listSql.add(sql1);
-
-				String sql2 = "insert into TbParts (PartsCode,Status,LastOpTime) values('"
-						+ partsCode + "', 'N', '" + f.format(new Date()) + "')";
-				listSql.add(sql2);
+				String sql0 = "update TbParts set Status='N',Code=null,"
+						+ "LastOpTime='" + f.format(new Date())
+						+ "',OpUser='" + user
+						+ "' where PartsCode='" + partsCode + "'";
+				listSql.add(sql0);
 			}
 		}
 
@@ -982,7 +976,7 @@ public class SqliteHelper {
 		try {
 			File name = new File(filePath);
 			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
-			String sql = "select PartsCode from TbParts where PartsCode='" + scode + "'";
+			String sql = "select * from TbParts where PartsCode='" + scode + "'";
 
 			Cursor cursor = db.rawQuery(sql, null);
 			if (cursor.moveToNext()) {
@@ -991,6 +985,8 @@ public class SqliteHelper {
 				r.put("Status", cursor.getString(1));
 				r.put("LastOpTime", cursor.getString(2));
 				r.put("Code", cursor.getString(3));
+				r.put("FactoryCode", cursor.getString(4));
+				r.put("OpUser", cursor.getString(5));
 			}
 
 			cursor.close();
@@ -1028,27 +1024,23 @@ public class SqliteHelper {
 	}
 
 	// 添加一条配件信息
-	public static Boolean savOnePart(String status, String partsCode, String code) {
+	public static Boolean savOnePart(String status, String partsCode, String code, String fc, String user) {
 		List<String> listSql = new ArrayList<String>();
-		String p, info;
-		if (status.equals("S")) {
-			p = ") values('";
-			info = status + ",,";
-			code = "')";	// 在所
-		} else {
-			p = ",Code) values('";
-			info = status + "," + code + ",";
-			code = "', '" + code + "')";
-		}
-
+		String p, info, sql;
 		String tim = f.format(new Date());
 
-		String sql = "insert into TbParts (PartsCode,Status,LastOpTime" + p +
-			partsCode + "', '" + status + "', '" + tim + code;
+		if (status.equals("S")) {
+			p = partsCode + "', '" + status + "', '" + tim + "', null, '" + fc + "', '" + user + "')";
+			info = partsCode + "', '15', '" + status + ",," + tim + "," + fc + "," + user + "')";
+		} else {
+			p = partsCode + "', '" + status + "', '" + tim + "', '" + code + "', '" + fc + "', '" + user + "')";
+			info = partsCode + "', '15', '" + status + "," + code + "," + tim + "," + fc + "," + user + "')";
+		}
 
+		sql = "insert into TbParts values('" + p;
 		listSql.add(sql);
 
-		sql = "insert into TbPartsOp values('" + partsCode + "', '15', '" + info + tim + "')";
+		sql = "insert into TbPartsOp values('" + info;
 		listSql.add(sql);
 
 		if (listSql.size() > 0) {

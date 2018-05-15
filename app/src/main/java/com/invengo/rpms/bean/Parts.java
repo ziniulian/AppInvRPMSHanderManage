@@ -26,6 +26,16 @@ public class Parts extends BaseBean {
 	/// </summary>
 	public String LastOpTime;
 
+	/// <summary>
+	/// 原厂编码
+	/// </summary>
+	public String FactoryCode;
+
+	/// <summary>
+	/// 操作人（USER_ID）
+	/// </summary>
+	public String OpUser;
+
 	@Override
 	public String getAddSql() {
 		StringBuilder r = new StringBuilder();
@@ -59,6 +69,22 @@ public class Parts extends BaseBean {
 		} else {
 			r.append("'");
 			r.append(Location);
+			r.append("'");
+		}
+		r.append(",");
+		if (FactoryCode == null) {
+			r.append("null");
+		} else {
+			r.append("'");
+			r.append(FactoryCode);
+			r.append("'");
+		}
+		r.append(",");
+		if (OpUser == null) {
+			r.append("null");
+		} else {
+			r.append("'");
+			r.append(OpUser);
 			r.append("'");
 		}
 		r.append(")");

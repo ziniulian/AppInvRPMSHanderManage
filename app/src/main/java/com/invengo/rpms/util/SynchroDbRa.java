@@ -9,6 +9,7 @@ import com.invengo.rpms.bean.BaseBean;
 import com.invengo.rpms.bean.CheckDetailEntity;
 import com.invengo.rpms.bean.CheckEntity;
 import com.invengo.rpms.bean.Parts;
+import com.invengo.rpms.bean.SendRepair;
 import com.invengo.rpms.bean.THDSEntity;
 import com.invengo.rpms.bean.TableVersion;
 import com.invengo.rpms.bean.TbCodeEntity;
@@ -47,6 +48,7 @@ public class SynchroDbRa implements Runnable {
 	private Type clsThds = new TypeToken<List<THDSEntity>>(){}.getType();
 	private Type clsUser = new TypeToken<List<UserEntity>>(){}.getType();
 	private Type clsSl = new TypeToken<List<TbStorageLocationEntity>>(){}.getType();
+	private Type clsPnr = new TypeToken<List<SendRepair>>(){}.getType();
 	private Type clsTbv = new TypeToken<List<TableVersion>>(){}.getType();
 
 	private String[] GetTableVersionOpKeys = new String[] {"tableName", "versionsFrom", "versionsTo"};
@@ -131,7 +133,6 @@ public class SynchroDbRa implements Runnable {
 				if (res.equals("HelloWorld!")) {
 					pushSynDat();
 					matchTabVer();
-					coverSendRepair();
 					sendMsg(SYN_OK);
 				} else {
 					sendMsg(SYN_ERR);
@@ -185,6 +186,8 @@ public class SynchroDbRa implements Runnable {
 					cover(clsUser, "GetUserByPage");
 				} else if (k.equals("STORAGELOCATION")) {
 					cover(clsSl, "GetStorageLocationByPage");
+				} else if (k.equals("PARTSNOREPAIR")) {
+					cover(clsPnr, "GetPartsNoRepair");
 				}
 			} else if (v[0] < v[1]) {
 				String r = ws.qry("GetTableVersionOP", GetTableVersionOpKeys, new Object[] {k, v[0], v[1]});
@@ -201,6 +204,8 @@ public class SynchroDbRa implements Runnable {
 					cover(clsUser, "GetUserByPage");
 				} else if (k.equals("STORAGELOCATION")) {
 					cover(clsSl, "GetStorageLocationByPage");
+				} else if (k.equals("PARTSNOREPAIR")) {
+					cover(clsPnr, "GetPartsNoRepair");
 				}
 			}
 		}
@@ -282,51 +287,6 @@ public class SynchroDbRa implements Runnable {
 				b = false;
 			} else {
 				i ++;
-			}
-		}
-		if (sql != null) {
-			SqliteHelper.ExceSql(sql);
-		}
-	}
-
-	// 覆盖送修记录
-	private void coverSendRepair () {
-		boolean b = true;
-		String res;
-		int i = 1;
-		int j;
-		int n = 100;
-		List<String> sql = null;
-		while (b) {
-			res = ws.qry("GetPartsNoRepair", CoverKeys, new Object[] {i, n});
-			if (res.length() > 1) {
-				if (sql == null) {
-					sql = new ArrayList<String>();
-					sql.add("delete from TbSendRepair");
-				}
-
-				j = 0;
-				res = res.replace("-", "&**&&");
-				res = res.replace("\r\n\r\n", "-");
-				res = res.replace("\r\n", "-");
-				String[] resutlStrArray = res.split("-");
-				for (String str : resutlStrArray) {
-					String strBack = str.replace("&**&&", "-");
-					String[] strArray = strBack.split(",", -1);
-					if (strArray.length == 5) {
-						sql.add(String.format("insert into TbSendRepair values('%s','%s','%s','%s','%s')",
-								strArray[0], strArray[1], strArray[2], strArray[3], strArray[4]));
-						j ++;
-					}
-				}
-
-				if (j < n) {
-					b = false;
-				} else {
-					i ++;
-				}
-			} else {
-				b = false;
 			}
 		}
 		if (sql != null) {

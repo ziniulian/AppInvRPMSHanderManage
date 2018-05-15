@@ -533,7 +533,7 @@ public class StockOutActivity extends BaseActivity {
 			String remark = "";
 			String info = user + "," + opTime + "," + remark;
 			boolean result = SqliteHelper.SaveOpRecord(listPartsCodeSucess,
-					OpType.StockOut, info, listInfoAll);
+					OpType.StockOut, info, listInfoAll, user);
 
 			if (result) {
 				listPartsCodeSucess.clear();
