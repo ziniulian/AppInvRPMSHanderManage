@@ -1181,9 +1181,14 @@ public class SqliteHelper {
 
 	// 设置同步时间
 	public static String setSynTim (String tim) {
-		List<String> listSql = new ArrayList<String>();
-		listSql.add("update SynTim set tim='" + tim + "' where id='synTim'");
-		ExceSql(listSql);
+		try {
+			Date d = new Date (tim);	// 检查tim是否为可用的时间字串，若出错则处理异常
+			List<String> listSql = new ArrayList<String>();
+			listSql.add("update SynTim set tim='" + tim + "' where id='synTim'");
+			ExceSql(listSql);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return tim;
 	}
 

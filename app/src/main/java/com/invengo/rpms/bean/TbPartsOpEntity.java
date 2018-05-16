@@ -68,7 +68,6 @@ public class TbPartsOpEntity extends BaseBean {
 			r.append(Info);
 			r.append("'");
 		}
-		r.append(")");
 		return r.toString();
 	}
 
