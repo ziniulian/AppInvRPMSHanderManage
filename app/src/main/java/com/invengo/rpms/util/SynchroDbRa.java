@@ -1,7 +1,10 @@
 package com.invengo.rpms.util;
 
+import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -33,13 +36,12 @@ public class SynchroDbRa implements Runnable {
 
 	private static SynchroDbRa self = null;
 	private boolean redo = true;
+	private Context toaCtx = null;
 	private Thread t = null;
 	private Handler hd = null;
 	private Gson gson = new Gson();
 
 	private WebSrv ws = null;
-	private String ip = "192.168.1.131";
-	private String port = "8000";
 	private String srvNam = "Service.svc";
 	private String npc = "http://tempuri.org/";
 
@@ -56,7 +58,19 @@ public class SynchroDbRa implements Runnable {
 	private String[] SavaCheckOpKeys = new String[] {"checkInfo", "checkDetailInfo"};
 	private String[] CoverKeys = new String[] {"page", "pageSize"};
 
-	private SynchroDbRa () {}
+	private SynchroDbRa () {
+		String po;
+		String pp = SqliteHelper.kvGet("synUrlIp");
+		if (pp == null) {
+			pp = "192.168.1.131";
+			po = "8000";
+			SqliteHelper.kvSet("synUrlIp", pp);
+			SqliteHelper.kvSet("synUrlPort", po);
+		} else {
+			po = SqliteHelper.kvGet("synUrlPort");
+		}
+		ws = new WebSrv("http://" + pp + ":" + po + "/" + srvNam, npc);
+	}
 
 	public static void oneStart() {
 		if (self == null) {
@@ -72,40 +86,29 @@ public class SynchroDbRa implements Runnable {
 		}
 	}
 
+	// 设置是否显示同步提示框
+	public static void setToaCtx (Context c) {
+		self.toaCtx = c;
+	}
+
 	// 立即同步数据，并设置URL，返回初次同步的结果
 	public static void reset(String ip, String port, Handler hd) {
-		oneStop();
-		self = new SynchroDbRa();
-		if (ip != null) {
-			self.ip = ip;
-		}
-		if (port != null) {
-			self.port = port;
-		}
-		if (hd != null) {
-			self.hd = hd;
-		}
+		self.stop();
+		SqliteHelper.kvSet("synUrlIp", ip);
+		SqliteHelper.kvSet("synUrlPort", port);
+		self.hd = hd;
+		self.ws.setUrl("http://" + ip + ":" + port + "/" + self.srvNam);
 		self.start();
 	}
 
-	public static void reset(Handler hd) {
-		if (self == null) {
-			reset(null, null, hd);
-		} else {
-			reset(self.ip, self.port, hd);
-		}
-	}
-
 	public static void reset() {
-		reset(null);
+		self.stop();
+		self.start();
 	}
 
 	public void start() {
 		if (t == null) {
 			redo = true;
-			if (ws == null) {
-				ws = new WebSrv("http://" + ip + ":" + port + "/" + srvNam, npc);
-			}
 			t = new Thread(this);
 			t.start();
 		}
@@ -137,10 +140,13 @@ public class SynchroDbRa implements Runnable {
 				} else {
 					sendMsg(SYN_ERR);
 				}
+			} catch (Exception e) {
+				sendMsg(SYN_ERR);
+			}
+			try {
 				Thread.sleep(120000);	// 休眠两分钟
 			} catch (Exception e) {
 				redo = false;
-				sendMsg(SYN_ERR);
 			}
 		}
 	}
@@ -150,6 +156,20 @@ public class SynchroDbRa implements Runnable {
 		if (hd != null) {
 			hd.sendMessage(hd.obtainMessage(sta));
 			hd = null;
+		}
+		if (toaCtx != null) {
+			switch (sta) {
+				case SYN_OK:
+					new ClsToa("数据同步已完成").start();
+					break;
+				case SYN_ERR:
+					if (SqliteHelper.queryNumByTbPartsOp() > 0) {
+						new ClsToa("有数据待上传，请及时上传数据！").start();
+					} else {
+						new ClsToa("同步失败，但没关系").start();
+					}
+					break;
+			}
 		}
 	}
 
@@ -294,4 +314,18 @@ public class SynchroDbRa implements Runnable {
 		}
 	}
 
+	private class ClsToa extends Thread {
+		private String msg;
+
+		ClsToa(String msg) {
+			this.msg = msg;
+		}
+
+		@Override
+		public void run() {
+			Looper.prepare();
+			Toast.makeText(toaCtx, msg, Toast.LENGTH_SHORT).show();
+			Looper.loop();
+		}
+	}
 }

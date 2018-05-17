@@ -820,7 +820,7 @@ public class SqliteHelper {
 			listSql.add(sql);
 
 			if (opType == OpType.StockOut) {
-				String sql0 = "update TbParts set Status='N',Code=null,"
+				String sql0 = "update TbParts set Status='S',Code=null,"
 						+ "LastOpTime='" + f.format(new Date())
 						+ "',OpUser='" + user
 						+ "' where PartsCode='" + partsCode + "'";
@@ -1241,6 +1241,27 @@ public class SqliteHelper {
 			e.printStackTrace();
 		}
 
+		return r;
+	}
+
+	// 获得操作记录数量
+	public static int queryNumByTbPartsOp() {
+		int r = 0;
+		try {
+			File name = new File(filePath);
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
+			String sql = "select count(*) from TbPartsOp";
+
+			Cursor cursor = db.rawQuery(sql, null);
+			if (cursor.moveToNext()) {
+				r = cursor.getInt(0);
+			}
+
+			cursor.close();
+			db.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return r;
 	}
 

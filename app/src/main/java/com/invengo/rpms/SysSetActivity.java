@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.invengo.rpms.util.Btn001;
+import com.invengo.rpms.util.SqliteHelper;
 import com.invengo.rpms.util.SynchroDbRa;
 
 public class SysSetActivity extends Activity {
@@ -40,6 +41,8 @@ public class SysSetActivity extends Activity {
 		txtInfo = (TextView) findViewById(R.id.txtInfo);
 		edtServiceIp = (EditText) findViewById(R.id.edtServiceIp);
 		edtServiceCom = (EditText) findViewById(R.id.edtServiceCom);
+		edtServiceIp.setText(SqliteHelper.kvGet("synUrlIp"));
+		edtServiceCom.setText(SqliteHelper.kvGet("synUrlPort"));
 
 		btnTest = (Button) findViewById(R.id.btnTest);
 		btnTest.setOnTouchListener(btnTestTouchListener);

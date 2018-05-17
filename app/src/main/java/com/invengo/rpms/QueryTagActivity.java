@@ -12,13 +12,13 @@ import android.widget.TextView;
 
 import com.invengo.lib.diagnostics.InvengoLog;
 import com.invengo.rpms.entity.PartsEntity;
-import com.invengo.rpms.entity.PartsStorageLocationEntity;
 import com.invengo.rpms.entity.StationEntity;
+import com.invengo.rpms.entity.TbCodeEntity;
 import com.invengo.rpms.util.Btn001;
 import com.invengo.rpms.util.SqliteHelper;
 import com.invengo.rpms.util.UtilityHelper;
 
-import java.util.List;
+import java.util.HashMap;
 
 import invengo.javaapi.core.BaseReader;
 import invengo.javaapi.core.IMessageNotification;
@@ -160,6 +160,107 @@ public class QueryTagActivity extends BaseActivity {
 		cardOperationHandler.sendMessage(powerOffMsg);
 	}
 
+	// 解析配件数据
+	private StringBuilder parseParts (String cod, String ud) {
+		StringBuilder r = new StringBuilder();
+		PartsEntity entity = UtilityHelper.GetPairEntityByCode(cod);
+		r.append("编码：");
+		r.append(entity.PartsCode);
+		r.append("\n\n厂家：");
+		r.append(entity.FactoryName);
+		r.append("\n\n型号：");
+		r.append(entity.PartsType);
+		r.append("\n\n类别：");
+		r.append(entity.BoxType);
+		r.append("\n\n名称：");
+		r.append(entity.PartsName);
+		r.append("\n\n序列号：");
+		r.append(entity.SeqNo);
+
+		r.append(qryPartPosition(cod, ud));
+		return r;
+	}
+
+	// 查询配件位置
+	private StringBuilder qryPartPosition (String cod, String ud) {
+		StringBuilder r = new StringBuilder();
+		if (ud.length() >= 4) {
+			byte[] bs = Util.convertHexStringToByteArray(ud);
+			r.append("\n\n状态：");
+			if (bs[1] == 0x01) {
+				r.append("已报废");
+			} else {
+				HashMap<String, String> m = SqliteHelper.queryOnePart(cod);
+
+				// 状态
+				switch (bs[0]) {
+					case 0x01:
+						r.append("在所（待入库）");
+						break;
+					case 0x02:
+						r.append("已入库");
+						break;
+					case 0x03:
+						r.append("在所（已出库）");
+						break;
+					case 0x04:
+					case 0x06:
+					case 0x07:
+						r.append("在段");
+						break;
+					case 0x05:
+						r.append("已启用");
+						break;
+					case 0x08:
+						r.append("在所（已送修）");
+						break;
+					case 0x09:
+						r.append("在所（待厂修）");
+						break;
+					case 0x0A:
+						r.append("在所（待入库）");
+//						r.append("在所（已修竣）");
+						break;
+					case 0x0B:
+						r.append("在所（待报废）");
+						break;
+				}
+
+				if (m != null) {
+					r.append("\n\n位置：");
+					switch (bs[0]) {
+						case 0x01:
+						case 0x03:
+						case 0x08:
+						case 0x09:
+						case 0x0A:
+						case 0x0B:
+							r.append("检测所");
+							break;
+						case 0x02:
+							r.append("库位_" + m.get("Code"));
+							break;
+						case 0x04:
+						case 0x06:
+						case 0x07:
+							TbCodeEntity ce = SqliteHelper.queryDbCodeByType("01", m.get("Code"));
+							if (ce != null) {
+								r.append("单位_" + ce.dbName);
+							}
+							break;
+						case 0x05:
+							StationEntity entityStation = SqliteHelper.queryStationByCode(m.get("Code"));
+							if (entityStation != null) {
+								r.append("站点_" + entityStation.StationName);
+							}
+							break;
+					}
+				}
+			}
+		}
+		return r;
+	}
+
 	@SuppressLint("HandlerLeak")
 	protected Handler cardOperationHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
@@ -185,22 +286,7 @@ public class QueryTagActivity extends BaseActivity {
 				break;
 			case DATA_ARRIVED_PAIRS:// 接收配件数据
 				StopRead();
-				PartsEntity entity = UtilityHelper
-						.GetPairEntityByCode(partsCode);
-				
-				txtTagInfo.setText(String.format(
-						"编码：%s\n\n厂家：%s\n\n型号：%s\n\n类别：%s\n\n名称： %s\n\n序列号：%s\n\n状态：%s",
-						entity.PartsCode, entity.FactoryName, entity.PartsType,
-						entity.BoxType, entity.PartsName, entity.SeqNo,UtilityHelper.GetPairStatus(userData)));
-				if(UtilityHelper.GetPairStatus(userData).equals("已入库"))
-				{
-					String key=partsCode;
-					List<PartsStorageLocationEntity> listInfo = SqliteHelper.queryPartsStorageLocation(key, 1);
-					if(listInfo.size()>0)
-					{
-						txtTagInfo.setText(txtTagInfo.getText()+"\n\n所在库位："+listInfo.get(0).StorageLocationCode);
-					}
-				}
+				txtTagInfo.setText(parseParts(partsCode, userData).toString());
 				break;
 			case DATA_ARRIVED_STORAGE_LOCATION:// 接收库位数据
 				StopRead();

@@ -44,7 +44,7 @@ public class TbPartsOpEntity extends BaseBean {
 	@Override
 	public String getDelSql() {
 		StringBuilder r = new StringBuilder();
-		r.append("delete from TbParts where PartsCode=");
+		r.append("delete from TbPartsOp where PartsCode=");
 		if (PartsCode == null) {
 			r.append("null");
 		} else {

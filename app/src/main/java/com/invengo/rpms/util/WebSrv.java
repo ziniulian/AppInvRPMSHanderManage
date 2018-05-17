@@ -20,6 +20,11 @@ public class WebSrv {
 		this.npc = n;
 	}
 
+	public WebSrv setUrl(String url) {
+		this.url = url;
+		return this;
+	}
+
 	public String qry (String mnam) {
 		return qry(mnam, null, null);
 	}

@@ -61,6 +61,7 @@ public class MainActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		SynchroDbRa.setToaCtx(this);
 		btnConfig = (Button) findViewById(R.id.btnConfig);
 		btnConfig.setOnTouchListener(btnConfigTouchListener);
 		btnConfig.setOnClickListener(btnConfigClickListener);
