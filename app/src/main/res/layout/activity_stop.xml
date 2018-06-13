@@ -3,30 +3,6 @@
     tools:context=".MainActivity" >
 
     <LinearLayout
-        android:id="@+id/connect_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:visibility="gone" >
-
-        <ProgressBar
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/connecting"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-    </LinearLayout>
-
-    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@drawable/background2"
@@ -70,7 +46,8 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="465dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:scrollbars="vertical" >
 
             <LinearLayout
@@ -78,21 +55,18 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/txtTagInfo"
+                    android:layout_margin="20dp"
+                    android:textSize="17sp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="20dp" >
-
-                    <TextView
-                        android:id="@+id/txtTagInfo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
+                    android:layout_height="wrap_content" />
 
                 <LinearLayout
                     android:id="@+id/layoutRepair"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:visibility="gone"
                     android:orientation="vertical" >
 
                     <LinearLayout
@@ -102,14 +76,15 @@
                         android:orientation="horizontal" >
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="60dp"
                             android:layout_height="wrap_content"
                             android:text="@string/FaultType" />
 
                         <LinearLayout
                             android:id="@+id/FaultType_CheckBoxList"
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:orientation="vertical" >
                         </LinearLayout>
                     </LinearLayout>
@@ -117,40 +92,19 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
+                        android:layout_margin="10dp"
                         android:orientation="horizontal" >
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="60dp"
                             android:layout_height="wrap_content"
                             android:text="@string/FaultDes" />
 
                         <EditText
                             android:id="@+id/edtFaultDes"
-                            android:layout_width="160dp"
+                            android:layout_width="0dp"
                             android:layout_height="80dp"
-                            android:background="@drawable/editsharp"
-                            android:gravity="top"
-                            android:inputType="textMultiLine" >
-                        </EditText>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginLeft="10dp"
-                        android:orientation="horizontal" >
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/Remark" />
-
-                        <EditText
-                            android:id="@+id/edtRemark"
-                            android:layout_width="160dp"
-                            android:layout_height="80dp"
+                            android:layout_weight="1"
                             android:background="@drawable/editsharp"
                             android:gravity="top"
                             android:inputType="textMultiLine" >
@@ -163,12 +117,31 @@
                         android:layout_margin="10dp"
                         android:orientation="horizontal" >
 
-                        <CheckBox
-                            android:id="@+id/cbxComfirmFault"
-                            android:layout_width="wrap_content"
+                        <TextView
+                            android:layout_width="60dp"
                             android:layout_height="wrap_content"
-                            android:text="@string/ComfirmStop" />
+                            android:text="@string/Remark" />
+
+                        <EditText
+                            android:id="@+id/edtRemark"
+                            android:layout_width="0dp"
+                            android:layout_height="80dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/editsharp"
+                            android:gravity="top"
+                            android:inputType="textMultiLine" >
+                        </EditText>
                     </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btnSav"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:padding="10dp"
+                        android:background="@color/yellow"
+                        android:text="保存"/>
+
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>

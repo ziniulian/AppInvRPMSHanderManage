@@ -4,32 +4,26 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
 
 import com.invengo.lib.diagnostics.InvengoLog;
 import com.invengo.rpms.entity.OpType;
 import com.invengo.rpms.entity.PartsEntity;
 import com.invengo.rpms.util.Btn001;
-import com.invengo.rpms.util.ReaderMessageHelper;
 import com.invengo.rpms.util.SqliteHelper;
 import com.invengo.rpms.util.UtilityHelper;
+import com.invengo.rpms.util.WrtUdRa;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,34 +34,34 @@ import java.util.Map;
 import invengo.javaapi.core.BaseReader;
 import invengo.javaapi.core.IMessageNotification;
 import invengo.javaapi.core.Util;
-import invengo.javaapi.protocol.IRP1.PowerOff;
 import invengo.javaapi.protocol.IRP1.RXD_TagData;
 import invengo.javaapi.protocol.IRP1.ReadTag;
 import invengo.javaapi.protocol.IRP1.ReadTag.ReadMemoryBank;
-import invengo.javaapi.protocol.IRP1.WriteUserData_6C;
+
+import static com.invengo.rpms.util.WrtRa.WRT_OK;
+import static com.invengo.rpms.util.WrtRa.WRT_UD_ERR;
 
 public class ScrapActivity extends BaseActivity {
 
 	TextView txtStatus;
-	CheckBox cbxComfirmScrap;
 	TextView txtInfo;
 	Button btnConfig;
 
 	private ListView mEpcListView;
 	private PartsAdapter mListAdapter;
 	private List<Map<String, Object>> listPartsData = new ArrayList<Map<String, Object>>();
-	private List<String> listPartsCodeSucess = new ArrayList<String>();
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_scrap);
 
-		cbxComfirmScrap = (CheckBox) findViewById(R.id.cbxComfirmScrap);
+		reader.onMessageNotificationReceived.clear();
+		reader.onMessageNotificationReceived.add(ScrapActivity.this);
+
 		txtStatus = (TextView) findViewById(R.id.txtStatus);
 		txtInfo = (TextView) findViewById(R.id.txtInfo);
 
 		btnConfig = (Button) findViewById(R.id.btnConfig);
-//		btnConfig.setOnTouchListener(btnConfigTouchListener);
 		btnConfig.setOnClickListener(btnConfigClickListener);
 		
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
@@ -82,65 +76,43 @@ public class ScrapActivity extends BaseActivity {
 			}
 		});
 
-
 		mEpcListView = (ListView) this.findViewById(R.id.lstPartsScrapView);
 		// 创建SimpleAdapter适配器将数据绑定到item显示控件上
 		mListAdapter = new PartsAdapter(this, listPartsData,
-				R.layout.listview_parts_item, new String[] { "sqeNo",
-						"partsCode", "partsName", "delIcon" }, new int[] {
-						R.id.sqeNo, R.id.partsCode, R.id.partsInfo,
-						R.id.delImage });
-		mListAdapter.setViewBinder(new ViewBinder() {
-			@Override
-			public boolean setViewValue(View view, Object data,
-					String textRepresentation) {
-				if (view instanceof ImageView && data instanceof Drawable) {
-					ImageView iv = (ImageView) view;
-					iv.setImageDrawable((Drawable) data);
-					return true;
-				}
-				return false;
-			}
-		});
+				R.layout.listview_parts_item2,
+				new String[] {"sqeNo", "partsCode", "partsName"},
+				new int[] {R.id.sqeNo, R.id.partsCode, R.id.partsInfo});
 		// 实现列表的显示
 		mEpcListView.setAdapter(mListAdapter);
-		
-		reader.onMessageNotificationReceived.clear();
-		reader.onMessageNotificationReceived.add(ScrapActivity.this);
 	}
 
-	private OnTouchListener btnConfigTouchListener = new OnTouchListener() {
-		public boolean onTouch(View v, MotionEvent event) {
-			switch (event.getAction()) {
+	@Override
+	protected void onDestroy() {
+		if (listPartsEntity.size() > 0) {
+			List<String> ps = new ArrayList<String>();
+			List<String> listSql = new ArrayList<String>();
+			String user = myApp.getUserId();
+			for (PartsEntity partsEntiry : listPartsEntity) {
+				ps.add(partsEntiry.PartsCode);
+				listSql.add("update TbParts set Status='S',"
+						+ "LastOpTime='" + SqliteHelper.f.format(new Date())
+//						+ "',Code='" + stationCodeStr
+						+ "',OpUser='" + user
+						+ "' where PartsCode='" + partsEntiry.PartsCode + "'");
+			}
+			String opTime = f.format(new Date());
+			String info = user + "," + opTime;
 
-			case MotionEvent.ACTION_DOWN: {
-				// 按住事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_MOVE: {
-				// 移动事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_UP: {
-				// 松开事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.yellow);
-				break;
-			}
-			default:
-
-				break;
-			}
-			return false;
+			SqliteHelper.SaveOpRecord(ps, OpType.Scrap, info);	// 保存操作记录
+			SqliteHelper.ExceSql(listSql);	// 更新本地数据库信息
 		}
-	};
+
+		super.onDestroy();
+	}
 
 	private OnClickListener btnConfigClickListener = new OnClickListener() {
 		public void onClick(View v) {
-
-			AlertDialog.Builder builder = new Builder(ScrapActivity.this,
-					R.style.AppTheme);
+			AlertDialog.Builder builder = new Builder(ScrapActivity.this, R.style.AppTheme);
 			builder.setTitle("温馨提示");
 			builder.setMessage(getResources().getString(
 					R.string.pairsScrapTipInfo));
@@ -148,65 +120,6 @@ public class ScrapActivity extends BaseActivity {
 			builder.show();
 		}
 	};
-
-	private void ScrapOP() {
-
-		if (listPartsEntity.size() == 0) {
-			showToast(String.format("请扫描到待%s%s",
-					getResources().getString(R.string.scrap), getResources()
-							.getString(R.string.parts)));
-			return;
-		}
-
-		for (PartsEntity partsEntiry : listPartsEntity) {
-			if (!listPartsCodeSucess.contains(partsEntiry.PartsCode)) {
-
-				// 写入标签用户数据
-				WriteUserData_6C msg = ReaderMessageHelper.GetWriteUserData_6C(
-						partsEntiry.Epc, OpType.Scrap);
-
-				//int count = 0;
-				//while (count < writeUserDataCount) {
-					boolean result = reader.send(msg);
-					if (result) {
-						listPartsCodeSucess.add(partsEntiry.PartsCode);
-						//break;
-					}
-					//count++;
-		        //}
-			}
-		}
-
-		if (listPartsCodeSucess.size() < listPartsEntity.size()) {
-			showToast(String.format("%s失败，请重新操作",
-					getResources().getString(R.string.scrap)));
-			return;
-		}
-
-		// 保存操作记录
-		String user = myApp.getUserId();
-		String opTime = f.format(new Date());
-		String info = user + "," + opTime;
-		boolean result = SqliteHelper.SaveOpRecord(listPartsCodeSucess,
-				OpType.Scrap, info);
-
-		if (result) {
-
-			showToast(String.format("%s成功",
-					getResources().getString(R.string.scrap)));
-
-			// 清除记录
-			listPartsCodeSucess.clear();
-			listPartsEntity.clear();
-			listPartsData.clear();
-			mListAdapter.notifyDataSetChanged();
-
-		} else {
-			showToast(String.format("%s失败，请重新操作",
-					getResources().getString(R.string.scrap)));
-		}
-
-	}
 
 	@Override
 	public void messageNotificationReceivedHandle(BaseReader reader,
@@ -222,8 +135,7 @@ public class ScrapActivity extends BaseActivity {
 
 					// 找到配件信息并且验证是否允许返厂
 					if (UtilityHelper.CheckEpc(epc) == 0
-							&& UtilityHelper.CheckUserData(userData,
-									OpType.Scrap)) {
+							&& UtilityHelper.CheckUserData(userData,OpType.Scrap)) {
 						if (IsValidEpc(epc, false)) {
 							String partsCode = UtilityHelper.GetCodeByEpc(epc);
 							if (partsCode.length() > 0) {
@@ -236,16 +148,8 @@ public class ScrapActivity extends BaseActivity {
 								}
 
 								if (!isExsit) {
-
-									PartsEntity entity = UtilityHelper
-											.GetPairEntityByCode(partsCode);
-									entity.Epc = epc;
-									listPartsEntity.add(entity);
-
-									Message dataArrivedMsg = new Message();
-									dataArrivedMsg.what = DATA_ARRIVED_PAIRS;
-									cardOperationHandler
-											.sendMessage(dataArrivedMsg);
+									String tid = Util.convertByteArrayToHexString(data.getReceivedMessage().getTID());
+									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(DATA_ARRIVED_PAIRS, 0, 0, new String[] {tid, epc, "0001", partsCode, userData.substring(0, 4)}));
 								}
 							}
 						}
@@ -266,18 +170,10 @@ public class ScrapActivity extends BaseActivity {
 				|| keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT || keyCode == KeyEvent.KEYCODE_SOFT_RIGHT)
 				&& event.getRepeatCount() <= 0 && isConnected) {
 
-			if (!cbxComfirmScrap.isChecked()) {
-				InvengoLog.i(TAG, "INFO.Start/Stop read tag.");
-				if (isReading == false) {
-					StartRead();
-				} else if (isReading == true) {
-					StopRead();
-				}
-			} else {
-				if (isReading == true) {
-					StopRead();
-				}
-				ScrapOP();
+			if (isReading == false) {
+				StartRead();
+			} else if (isReading == true) {
+				StopRead();
 			}
 			return true;
 		}
@@ -285,6 +181,8 @@ public class ScrapActivity extends BaseActivity {
 	}
 
 	private void StartRead() {
+		setRate(true);	// 最小功率
+
 		isReading = true;
 		listEPCEntity.clear();
 		ReadTag readTag = new ReadTag(ReadMemoryBank.EPC_TID_UserData_6C);
@@ -297,12 +195,26 @@ public class ScrapActivity extends BaseActivity {
 	}
 
 	private void StopRead() {
-		isReading = false;
-		boolean result = reader.send(new PowerOff());
 		Message powerOffMsg = new Message();
 		powerOffMsg.what = STOP_READ;
-		powerOffMsg.obj = result;
+		powerOffMsg.obj = setRate();	// 最大功率
 		cardOperationHandler.sendMessage(powerOffMsg);
+	}
+
+	// 写用户区
+	private void writeCard(String[] sa, int a1, int a2) {
+		if (setRate()) {	// 最大功率
+			WrtUdRa r = new WrtUdRa(
+					reader,
+					sa,
+					cardOperationHandler,
+					a1,
+					a2
+			);
+			new Thread(r).start();
+		} else {
+			StartRead();
+		}
 	}
 
 	@SuppressLint("HandlerLeak")
@@ -330,23 +242,51 @@ public class ScrapActivity extends BaseActivity {
 				}
 				break;
 			case DATA_ARRIVED_PAIRS:// 接收配件数据
-				listPartsData.clear();
-				int no = 1;
-				for (PartsEntity partsEntity : listPartsEntity) {
-					Map<String, Object> item = new HashMap<String, Object>();
-					item.put("sqeNo", no);
-					item.put("partsCode", partsEntity.PartsCode);
-					item.put("partsName", partsEntity.PartsType + "  "
-							+ partsEntity.PartsName);
-					Drawable delDr = getResources().getDrawable(
-							R.drawable.delete);
-					item.put("delIcon", delDr);
-					listPartsData.add(item);
-					no++;
+				writeCard((String[]) msg.obj, 0, 0);
+				break;
+			case WRT_UD_ERR:	// 用户区写入失败
+				if (msg.arg1 == 1) {
+					// 数据删除失败
+					showToast("删除失败");
+					StopRead();
+				} else {
+					StartRead();
 				}
-				txtInfo.setText(String.format("数量:%s", listPartsData.size()));
-				mListAdapter.notifyDataSetChanged();
-				sp.play(music1, 1, 1, 0, 0, 1);
+				break;
+			case WRT_OK:// 接收配件数据
+				String[] sa = (String[]) msg.obj;
+				if (msg.arg1 == 1) {
+					// 数据删除成功
+					Map<String, Object> m = listPartsData.get(msg.arg2);
+					PartsEntity o = (PartsEntity) m.get("obj");
+					listPartsEntity.remove(o);
+					listPartsData.remove(msg.arg2);
+					// 调整序号
+					for (int i = msg.arg2; i < listPartsData.size(); i ++) {
+						listPartsData.get(msg.arg2).put("sqeNo", i + 1);
+					}
+					mListAdapter.notifyDataSetChanged();
+					txtInfo.setText(String.format("数量:%s", listPartsData.size()));
+					StopRead();
+				} else {
+					PartsEntity pe = UtilityHelper.GetPairEntityByCode(sa[3]);
+					pe.Epc = sa[1];
+					listPartsEntity.add(pe);
+
+					Map<String, Object> item = new HashMap<String, Object>();
+					item.put("sqeNo", listPartsData.size() + 1);
+					item.put("partsCode", pe.PartsCode);
+					item.put("partsName", pe.PartsType + "  " + pe.PartsName);
+					item.put("tid", sa[0]);
+					item.put("oud", sa[4]);		// 原用户区信息
+					item.put("obj", pe);
+					listPartsData.add(item);
+
+					mListAdapter.notifyDataSetChanged();
+					txtInfo.setText(String.format("数量:%s", listPartsData.size()));
+					sp.play(music1, 1, 1, 0, 0, 1);
+					StartRead();
+				}
 				break;
 			case CONNECT:// 读写器连接
 				boolean result = (Boolean) msg.obj;
@@ -359,8 +299,6 @@ public class ScrapActivity extends BaseActivity {
 							R.string.connecFail));
 					isConnected = false;
 				}
-				break;
-			default:
 				break;
 			}
 		};
@@ -391,35 +329,24 @@ public class ScrapActivity extends BaseActivity {
 		}
 
 		@Override
-		public View getView(final int position, View convertView,
-				ViewGroup parent) {
+		public View getView(final int position, View convertView, ViewGroup parent) {
 			if (convertView == null) {
 				convertView = LinearLayout.inflate(getBaseContext(),
-						R.layout.listview_parts_item, null);
+						R.layout.listview_parts_item2, null);
 			}
 
-			ImageView imgDel = (ImageView) convertView
-					.findViewById(R.id.delImage);
 			// 设置回调监听
-			imgDel.setOnClickListener(new OnClickListener() {
-
+			Button btnd = (Button) convertView.findViewById(R.id.btnDel);
+			btnd.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-
 					Map<String, Object> entity = listPartsData.get(position);
-					final String partsCodeSelected = entity.get("partsCode")
-							.toString();
-
-					for (PartsEntity partsEntiry : listPartsEntity) {
-						if (partsEntiry.PartsCode.equals(partsCodeSelected)) {
-							listPartsEntity.remove(partsEntiry);
-							break;
-						}
-					}
-
-					listPartsData.remove(position);
-					mListAdapter.notifyDataSetChanged();
-					txtInfo.setText(String.format("数量:%s", listPartsData.size()));
+					String[] sa = new String[] {
+							entity.get("tid").toString(),
+							"",
+							entity.get("oud").toString()
+					};
+					writeCard(sa, 1, position);
 				}
 
 			});

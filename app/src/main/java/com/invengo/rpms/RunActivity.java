@@ -287,6 +287,10 @@ public class RunActivity extends BaseActivity {
 					PartsEntity o = (PartsEntity) m.get("obj");
 					listPartsEntity.remove(o);
 					listPartsData.remove(msg.arg2);
+					// 调整序号
+					for (int i = msg.arg2; i < listPartsData.size(); i ++) {
+						listPartsData.get(msg.arg2).put("sqeNo", i + 1);
+					}
 					mListAdapter.notifyDataSetChanged();
 					txtInfo.setText(String.format("数量:%s", listPartsData.size()));
 					StopRead();

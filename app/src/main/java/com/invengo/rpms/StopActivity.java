@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.invengo.lib.diagnostics.InvengoLog;
 import com.invengo.rpms.entity.OpType;
 import com.invengo.rpms.entity.PartsEntity;
+import com.invengo.rpms.entity.SendRepairEntity;
 import com.invengo.rpms.entity.TbCodeEntity;
 import com.invengo.rpms.util.Btn001;
 import com.invengo.rpms.util.ReaderMessageHelper;
@@ -33,7 +34,6 @@ import java.util.List;
 import invengo.javaapi.core.BaseReader;
 import invengo.javaapi.core.IMessageNotification;
 import invengo.javaapi.core.Util;
-import invengo.javaapi.protocol.IRP1.PowerOff;
 import invengo.javaapi.protocol.IRP1.RXD_TagData;
 import invengo.javaapi.protocol.IRP1.ReadTag;
 import invengo.javaapi.protocol.IRP1.ReadTag.ReadMemoryBank;
@@ -43,12 +43,12 @@ public class StopActivity extends BaseActivity {
 
 	LinearLayout layoutRepair;
 	LinearLayout FaultType_CheckBoxList;
-	CheckBox cbxComfirmFault;
 	TextView txtStatus;
 	TextView txtTagInfo;
 	EditText edtFaultDes;
 	EditText edtRemark;
 	Button btnConfig;
+	Button btnSav;
 
 	private List<CheckBox> checkBoxList = new ArrayList<CheckBox>();
 	private String partsCode = "";
@@ -61,15 +61,22 @@ public class StopActivity extends BaseActivity {
 		reader.onMessageNotificationReceived.clear();
 		reader.onMessageNotificationReceived.add(StopActivity.this);
 
-		cbxComfirmFault = (CheckBox) findViewById(R.id.cbxComfirmFault);
 		txtStatus = (TextView) findViewById(R.id.txtStatus);
 		txtTagInfo = (TextView) findViewById(R.id.txtTagInfo);
 
 		edtFaultDes = (EditText) findViewById(R.id.edtFaultDes);
 		edtRemark = (EditText) findViewById(R.id.edtRemark);
-		
+
+		btnSav = (Button) findViewById(R.id.btnSav);
+		btnSav.setOnTouchListener(btnSavTouchListener);
+		btnSav.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				FaultOP();
+			}
+		});
+
 		btnConfig = (Button) findViewById(R.id.btnConfig);
-//		btnConfig.setOnTouchListener(btnConfigTouchListener);
 		btnConfig.setOnClickListener(btnConfigClickListener);
 		
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
@@ -84,48 +91,28 @@ public class StopActivity extends BaseActivity {
 			}
 		});
 
-
-		List<TbCodeEntity> listCode = SqliteHelper.queryDbCodeByType("04");
-		FaultType_CheckBoxList = (LinearLayout) findViewById(R.id.FaultType_CheckBoxList);
-		for (TbCodeEntity entity : listCode) {
-			CheckBox checkBox = new CheckBox(this);
-			checkBox.setText(entity.dbName);
-			checkBox.setTag(entity.dbCode);
-			FaultType_CheckBoxList.addView(checkBox);
-			checkBoxList.add(checkBox);
-		}
-		CheckBox checkBox = new CheckBox(this);
-		checkBox.setText("其他");
-		checkBox.setTag("00");
-		FaultType_CheckBoxList.addView(checkBox);
-		checkBoxList.add(checkBox);
-
 		layoutRepair = (LinearLayout) findViewById(R.id.layoutRepair);
-		layoutRepair.setVisibility(View.GONE);
+		FaultType_CheckBoxList = (LinearLayout) findViewById(R.id.FaultType_CheckBoxList);
 	}
 	
-	private OnTouchListener btnConfigTouchListener = new OnTouchListener() {
+	private OnTouchListener btnSavTouchListener = new OnTouchListener() {
 		public boolean onTouch(View v, MotionEvent event) {
 			switch (event.getAction()) {
-
-			case MotionEvent.ACTION_DOWN: {
-				// 按住事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_MOVE: {
-				// 移动事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_UP: {
-				// 松开事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.yellow);
-				break;
-			}
-			default:
-
-				break;
+				case MotionEvent.ACTION_DOWN: {
+					// 按住事件发生后执行代码的区域
+					btnSav.setBackgroundResource(R.color.lightwhite);
+					break;
+				}
+				case MotionEvent.ACTION_MOVE: {
+					// 移动事件发生后执行代码的区域
+					btnSav.setBackgroundResource(R.color.lightwhite);
+					break;
+				}
+				case MotionEvent.ACTION_UP: {
+					// 松开事件发生后执行代码的区域
+					btnSav.setBackgroundResource(R.color.yellow);
+					break;
+				}
 			}
 			return false;
 		}
@@ -133,76 +120,70 @@ public class StopActivity extends BaseActivity {
 
 	private OnClickListener btnConfigClickListener = new OnClickListener() {
 		public void onClick(View v) {
-			
 			AlertDialog.Builder builder  = new Builder(StopActivity.this, R.style.AppTheme);
-			 builder.setTitle("温馨提示" ) ;
-			 builder.setMessage(getResources().getString(R.string.pairsFaultTipInfo)) ;
-			 builder.setPositiveButton("关闭" ,  null );
-			 builder.show();
+			builder.setTitle("温馨提示" ) ;
+			builder.setMessage(getResources().getString(R.string.pairsFaultTipInfo)) ;
+			builder.setPositiveButton("关闭" ,  null );
+			builder.show();
 		}
 	};
 
-
 	private void FaultOP() {
-
-		if (partsCode.length() == 0) {
-			showToast(String.format("请扫描到%s",
-					getResources().getString(R.string.parts)));
-			return;
-		}
-
+		SendRepairEntity se = new SendRepairEntity();
 		String faultCodeStr = "";
 		for (CheckBox checkBox : checkBoxList) {
 			if (checkBox.isChecked()) {
+				if (se.FaultCode == null) {
+					se.FaultCode = "";
+				} else {
+					se.FaultCode += ",";
+				}
+				se.FaultCode += checkBox.getTag().toString();
 				faultCodeStr += checkBox.getTag().toString();
 			}
 		}
 		if (faultCodeStr.length() == 0) {
-			showToast(String.format("请选择%s",
-					getResources().getString(R.string.FaultType)));
+			showToast(String.format("请选择%s", getResources().getString(R.string.FaultType)));
 			return;
 		}
 
-		String faultDes = edtFaultDes.getText().toString().trim().replace(",","+++");;
-		String remark = edtRemark.getText().toString().trim().replace(",","+++");;
+		se.FaultDes = edtFaultDes.getText().toString().trim();
+		se.Remark = edtRemark.getText().toString().trim();
+		String faultDes = se.FaultDes.replace(",","+++");
+		String remark = se.Remark.replace(",","+++");
 
 		// 写入标签用户数据
-		WriteUserData_6C msg = ReaderMessageHelper.GetWriteUserData_6C(
-				partsEpc, OpType.Stop);
-		
-		boolean result = false;
-		//int count = 0;
-		//while (count < writeUserDataCount) {
-		    result = reader.send(msg);
-			//if (result) {
-			//	break;
-			//}
-			//count++;
-		//}
-		
+		WriteUserData_6C msg = ReaderMessageHelper.GetWriteUserData_6C(partsEpc, OpType.Stop);
+		boolean result = reader.send(msg);
+
 		if (result) {
 			// 保存操作记录
 			String user = myApp.getUserId();
 			String opTime = f.format(new Date());
-			String info = faultCodeStr + "," + faultDes + "," + remark + ","
-					+ user + "," + opTime;
+			String info = faultCodeStr + "," + faultDes + "," + remark + "," + user + "," + opTime;
 			List<String> listPartsCodeSucess = new ArrayList<String>();
 			listPartsCodeSucess.add(partsCode);
-
-			result = SqliteHelper.SaveOpRecord(listPartsCodeSucess,
-					OpType.Stop, info);
+			result = SqliteHelper.SaveOpRecord(listPartsCodeSucess, OpType.Stop, info);
 
 			if (result) {
-				showToast(String.format("%s成功",
-						getResources().getString(R.string.pairsStop)));
+				List<String> listSql = new ArrayList<String>();
+				listSql.add("update TbParts set Status='T',"
+						+ "LastOpTime='" + SqliteHelper.f.format(new Date())
+//						+ "',Code='" + stationCodeStr
+						+ "',OpUser='" + user
+						+ "' where PartsCode='" + partsCode + "'");
+				listSql.add("insert into TbSendRepair values('', '"		// TODO: 2018/6/12 测试用功能，实际发布后，无需在此处保存故障信息。
+						+ partsCode + "', '"
+						+ se.FaultCode + "', '"
+						+ se.FaultDes + "', '"
+						+ se.Remark + "')");
+				SqliteHelper.ExceSql(listSql);	// 更新本地数据库信息
+				showToast(String.format("%s成功", getResources().getString(R.string.pairsStop)));
 			} else {
-				showToast(String.format("%s失败，请重新操作",
-						getResources().getString(R.string.pairsStop)));
+				showToast(String.format("%s失败，请重新操作", getResources().getString(R.string.pairsStop)));
 			}
-
 		} else {
-			showToast(String.format("%s失败，请重新操作",
-					getResources().getString(R.string.pairsStop)));
+			showToast(String.format("%s失败，请重新操作", getResources().getString(R.string.pairsStop)));
 		}
 	}
 
@@ -226,7 +207,6 @@ public class StopActivity extends BaseActivity {
 							partsEpc=epc;
 						    partsCode = UtilityHelper.GetCodeByEpc(epc);
 							if (partsCode.length() > 0) {
-
 								Message dataArrivedMsg = new Message();
 								dataArrivedMsg.what = DATA_ARRIVED_PAIRS;
 								cardOperationHandler
@@ -251,15 +231,12 @@ public class StopActivity extends BaseActivity {
 				|| keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT || keyCode == KeyEvent.KEYCODE_SOFT_RIGHT)
 				&& event.getRepeatCount() <= 0 && isConnected) {
 
-			if (cbxComfirmFault.isChecked()) {
-				FaultOP();
-			} else {
-				InvengoLog.i(TAG, "INFO.Start/Stop read tag.");
-				if (isReading == false) {
-					StartRead();
-				} else if (isReading == true) {
-					StopRead();
-				}
+			txtTagInfo.setText("");
+			layoutRepair.setVisibility(View.GONE);
+			if (isReading == false) {
+				StartRead();
+			} else if (isReading == true) {
+				StopRead();
 			}
 			return true;
 		}
@@ -267,6 +244,8 @@ public class StopActivity extends BaseActivity {
 	}
 
 	private void StartRead() {
+		setRate(true);	// 最小功率
+
 		isReading = true;
 		listEPCEntity.clear();
 		ReadTag readTag = new ReadTag(ReadMemoryBank.EPC_TID_UserData_6C);
@@ -279,12 +258,31 @@ public class StopActivity extends BaseActivity {
 	}
 
 	private void StopRead() {
-		isReading = false;
-		boolean result = reader.send(new PowerOff());
 		Message powerOffMsg = new Message();
 		powerOffMsg.what = STOP_READ;
-		powerOffMsg.obj = result;
+		powerOffMsg.obj = setRate();	// 最大功率
 		cardOperationHandler.sendMessage(powerOffMsg);
+	}
+
+	private void showList () {
+		FaultType_CheckBoxList.removeAllViews();
+		checkBoxList.clear();
+		List<TbCodeEntity> listCode = SqliteHelper.qrySnag(partsCode.substring(5,7));
+		for (TbCodeEntity entity : listCode) {
+			CheckBox checkBox = new CheckBox(this);
+			checkBox.setText(entity.dbName);
+			checkBox.setTag(entity.dbCode);
+			FaultType_CheckBoxList.addView(checkBox);
+			checkBoxList.add(checkBox);
+		}
+		CheckBox checkBox = new CheckBox(this);
+		checkBox.setText("其他");
+		checkBox.setTag("00");
+		FaultType_CheckBoxList.addView(checkBox);
+		checkBoxList.add(checkBox);
+		edtFaultDes.setText("");
+		edtRemark.setText("");
+		layoutRepair.setVisibility(View.VISIBLE);
 	}
 
 	@SuppressLint("HandlerLeak")
@@ -312,13 +310,12 @@ public class StopActivity extends BaseActivity {
 				break;
 			case DATA_ARRIVED_PAIRS:// 接收配件数据
 				StopRead();
-				PartsEntity entity = UtilityHelper
-						.GetPairEntityByCode(partsCode);
+				PartsEntity entity = UtilityHelper.GetPairEntityByCode(partsCode);
 				txtTagInfo.setText(String.format(
 						"编码：%s\n厂家：%s\n型号：%s\n类别：%s\n名称： %s\n序列号：%s",
 						entity.PartsCode, entity.FactoryName, entity.PartsType,
 						entity.BoxType, entity.PartsName, entity.SeqNo));
-				layoutRepair.setVisibility(View.VISIBLE);
+				showList();
 				break;
 			case CONNECT:// 读写器连接
 				boolean result = (Boolean) msg.obj;

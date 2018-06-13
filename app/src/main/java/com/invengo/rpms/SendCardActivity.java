@@ -34,7 +34,6 @@ import java.util.List;
 import invengo.javaapi.core.BaseReader;
 import invengo.javaapi.core.IMessageNotification;
 import invengo.javaapi.core.Util;
-import invengo.javaapi.protocol.IRP1.PowerOff;
 import invengo.javaapi.protocol.IRP1.RXD_TagData;
 import invengo.javaapi.protocol.IRP1.ReadTag;
 import invengo.javaapi.protocol.IRP1.ReadTag.ReadMemoryBank;
@@ -607,6 +606,8 @@ public class SendCardActivity extends BaseActivity {
 				fc = sn;
 			}
 
+			setRate(true);	// 最小功率
+
 			partsCode = sb.toString();
 			isReading = true;
 			listEPCEntity.clear();
@@ -621,14 +622,10 @@ public class SendCardActivity extends BaseActivity {
 	}
 
 	private void StopRead() {
-		if (isReading) {
-			isReading = false;
-			boolean result = reader.send(new PowerOff());
-			Message powerOffMsg = new Message();
-			powerOffMsg.what = STOP_READ;
-			powerOffMsg.obj = result;
-			cardOperationHandler.sendMessage(powerOffMsg);
-		}
+		Message powerOffMsg = new Message();
+		powerOffMsg.what = STOP_READ;
+		powerOffMsg.obj = setRate();	// 最大功率
+		cardOperationHandler.sendMessage(powerOffMsg);
 	}
 
 	@SuppressLint("HandlerLeak")

@@ -1269,6 +1269,41 @@ public class SqliteHelper {
 		return r;
 	}
 
+	// 获取故障类型
+	public static List<TbCodeEntity> qrySnag (String typ) {
+		List<TbCodeEntity> listEntity = new ArrayList<TbCodeEntity>();
+		try {
+			File name = new File(filePath);
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
+			String sql = "select * from TbCode where Dbtype='04' and DbCodeBeyond like '%" + typ + "%'";
+
+			Cursor cursor = db.rawQuery(sql, null);
+			while (cursor.moveToNext()) {
+				String dbType = cursor.getString(cursor.getColumnIndex("Dbtype"));
+				String dbCode = cursor.getString(cursor.getColumnIndex("DbCode"));
+				String dbName = cursor.getString(cursor.getColumnIndex("DbName"));
+				String dbTypeBeyond = cursor.getString(cursor.getColumnIndex("DbtypeBeyond"));
+				String dbCodeBeyond = cursor.getString(cursor.getColumnIndex("DbCodeBeyond"));
+
+				TbCodeEntity entity = new TbCodeEntity();
+				entity.dbType = dbType;
+				entity.dbCode = dbCode;
+				entity.dbName = dbName;
+				entity.dbTypeBeyond=dbTypeBeyond;
+				entity.dbCodeBeyond=dbCodeBeyond;
+
+				listEntity.add(entity);
+			}
+
+			cursor.close();
+			db.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return listEntity;
+	}
+
 	// 添加数据恢复记录
 	public static Boolean addRecover(String id, String stu) {
 		String sql = "select id from Recover where id = '" + id + "'";

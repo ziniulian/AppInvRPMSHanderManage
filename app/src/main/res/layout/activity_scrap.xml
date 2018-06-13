@@ -3,30 +3,6 @@
     tools:context=".MainActivity" >
 
     <LinearLayout
-        android:id="@+id/connect_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:visibility="gone" >
-
-        <ProgressBar
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/connecting"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-    </LinearLayout>
-
-    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@drawable/background2"
@@ -70,44 +46,25 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="465dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:orientation="vertical" >
 
-            <LinearLayout
+            <ListView
+                android:id="@+id/lstPartsScrapView"
                 android:layout_width="match_parent"
-                android:layout_height="380dp"
-                android:background="@color/listviewbg"
-                android:orientation="vertical" >
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_margin="1dp"
+                android:listSelector="@drawable/list_item_shape" >
+            </ListView>
 
-                <ListView
-                    android:id="@+id/lstPartsScrapView"
-                    android:layout_width="match_parent"
-                    android:layout_height="350dp"
-                    android:layout_margin="1dp"
-                    android:listSelector="@drawable/list_item_shape" >
-                </ListView>
-
-                <TextView
-                    android:id="@+id/txtInfo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="20dp"
-                android:orientation="horizontal" >
-
-                <CheckBox
-                    android:id="@+id/cbxComfirmScrap"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ComfirmScrap" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/txtInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="数量:0"
+                android:layout_marginLeft="5dp" />
         </LinearLayout>
 
         <LinearLayout
