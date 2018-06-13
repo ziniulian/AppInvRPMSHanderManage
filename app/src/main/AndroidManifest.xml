@@ -149,6 +149,12 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
         </activity>
+        <activity
+            android:name="com.invengo.rpms.StationSendCardActivity"
+            android:label="@string/stattionSendCard"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
     </application>
 
 </manifest>

@@ -120,7 +120,8 @@ public class MainActivity extends BaseActivity {
 				getResources().getString(R.string.pairsScrap),
 				getResources().getString(R.string.pairsSendCard),
 				getResources().getString(R.string.pairsFind),
-				getResources().getString(R.string.About)
+				getResources().getString(R.string.About),
+				getResources().getString(R.string.stattionSendCard)
 		};
 		int[] resIds = {
 				R.drawable.hom_tagquery,
@@ -137,7 +138,8 @@ public class MainActivity extends BaseActivity {
 				R.drawable.hom_partscrap,
 				R.drawable.hom_partsendcard,
 				R.drawable.hom_partquerycheck,
-				R.drawable.hom_about
+				R.drawable.hom_about,
+				R.drawable.hom_partbackfactoty
 		};
 
 		String roleStr = "";
@@ -279,6 +281,9 @@ public class MainActivity extends BaseActivity {
 					startActivity(intent);
 				} else if (title.equals(getResources().getString(R.string.pairsFind))) {
 					Intent intent = new Intent(MainActivity.this, FindActivity.class);
+					startActivity(intent);
+				} else if (title.equals(getResources().getString(R.string.stattionSendCard))) {
+					Intent intent = new Intent(MainActivity.this, StationSendCardActivity.class);
 					startActivity(intent);
 				}
 			}

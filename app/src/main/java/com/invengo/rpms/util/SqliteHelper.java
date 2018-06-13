@@ -6,6 +6,7 @@ import android.os.Environment;
 
 import com.invengo.rpms.bean.CheckDetailEntity;
 import com.invengo.rpms.bean.CheckEntity;
+import com.invengo.rpms.bean.THDSEntity;
 import com.invengo.rpms.bean.TbPartsOpEntity;
 import com.invengo.rpms.entity.OpType;
 import com.invengo.rpms.entity.PartsStorageLocationEntity;
@@ -1361,6 +1362,32 @@ public class SqliteHelper {
 		} else {
 			return false;
 		}
+	}
+
+	// 获取所有站点信息
+	public static List<THDSEntity> getAllStations () {
+		List<THDSEntity> r = new ArrayList<THDSEntity>();
+		try {
+			File name = new File(filePath);
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);// 读SD卡数据库必须如此--用静态方法打开数据库。
+			String sql = "select * from TbTHDS";
+
+			Cursor cursor = db.rawQuery(sql, null);
+			THDSEntity te;
+			while (cursor.moveToNext()) {
+				te = new THDSEntity();
+				te.THDSCode = cursor.getString(0);
+				te.THDSName = cursor.getString(1);
+				te.FactoryName = cursor.getString(2);
+				r.add(te);
+			}
+
+			cursor.close();
+			db.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return r;
 	}
 
 }

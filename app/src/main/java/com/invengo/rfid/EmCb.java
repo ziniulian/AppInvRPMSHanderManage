@@ -11,6 +11,7 @@ public enum EmCb {
 	ShowToast,		// 信息提示
 	Scanning,		// 开始扫描
 	Stopped,		// 扫描已停止
+	RateChg,		// 功率改变
 	ErrWrt,		// 写入失败
 	Connected,		// 与RFID设备已建立连接
 	DisConnected,	// 与RFID设备已断开连接

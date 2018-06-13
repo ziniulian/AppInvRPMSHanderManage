@@ -51,4 +51,9 @@ public class THDSEntity extends BaseBean {
 	public String getDelAllSql() {
 		return "delete from TbTHDS";
 	}
+
+	@Override
+	public String toString() {
+		return THDSName;
+	}
 }

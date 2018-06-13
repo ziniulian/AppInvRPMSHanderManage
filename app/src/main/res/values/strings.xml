@@ -67,6 +67,7 @@
     <string name="pairsSendCard">配件发卡</string>
     <string name="pairsFind">配件巡检</string>
     <string name="About">关于软件</string>
+    <string name="stattionSendCard">站点发卡</string>
     
     <string name="SysSet">系统配置</string>
     <string name="check">盘点任务</string>

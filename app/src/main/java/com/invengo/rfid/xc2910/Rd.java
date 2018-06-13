@@ -1,13 +1,9 @@
 package com.invengo.rfid.xc2910;
 
-import android.util.Log;
-import android.widget.ProgressBar;
-
 import com.invengo.rfid.Base;
 import com.invengo.rfid.EmCb;
 import com.invengo.rfid.EmPushMod;
 import com.invengo.rfid.tag.T6C;
-import com.invengo.rfid.util.Str;
 import com.invengo.rpms.BaseActivity;
 
 import invengo.javaapi.core.BaseReader;
@@ -20,13 +16,9 @@ import invengo.javaapi.protocol.IRP1.PowerOff;
 import invengo.javaapi.protocol.IRP1.RXD_TagData;
 import invengo.javaapi.protocol.IRP1.ReadTag;
 import invengo.javaapi.protocol.IRP1.Reader;
-import invengo.javaapi.protocol.IRP1.ResetReader_800;
 import invengo.javaapi.protocol.IRP1.SysConfig_800;
-import invengo.javaapi.protocol.IRP1.SysQuery_500;
-import invengo.javaapi.protocol.IRP1.SysQuery_800;
 import invengo.javaapi.protocol.IRP1.WriteEpc;
 import invengo.javaapi.protocol.IRP1.WriteUserData_6C;
-import invengo.javaapi.protocol.receivedInfo.SysQuery800ReceivedInfo;
 
 /**
  * XC2910型标签读写器
@@ -41,7 +33,7 @@ public class Rd extends Base implements IMessageNotificationReceivedHandle {
 	private final byte antenna = 1;
 	private byte qv = 6;
 	private ReadTag.ReadMemoryBank bank = ReadTag.ReadMemoryBank.EPC_TID_UserData_6C;
-	private final byte[] defaulPwd = new byte[] {0, 0, 0, 0};
+	private byte[] defaulPwd = new byte[] {0, 0, 0, 0};
 
 	// 连接设备
 	private Runnable connectRa = new Runnable() {
@@ -128,6 +120,33 @@ public class Rd extends Base implements IMessageNotificationReceivedHandle {
 //Log.i("---", msg.getErrInfo());
 				cb(EmCb.ErrWrt);
 			}
+		}
+	}
+
+	// 功率
+	private RateRunable rateRa = new RateRunable();
+	private class RateRunable implements Runnable {
+		private byte pm = 0x65;		// 功率的配置参数
+		private byte len = 0x02;	// 字长
+		private byte ant = 0x00;	// 天线端口号
+		private String rat = "30";
+
+		public RateRunable setRat(String rat) {
+			this.rat = rat;
+			return this;
+		}
+
+		public String getRat() {
+			return rat;
+		}
+
+		@Override
+		public void run() {
+			isScanning = false;
+			rd.send(new PowerOff());
+			byte[] d = {len, ant, Byte.parseByte(rat)};
+			rd.send(new SysConfig_800(pm, d));
+			cb(EmCb.RateChg);
 		}
 	}
 
@@ -242,6 +261,11 @@ public class Rd extends Base implements IMessageNotificationReceivedHandle {
 		if (isScanning && isConnect) {
 			new Thread(stopRa).start();
 		}
+	}
+
+	public void rate(String r) {
+		rateRa.setRat(r);
+		new Thread(rateRa).start();
 	}
 
 	@Override

@@ -122,7 +122,6 @@ public class SendCardActivity extends BaseActivity {
 		txtSqe = (EditText) findViewById(R.id.txtSqe);
 		txtFd = (EditText) findViewById(R.id.txtFd);
 
-
 		sprPartsT5 = (Spinner) findViewById(R.id.sprPartsT5);
 		List<String> listPartsT5 = new ArrayList<String>();
 		List<TbCodeEntity> listCodeT5 = SqliteHelper.queryDbCodeByType("05");
