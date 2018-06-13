@@ -71,64 +71,54 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="465dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:orientation="vertical" >
 
-            <LinearLayout
+            <ListView
+                android:id="@+id/lstPartsRunAndStopView"
                 android:layout_width="match_parent"
-                android:layout_height="320dp"
-                android:background="@color/listviewbg"
-                android:orientation="vertical" >
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_margin="1dp"
+                android:listSelector="@drawable/list_item_shape" >
+            </ListView>
 
-                <ListView
-                    android:id="@+id/lstPartsRunAndStopView"
-                    android:layout_width="match_parent"
-                    android:layout_height="290dp"
-                    android:layout_margin="1dp"
-                    android:listSelector="@drawable/list_item_shape" >
-                </ListView>
-
-                <TextView
-                    android:id="@+id/txtInfo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/txtInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="数量:0"
+                android:layout_marginLeft="5dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
                 android:layout_marginTop="10dp"
                 android:orientation="horizontal" >
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/stattion" />
+                    android:layout_marginLeft="5dp"
+                    android:text="站点：" />
 
-                <EditText
-                    android:id="@+id/edtStation"
-                    android:layout_width="240dp"
-                    android:layout_height="56dp"
-                    android:maxLength="10" >
-                </EditText>
-            </LinearLayout>
+                <TextView
+                    android:id="@+id/txtNam"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="20dp"
-                android:orientation="vertical" >
-
-                <CheckBox
-                    android:id="@+id/cbxComfirmRun"
+                <Button
+                    android:id="@+id/btnClear"
+                    android:visibility="invisible"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/ComfirmRun" />
+                    android:text="重选站点"
+                    android:background="@color/yellow"
+                    android:padding="10dp" />
             </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout
@@ -142,7 +132,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
-                android:text="@string/ReadTip"
+                android:text="请读取站点标签"
                 android:textColor="#ffffff" />
         </LinearLayout>
     </LinearLayout>

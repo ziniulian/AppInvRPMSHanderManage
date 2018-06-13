@@ -27,8 +27,8 @@ public class SqliteHelper {
 	// 从sd卡中数据库路径
 	private static String filedirPath = Environment
 			.getExternalStorageDirectory().getAbsolutePath() + "/RPMS";
-	private static String filePath = filedirPath + "/RPMSHanderV1002";
-	private static SimpleDateFormat f = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+	private static String filePath = filedirPath + "/RPMSHanderV1003";
+	public static SimpleDateFormat f = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
 	// 初始化数据库
 	public static void InintDatabase() {
@@ -77,6 +77,10 @@ public class SqliteHelper {
 				// 其它信息缓存表
 				String sql_table12 = "Create TABLE SynTim(id int PRIMARY KEY, tim datetime)";
 				listSql.add(sql_table12);
+
+				// 数据恢复表
+				String sql_table13 = "Create TABLE Recover(id varchar(20) PRIMARY KEY, stu char(1))";
+				listSql.add(sql_table13);
 
 				db.beginTransaction();
 				for (String sql : listSql) {
@@ -1263,6 +1267,65 @@ public class SqliteHelper {
 			e.printStackTrace();
 		}
 		return r;
+	}
+
+	// 添加数据恢复记录
+	public static Boolean addRecover(String id, String stu) {
+		String sql = "select id from Recover where id = '" + id + "'";
+		try {
+			File name = new File(filePath);
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);
+			Cursor cursor = db.rawQuery(sql, null);
+			if (cursor.moveToNext()) {
+				sql = "update Recover set stu = '" + stu + "' where id = '" + id + "'";
+			} else {
+				sql = "insert into SynTim values('" + id + "', '" + stu + "')";
+			}
+			cursor.close();
+			db.close();
+
+			List<String> listSql = new ArrayList<String>();
+			listSql.add(sql);
+			return ExceSql(listSql);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	// 获取数据恢复记录
+	public static String getRecover(String id) {
+		String r = null;
+		try {
+			File name = new File(filePath);
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(name, null);
+			String sql = "select stu from Recover where id = '" + id + "'";
+
+			Cursor cursor = db.rawQuery(sql, null);
+			if (cursor.moveToNext()) {
+				r = cursor.getString(0);
+			}
+
+			cursor.close();
+			db.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return r;
+	}
+
+	// 删除数据恢复记录
+	public static Boolean delRecover(String ids) {
+		String[] idas = ids.split(",");
+		if (idas.length > 0) {
+			List<String> listSql = new ArrayList<String>();
+			for (int i = 0; i < idas.length; i ++) {
+				listSql.add("delete from Recover where id = '" + idas[i] + "'");
+			}
+			return ExceSql(listSql);
+		} else {
+			return false;
+		}
 	}
 
 }

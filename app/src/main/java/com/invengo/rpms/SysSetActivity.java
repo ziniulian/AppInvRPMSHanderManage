@@ -24,6 +24,8 @@ public class SysSetActivity extends Activity {
 	Button btnTest;
 	EditText edtServiceIp;
 	EditText edtServiceCom;
+	EditText maxRate;
+	EditText minRate;
 	TextView txtInfo;
 
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +43,18 @@ public class SysSetActivity extends Activity {
 		txtInfo = (TextView) findViewById(R.id.txtInfo);
 		edtServiceIp = (EditText) findViewById(R.id.edtServiceIp);
 		edtServiceCom = (EditText) findViewById(R.id.edtServiceCom);
+		maxRate = (EditText) findViewById(R.id.maxRate);
+		minRate = (EditText) findViewById(R.id.minRate);
 		edtServiceIp.setText(SqliteHelper.kvGet("synUrlIp"));
 		edtServiceCom.setText(SqliteHelper.kvGet("synUrlPort"));
+		String s = SqliteHelper.kvGet("maxRate");
+		if (s != null) {
+			maxRate.setText(s);
+		}
+		s = SqliteHelper.kvGet("minRate");
+		if (s != null) {
+			minRate.setText(s);
+		}
 
 		btnTest = (Button) findViewById(R.id.btnTest);
 		btnTest.setOnTouchListener(btnTestTouchListener);
@@ -74,6 +86,26 @@ public class SysSetActivity extends Activity {
 
 	private OnClickListener btnTestClickListener = new OnClickListener() {
 		public void onClick(View v) {
+			rate(maxRate, "maxRate");
+			rate(minRate, "minRate");
+			syn();
+		}
+
+		// 功率设置
+		private void rate (EditText et, String k) {
+			int v = Integer.parseInt(et.getText().toString());
+			if (v < 1) {
+				v = 1;
+			} else if (v > 30) {
+				v = 30;
+			}
+			String s = v + "";
+			et.setText(s);
+			SqliteHelper.kvSet(k, s);
+		}
+
+		// 数据同步
+		private void syn () {
 			String serverIp = edtServiceIp.getText().toString().trim();
 			if (serverIp.length() == 0) {
 				showToast("请输入服务地址");

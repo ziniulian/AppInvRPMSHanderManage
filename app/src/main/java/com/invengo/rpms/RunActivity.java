@@ -4,24 +4,17 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
 
 import com.invengo.lib.diagnostics.InvengoLog;
@@ -29,9 +22,9 @@ import com.invengo.rpms.entity.OpType;
 import com.invengo.rpms.entity.PartsEntity;
 import com.invengo.rpms.entity.StationEntity;
 import com.invengo.rpms.util.Btn001;
-import com.invengo.rpms.util.ReaderMessageHelper;
 import com.invengo.rpms.util.SqliteHelper;
 import com.invengo.rpms.util.UtilityHelper;
+import com.invengo.rpms.util.WrtUdRa;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,38 +35,49 @@ import java.util.Map;
 import invengo.javaapi.core.BaseReader;
 import invengo.javaapi.core.IMessageNotification;
 import invengo.javaapi.core.Util;
-import invengo.javaapi.protocol.IRP1.PowerOff;
 import invengo.javaapi.protocol.IRP1.RXD_TagData;
 import invengo.javaapi.protocol.IRP1.ReadTag;
 import invengo.javaapi.protocol.IRP1.ReadTag.ReadMemoryBank;
-import invengo.javaapi.protocol.IRP1.WriteUserData_6C;
+
+import static com.invengo.rpms.util.WrtRa.WRT_OK;
+import static com.invengo.rpms.util.WrtRa.WRT_UD_ERR;
 
 public class RunActivity extends BaseActivity {
 
 	TextView txtStatus;
-	EditText edtStation;
-	CheckBox cbxComfirmRun;
 	TextView txtInfo;
+	TextView txtNam;
 	Button btnConfig;
-	TextView txtTitle;
+	Button btnClear;
 
 	private ListView mEpcListView;
 	private PartsAdapter mListAdapter;
 	private List<Map<String, Object>> listPartsData = new ArrayList<Map<String, Object>>();
 	private String stationCodeStr = "";
-	private List<String> listPartsCodeSucess = new ArrayList<String>();
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_run);
 
+		reader.onMessageNotificationReceived.clear();
+		reader.onMessageNotificationReceived.add(RunActivity.this);
+
 		txtInfo = (TextView) findViewById(R.id.txtInfo);
-		txtTitle = (TextView) findViewById(R.id.txtTitle);
+		txtNam = (TextView) findViewById(R.id.txtNam);
+		txtStatus = (TextView) findViewById(R.id.txtStatus);
 
 		btnConfig = (Button) findViewById(R.id.btnConfig);
-//		btnConfig.setOnTouchListener(btnConfigTouchListener);
 		btnConfig.setOnClickListener(btnConfigClickListener);
-		
+
+		btnClear = (Button) findViewById(R.id.btnClear);
+		btnClear.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				btnClear.setVisibility(View.INVISIBLE);
+				txtNam.setText("");
+			}
+		});
+
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
 		btnBack.setOnTouchListener(new Btn001());
 		btnBack.setOnClickListener(new OnClickListener() {
@@ -86,69 +90,42 @@ public class RunActivity extends BaseActivity {
 			}
 		});
 
-
-		cbxComfirmRun = (CheckBox) findViewById(R.id.cbxComfirmRun);
-		txtStatus = (TextView) findViewById(R.id.txtStatus);
-
-		edtStation = (EditText) findViewById(R.id.edtStation);
-		edtStation.setCursorVisible(false);
-		edtStation.setFocusable(false);
-		edtStation.setFocusableInTouchMode(false);
-
-		mEpcListView = (ListView) this
-				.findViewById(R.id.lstPartsRunAndStopView);
+		mEpcListView = (ListView) this.findViewById(R.id.lstPartsRunAndStopView);
 
 		// 创建SimpleAdapter适配器将数据绑定到item显示控件上
 		mListAdapter = new PartsAdapter(this, listPartsData,
-				R.layout.listview_parts_item, new String[] { "sqeNo",
-						"partsCode", "partsName", "delIcon" }, new int[] {
-						R.id.sqeNo, R.id.partsCode, R.id.partsInfo,
-						R.id.delImage });
-		mListAdapter.setViewBinder(new ViewBinder() {
-			@Override
-			public boolean setViewValue(View view, Object data,
-					String textRepresentation) {
-				if (view instanceof ImageView && data instanceof Drawable) {
-					ImageView iv = (ImageView) view;
-					iv.setImageDrawable((Drawable) data);
-					return true;
-				}
-				return false;
-			}
-		});
+				R.layout.listview_parts_item2,
+				new String[] {"sqeNo", "partsCode", "partsName"},
+				new int[] {R.id.sqeNo, R.id.partsCode, R.id.partsInfo});
 		// 实现列表的显示
 		mEpcListView.setAdapter(mListAdapter);
-		
-		reader.onMessageNotificationReceived.clear();
-		reader.onMessageNotificationReceived.add(RunActivity.this);
 	}
 
-	private OnTouchListener btnConfigTouchListener = new OnTouchListener() {
-		public boolean onTouch(View v, MotionEvent event) {
-			switch (event.getAction()) {
+	@Override
+	protected void onDestroy() {
+		if (stationCodeStr.length() > 0 && listPartsEntity.size() > 0) {
+			List<String> ps = new ArrayList<String>();
+			List<String> listSql = new ArrayList<String>();
+			String user = myApp.getUserId();
+			for (PartsEntity partsEntiry : listPartsEntity) {
+				ps.add(partsEntiry.PartsCode);
+				listSql.add("update TbParts set Status='U',"
+						+ "LastOpTime='" + SqliteHelper.f.format(new Date())
+						+ "',Code='" + stationCodeStr
+						+ "',OpUser='" + user
+						+ "' where PartsCode='" + partsEntiry.PartsCode + "'");
+			}
+			String opTime = f.format(new Date());
+			String remark = "";
+			String hostCodeStr = "";
+			String info = stationCodeStr + "," + hostCodeStr + "," + user + "," + opTime + "," + remark;
 
-			case MotionEvent.ACTION_DOWN: {
-				// 按住事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_MOVE: {
-				// 移动事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_UP: {
-				// 松开事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.yellow);
-				break;
-			}
-			default:
-
-				break;
-			}
-			return false;
+			SqliteHelper.SaveOpRecord(ps, OpType.Use, info);	// 保存操作记录
+			SqliteHelper.ExceSql(listSql);	// 更新本地数据库信息
 		}
-	};
+
+		super.onDestroy();
+	}
 
 	private OnClickListener btnConfigClickListener = new OnClickListener() {
 		public void onClick(View v) {
@@ -164,75 +141,8 @@ public class RunActivity extends BaseActivity {
 		}
 	};
 
-	private void RunOP() {
-
-		if (stationCodeStr.length() == 0) {
-			showToast(String.format("请扫描到%s",
-					getResources().getString(R.string.stattion)));
-			return;
-		}
-
-		if (listPartsEntity.size() == 0) {
-			showToast(String.format("请扫描到待%s%s",
-					getResources().getString(R.string.run),
-					getResources().getString(R.string.parts)));
-			return;
-		}
-
-		for (PartsEntity partsEntiry : listPartsEntity) {
-			if (!listPartsCodeSucess.contains(partsEntiry.PartsCode)) {
-				// 写入标签用户数据
-				WriteUserData_6C msg = ReaderMessageHelper.GetWriteUserData_6C(
-						partsEntiry.Epc, OpType.Use);
-
-				//int count = 0;
-				//while (count < writeUserDataCount) {
-					boolean result = reader.send(msg);
-					if (result) {
-						listPartsCodeSucess.add(partsEntiry.PartsCode);
-						//break;
-					}
-					//count++;
-		        //}
-			}
-		}
-
-		if (listPartsCodeSucess.size() < listPartsEntity.size()) {
-			showToast(String.format("%s失败，请重新操作",
-					getResources().getString(R.string.pairsRun)));
-			return;
-		}
-
-		// 保存操作记录
-		String user = myApp.getUserId();
-		String opTime = f.format(new Date());
-		String remark = "";
-		String hostCodeStr = "";
-		String info = stationCodeStr + "," + hostCodeStr + "," + user + ","
-				+ opTime + "," + remark;
-		boolean result = SqliteHelper.SaveOpRecord(listPartsCodeSucess,
-				OpType.Use, info);
-
-		if (result) {
-
-			showToast(String.format("%s成功",
-					getResources().getString(R.string.pairsRun)));
-
-			// 清除记录
-			listPartsCodeSucess.clear();
-			listPartsEntity.clear();
-			listPartsData.clear();
-			mListAdapter.notifyDataSetChanged();
-
-		} else {
-			showToast(String.format("%s失败，请重新操作",
-					getResources().getString(R.string.pairsRun)));
-		}
-	}
-
 	@Override
-	public void messageNotificationReceivedHandle(BaseReader reader,
-			IMessageNotification msg) {
+	public void messageNotificationReceivedHandle(BaseReader reader, IMessageNotification msg) {
 		if (isConnected && isReading) {
 			try {
 				if (msg instanceof RXD_TagData) {
@@ -242,10 +152,17 @@ public class RunActivity extends BaseActivity {
 					String userData = Util.convertByteArrayToHexString(data
 							.getReceivedMessage().getUserData());
 
-					// 找到配件信息并且验证是否允许启用
-					if (UtilityHelper.CheckEpc(epc) == 0
-							&& UtilityHelper
-									.CheckUserData(userData, OpType.Use)) {
+					if (txtNam.getText().length() == 0) {
+						if (UtilityHelper.CheckEpc(epc) == 2) {		// 找到站点信息
+							stationCodeStr = UtilityHelper.GetCodeByEpc(epc);
+							if (stationCodeStr.length() > 0) {
+								Message dataArrivedMsg = new Message();
+								dataArrivedMsg.what = DATA_ARRIVED_STORAGE_LOCATION;
+								cardOperationHandler.sendMessage(dataArrivedMsg);
+							}
+						}
+					} else if (UtilityHelper.CheckEpc(epc) == 0		// 找到配件信息并且验证是否允许启用
+							&& UtilityHelper.CheckUserData(userData, OpType.Use)) {
 						if (IsValidEpc(epc, false)) {
 							String partsCode = UtilityHelper.GetCodeByEpc(epc);
 							if (partsCode.length() > 0) {
@@ -258,31 +175,13 @@ public class RunActivity extends BaseActivity {
 								}
 
 								if (!isExsit) {
-
-									PartsEntity entity = UtilityHelper
-											.GetPairEntityByCode(partsCode);
-									entity.Epc = epc;
-									listPartsEntity.add(entity);
-
-									Message dataArrivedMsg = new Message();
-									dataArrivedMsg.what = DATA_ARRIVED_PAIRS;
-									cardOperationHandler
-											.sendMessage(dataArrivedMsg);
+									String tid = Util.convertByteArrayToHexString(data.getReceivedMessage().getTID());
+									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(DATA_ARRIVED_PAIRS, 0, 0, new String[] {tid, epc, "0500", partsCode, userData.substring(0, 4)}));
 								}
 							}
 						}
 					}
 
-					// 找到站点信息
-					if (UtilityHelper.CheckEpc(epc) == 2) {
-						stationCodeStr = UtilityHelper.GetCodeByEpc(epc);
-						if (stationCodeStr.length() > 0) {
-
-							Message dataArrivedMsg = new Message();
-							dataArrivedMsg.what = DATA_ARRIVED_STORAGE_LOCATION;
-							cardOperationHandler.sendMessage(dataArrivedMsg);
-						}
-					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -299,19 +198,11 @@ public class RunActivity extends BaseActivity {
 				|| keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT || keyCode == KeyEvent.KEYCODE_SOFT_RIGHT)
 				&& event.getRepeatCount() <= 0 && isConnected) {
 
-			if (cbxComfirmRun.isChecked()) {
-				if (isReading == true) {
-					StopRead();
-				}
-				RunOP();
-			} else {
-				InvengoLog.i(TAG, "INFO.Start/Stop read tag.");
-				if (isReading == false) {
-					StartRead();
-				} else if (isReading == true) {
-					StopRead();
-				}
-
+			InvengoLog.i(TAG, "INFO.Start/Stop read tag.");
+			if (isReading == false) {
+				StartRead();
+			} else if (isReading == true) {
+				StopRead();
 			}
 			return true;
 		}
@@ -319,6 +210,10 @@ public class RunActivity extends BaseActivity {
 	}
 
 	private void StartRead() {
+		if (txtNam.getText().length() > 0) {
+			setRate(true);	// 最小功率
+		}
+
 		isReading = true;
 		listEPCEntity.clear();
 		ReadTag readTag = new ReadTag(ReadMemoryBank.EPC_TID_UserData_6C);
@@ -331,12 +226,27 @@ public class RunActivity extends BaseActivity {
 	}
 
 	private void StopRead() {
-		isReading = false;
-		boolean result = reader.send(new PowerOff());
 		Message powerOffMsg = new Message();
 		powerOffMsg.what = STOP_READ;
-		powerOffMsg.obj = result;
+		powerOffMsg.obj = setRate();	// 最大功率
 		cardOperationHandler.sendMessage(powerOffMsg);
+	}
+
+	// 写用户区
+	private void writeCard(String[] sa, int a1, int a2) {
+		if (setRate()) {	// 最大功率
+//			txtStatus.setText("信息写入中，请稍候 ...");
+			WrtUdRa r = new WrtUdRa(
+					reader,
+					sa,
+					cardOperationHandler,
+					a1,
+					a2
+			);
+			new Thread(r).start();
+		} else {
+			StartRead();
+		}
 	}
 
 	@SuppressLint("HandlerLeak")
@@ -364,32 +274,59 @@ public class RunActivity extends BaseActivity {
 				}
 				break;
 			case DATA_ARRIVED_PAIRS:// 接收配件数据
-				listPartsData.clear();
-				int no = 1;
-				for (PartsEntity partsEntity : listPartsEntity) {
+//				StopRead();
+//				sa = (String[]) msg.obj;
+//				SqliteHelper.addRecover(sa[3], sa[4]);	// 保存恢复记录
+				writeCard((String[]) msg.obj, 0, 0);
+				break;
+			case WRT_OK:	// 用户区写入成功
+				String[] sa = (String[]) msg.obj;
+				if (msg.arg1 == 1) {
+					// 数据删除成功
+					Map<String, Object> m = listPartsData.get(msg.arg2);
+					PartsEntity o = (PartsEntity) m.get("obj");
+					listPartsEntity.remove(o);
+					listPartsData.remove(msg.arg2);
+					mListAdapter.notifyDataSetChanged();
+					txtInfo.setText(String.format("数量:%s", listPartsData.size()));
+					StopRead();
+				} else {
+					PartsEntity pe = UtilityHelper.GetPairEntityByCode(sa[3]);
+					pe.Epc = sa[1];
+					listPartsEntity.add(pe);
+
 					Map<String, Object> item = new HashMap<String, Object>();
-					item.put("sqeNo", no);
-					item.put("partsCode", partsEntity.PartsCode);
-					item.put("partsName", partsEntity.PartsType + "  "
-							+ partsEntity.PartsName);
-					Drawable delDr = getResources().getDrawable(
-							R.drawable.delete);
-					item.put("delIcon", delDr);
+					item.put("sqeNo", listPartsData.size() + 1);
+					item.put("partsCode", pe.PartsCode);
+					item.put("partsName", pe.PartsType + "  " + pe.PartsName);
+					item.put("tid", sa[0]);
+					item.put("oud", sa[4]);		// 原用户区信息
+					item.put("obj", pe);
 					listPartsData.add(item);
-					no++;
+
+					mListAdapter.notifyDataSetChanged();
+					txtInfo.setText(String.format("数量:%s", listPartsData.size()));
+					sp.play(music1, 1, 1, 0, 0, 1);
+					StartRead();
 				}
-				mListAdapter.notifyDataSetChanged();
-				txtInfo.setText(String.format("数量:%s", listPartsData.size()));
-				sp.play(music1, 1, 1, 0, 0, 1);
+				break;
+			case WRT_UD_ERR:	// 用户区写入失败
+				if (msg.arg1 == 1) {
+					// 数据删除失败
+					showToast("删除失败");
+					StopRead();
+				} else {
+					StartRead();
+				}
 				break;
 			case DATA_ARRIVED_STORAGE_LOCATION:// 接收站点数据
-				StationEntity entity = SqliteHelper
-						.queryStationByCode(stationCodeStr);
+				StationEntity entity = SqliteHelper.queryStationByCode(stationCodeStr);
 				if (entity != null) {
-					edtStation.setText(entity.StationName);
+					txtNam.setText(entity.StationName);
 				} else {
-					edtStation.setText(stationCodeStr);
+					txtNam.setText(stationCodeStr);
 				}
+				btnClear.setVisibility(View.VISIBLE);
 				sp.play(music1, 1, 1, 0, 0, 1);
 				StopRead();
 				break;
@@ -404,8 +341,6 @@ public class RunActivity extends BaseActivity {
 							R.string.connecFail));
 					isConnected = false;
 				}
-				break;
-			default:
 				break;
 			}
 		};
@@ -436,35 +371,24 @@ public class RunActivity extends BaseActivity {
 		}
 
 		@Override
-		public View getView(final int position, View convertView,
-				ViewGroup parent) {
+		public View getView(final int position, View convertView, ViewGroup parent) {
 			if (convertView == null) {
 				convertView = LinearLayout.inflate(getBaseContext(),
-						R.layout.listview_parts_item, null);
+						R.layout.listview_parts_item2, null);
 			}
 
-			ImageView imgDel = (ImageView) convertView
-					.findViewById(R.id.delImage);
 			// 设置回调监听
-			imgDel.setOnClickListener(new OnClickListener() {
-
+			Button btnd = (Button) convertView.findViewById(R.id.btnDel);
+			btnd.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-
 					Map<String, Object> entity = listPartsData.get(position);
-					final String partsCodeSelected = entity.get("partsCode")
-							.toString();
-
-					for (PartsEntity partsEntiry : listPartsEntity) {
-						if (partsEntiry.PartsCode.equals(partsCodeSelected)) {
-							listPartsEntity.remove(partsEntiry);
-							break;
-						}
-					}
-
-					listPartsData.remove(position);
-					mListAdapter.notifyDataSetChanged();
-					txtInfo.setText(String.format("数量:%s", listPartsData.size()));
+					String[] sa = new String[] {
+							entity.get("tid").toString(),
+							"",
+							entity.get("oud").toString()
+					};
+					writeCard(sa, 1, position);
 				}
 
 			});

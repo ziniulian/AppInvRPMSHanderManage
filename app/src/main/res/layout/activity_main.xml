@@ -35,13 +35,10 @@
 
         <Button
             android:id="@+id/btnConfig"
-            android:layout_width="50dp"
-            android:layout_height="26dp"
-            android:layout_margin="10dp"
-            android:textColor="@color/white"
-            android:background="@color/chinacartred"
-            android:visibility="gone"
-            android:text="@string/menu_settings" >
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/set">
 
         </Button>
     </LinearLayout>

@@ -4,14 +4,13 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -56,6 +55,7 @@ public class SendCardActivity extends BaseActivity {
 	TextView txtInfo;
 	TextView txtRemark;
 	TextView txtRemarkV;
+	Button btnOk;
 
 	private String partsCode;
 	private String code;
@@ -94,8 +94,18 @@ public class SendCardActivity extends BaseActivity {
 		txtRemark = (TextView) findViewById(R.id.txtRemark);
 		txtRemarkV = (TextView) findViewById(R.id.txtRemarkV);
 
+		btnOk = (Button) findViewById(R.id.btnOK);
+		btnOk.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				Intent intent = new Intent(SendCardActivity.this,
+						QueryTagActivity.class);
+				startActivity(intent);
+				finish();
+			}
+		});
+
 		btnConfig = (Button) findViewById(R.id.btnConfig);
-//		btnConfig.setOnTouchListener(btnConfigTouchListener);
 		btnConfig.setOnClickListener(btnConfigClickListener);
 
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
@@ -359,33 +369,6 @@ public class SendCardActivity extends BaseActivity {
 		});
 	}
 
-	private OnTouchListener btnConfigTouchListener = new OnTouchListener() {
-		public boolean onTouch(View v, MotionEvent event) {
-			switch (event.getAction()) {
-
-			case MotionEvent.ACTION_DOWN: {
-				// 按住事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_MOVE: {
-				// 移动事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_UP: {
-				// 松开事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.yellow);
-				break;
-			}
-			default:
-
-				break;
-			}
-			return false;
-		}
-	};
-
 	private OnClickListener btnConfigClickListener = new OnClickListener() {
 		public void onClick(View v) {
 
@@ -554,6 +537,7 @@ public class SendCardActivity extends BaseActivity {
 	}
 
 	private void StartRead() {
+		btnOk.setVisibility(View.GONE);
 		if (!lockRd) {
 			StringBuilder sb = new StringBuilder();
 
@@ -770,6 +754,7 @@ public class SendCardActivity extends BaseActivity {
 				SqliteHelper.savOnePart(typ, partsCode, code, fc, myApp.getUserId());
 				lockRd = false;		// 释放锁
 				txtStatus.setText(getResources().getString(R.string.memo_WRT_OK));
+				btnOk.setVisibility(View.VISIBLE);
 				break;
 			case WrtRa.WRT_EPC_ERR:
 				lockRd = false;		// 释放锁

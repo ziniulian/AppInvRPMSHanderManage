@@ -1,25 +1,7 @@
 package com.invengo.rpms;
 
-import invengo.javaapi.core.BaseReader;
-import invengo.javaapi.core.IMessageNotification;
-import invengo.javaapi.handle.IMessageNotificationReceivedHandle;
-import invengo.javaapi.protocol.IRP1.PowerOff;
-import invengo.javaapi.protocol.IRP1.Reader;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.net.ConnectivityManager;
@@ -29,18 +11,29 @@ import android.os.Bundle;
 import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.invengo.rpms.R;
-import com.invengo.rpms.entity.*;
+import com.invengo.rpms.entity.EPCEntity;
+import com.invengo.rpms.entity.PartsEntity;
+import com.invengo.rpms.util.SqliteHelper;
 import com.invengo.rpms.util.UtilityHelper;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import invengo.javaapi.core.BaseReader;
+import invengo.javaapi.core.IMessageNotification;
+import invengo.javaapi.handle.IMessageNotificationReceivedHandle;
+import invengo.javaapi.protocol.IRP1.PowerOff;
+import invengo.javaapi.protocol.IRP1.Reader;
+import invengo.javaapi.protocol.IRP1.SysConfig_800;
 
 public class BaseActivity extends Activity implements
 		IMessageNotificationReceivedHandle {
@@ -66,7 +59,7 @@ public class BaseActivity extends Activity implements
 
 	protected static final int START_READ = 0;
 	protected static final int STOP_READ = 1;
-	protected static final int DATA_ARRIVED_PAIRS = 2;
+	public static final int DATA_ARRIVED_PAIRS = 2;
 	protected static final int CONNECT = 3;
 	protected static final int DATA_ARRIVED_STORAGE_LOCATION = 4;
 	protected static final int DATA_ARRIVED_STATION = 5;
@@ -240,6 +233,38 @@ public class BaseActivity extends Activity implements
 		}
 
 		return false;
+	}
+
+	// 设置功率
+	protected boolean setRate (boolean isMin) {
+		boolean r = false;
+		if (reader.send(new PowerOff())) {
+			isReading = false;
+			byte pm = 0x65;		// 功率的配置参数
+			byte len = 0x02;	// 字长
+			byte ant = 0x00;	// 天线端口号
+			String rat;			// 功率大小
+			if (isMin) {
+				rat = SqliteHelper.kvGet("minRate");
+				if (rat == null) {
+					rat = "5";
+					SqliteHelper.kvSet("minRate", rat);
+				}
+			} else {
+				rat = SqliteHelper.kvGet("maxRate");
+				if (rat == null) {
+					rat = "30";
+					SqliteHelper.kvSet("maxRate", rat);
+				}
+			}
+			byte[] d = {len, ant, Byte.parseByte(rat)};
+			SysConfig_800 sc = new SysConfig_800(pm, d);
+			r = reader.send(sc);
+		}
+		return r;
+	}
+	protected boolean setRate () {
+		return setRate(false);
 	}
 
 	@Deprecated

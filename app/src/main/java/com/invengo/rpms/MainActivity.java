@@ -11,10 +11,8 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
@@ -63,7 +61,6 @@ public class MainActivity extends BaseActivity {
 
 		SynchroDbRa.setToaCtx(this);
 		btnConfig = (Button) findViewById(R.id.btnConfig);
-		btnConfig.setOnTouchListener(btnConfigTouchListener);
 		btnConfig.setOnClickListener(btnConfigClickListener);
 
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
@@ -308,36 +305,8 @@ public class MainActivity extends BaseActivity {
 		}
 	}
 
-	private OnTouchListener btnConfigTouchListener = new OnTouchListener() {
-		public boolean onTouch(View v, MotionEvent event) {
-			switch (event.getAction()) {
-
-			case MotionEvent.ACTION_DOWN: {
-				// 按住事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_MOVE: {
-				// 移动事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_UP: {
-				// 松开事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.yellow);
-				break;
-			}
-			default:
-
-				break;
-			}
-			return false;
-		}
-	};
-
 	private OnClickListener btnConfigClickListener = new OnClickListener() {
 		public void onClick(View v) {
-
 			Intent intent = new Intent(MainActivity.this, SysSetActivity.class);
 			startActivity(intent);
 		}
