@@ -114,6 +114,24 @@
                 android:background="@drawable/ybtn"
                 android:layout_gravity="center"
                 android:text="发卡成功，可点此跳至查询页" />
+
+            <EditText
+                android:id="@+id/search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:maxLines="1"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:hint="请输入关键字进行搜索"/>
+
+            <ListView
+                android:id="@+id/searchResults"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_margin="10dp"/>
+
         </LinearLayout>
 
         <LinearLayout

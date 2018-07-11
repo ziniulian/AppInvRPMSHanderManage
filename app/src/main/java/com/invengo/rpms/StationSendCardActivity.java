@@ -11,7 +11,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +28,7 @@ import com.invengo.rpms.util.HelpClick;
 import com.invengo.rpms.util.SqliteHelper;
 import com.invengo.rpms.util.UtilityHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.invengo.rpms.BaseActivity.START_READ;
@@ -40,13 +43,17 @@ public class StationSendCardActivity extends Activity {
 	public static final int SSD_OLD = 1301;		// 旧标签
 	public static final int SSD_ERR = 1302;		// 写入失败
 	public static final int SSD_OK = 1303;		// 写入成功
+	public static final int SSD_FLUSH = 1304;		// 刷新搜索列表
 
 	private Context con = this;
 	private Rd rfd = new Rd();	// 读写器
 	private TextView txtStatus;	// 提示框
 	private LinearLayout dlog;	// 弹出框
-	private Button btno;			// 跳转按钮
+	private Button btno;		// 跳转按钮
+	private Spinner sts;		// 选择框
 	private List<THDSEntity> asts;	// 站点数据
+	private List<String> rsch = new ArrayList<String>();	// 搜索结果
+	private ArrayAdapter asch;		// 搜索结果匹配器
 	private String cod;		// 站点EPC
 	private int stu = 0;	// 状态
 	private String tid;
@@ -115,7 +122,7 @@ public class StationSendCardActivity extends Activity {
 		});
 
 		// 下拉框
-		Spinner sts = (Spinner) findViewById(R.id.sts);
+		sts = (Spinner) findViewById(R.id.sts);
 		asts = SqliteHelper.getAllStations();
 		ArrayAdapter<THDSEntity> adsts = new ArrayAdapter<THDSEntity>(this,android.R.layout.simple_spinner_item, asts);
 		adsts.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
@@ -129,6 +136,43 @@ public class StationSendCardActivity extends Activity {
 			@Override
 			public void onNothingSelected(AdapterView<?> adapterView) {}
 		});
+
+		// 搜索结果列表
+		ListView ls = (ListView) findViewById(R.id.searchResults);
+		asch = new ArrayAdapter<String>(con, android.R.layout.simple_list_item_1, rsch);
+		ls.setAdapter(asch);
+		ls.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+				String s = rsch.get(i);
+				int d = s.indexOf(".");
+				d = Integer.parseInt(s.substring(0, d));
+				sts.setSelection(d - 1);
+			}
+		});
+
+		// 搜索输入框
+		EditText search = (EditText) findViewById(R.id.search);
+		search.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+				if (i == KeyEvent.ACTION_DOWN) {
+					String d = textView.getText().toString();
+					String r;
+					rsch.clear();
+					if (d.length() > 0) {
+						for (i = 0; i < asts.size(); i ++) {
+							r = asts.get(i).THDSName;
+							if (r.contains(d)) {
+								rsch.add((i + 1) + ". " + r);
+							}
+						}
+					}
+					sendMsg(SSD_FLUSH);
+				}
+				return false;
+			}
+		});
 	}
 
 	// 初始化读写器
@@ -138,7 +182,9 @@ public class StationSendCardActivity extends Activity {
 			@Override
 			public void onReadTag(com.invengo.rfid.tag.Base bt, InfTagListener itl) {
 				String epc = bt.getEpcHexstr();
+//Log.i("------", epc);
 				switch (UtilityHelper.CheckEpc(epc)) {
+//					default:	// 所有标签
 					case -1:	// 新标签
 						tid = bt.getTidHexstr();
 						stu = 3;
@@ -240,6 +286,9 @@ public class StationSendCardActivity extends Activity {
 					close();
 					btno.setVisibility(View.VISIBLE);
 					Toast.makeText(con, "写入成功", Toast.LENGTH_SHORT).show();
+					break;
+				case SSD_FLUSH:
+					asch.notifyDataSetChanged();
 					break;
 			}
 		}

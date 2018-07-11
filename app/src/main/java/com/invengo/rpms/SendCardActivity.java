@@ -485,7 +485,7 @@ public class SendCardActivity extends BaseActivity {
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(READY_WRITE, 4, 0, new String[] {tid}));
 									break;
 								default:
-									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
+//									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
 									break;
 							}
 							break;
@@ -497,10 +497,11 @@ public class SendCardActivity extends BaseActivity {
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(READY_WRITE, 3, 1, new String[] {tid, epc, userData}));
 									break;
 								case -1:
+//								default:
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(READY_WRITE, 3, 0, new String[] {tid}));
 									break;
 								default:
-									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
+//									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(GET_PAIRS));
 									break;
 							}
 							break;

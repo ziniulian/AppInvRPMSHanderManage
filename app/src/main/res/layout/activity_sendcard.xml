@@ -133,22 +133,53 @@
                     android:layout_height="40dp" />
             </LinearLayout>
 
-            <EditText
-                android:id="@+id/txtSqe"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:inputType="number"
-                android:hint="请输入序列号"
-                android:background="@color/open"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <EditText
-                android:id="@+id/txtFd"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="序列号："/>
+
+                <EditText
+                    android:id="@+id/txtSqe"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="10dp"
+                    android:inputType="number"
+                    android:hint="请输入序列号"
+                    android:background="@color/open"/>
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:hint="请输入原厂编码"
-                android:background="@color/open"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="原厂编码："/>
+
+                <EditText
+                    android:id="@+id/txtFd"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:maxLines="1"
+                    android:inputType="text"
+                    android:imeOptions="actionDone"
+                    android:hint="请输入原厂编码"
+                    android:background="@color/open"/>
+
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"

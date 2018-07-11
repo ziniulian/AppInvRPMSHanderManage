@@ -44,6 +44,7 @@ public class WrtRa implements Runnable {
 	@Override
 	public void run() {
 		IMessage msg;
+//Log.i("-----", "---001---");
 		if (isNew) {
 			// 新标签写入EPC
 			msg = new WriteEpc(antenna, defaulPwd, epc, tid, MemoryBank.TIDMemory);
