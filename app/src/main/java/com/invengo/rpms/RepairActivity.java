@@ -250,7 +250,7 @@ public class RepairActivity extends BaseActivity {
 						getResources().getString(R.string.repaircheck)));
 				
 				//删除故障记录信息
-				SqliteHelper.DeteleSendRepair(listPartsCodeSucess);
+//				SqliteHelper.DeteleSendRepair(listPartsCodeSucess);        // TODO: 2018/7/12 如果此处删除故障记录，将导致返厂回来后的配件无法再次检修。所以暂不进行删除操作，待后续研究决定如何处理。
 				
 			} else {
 				showToast(String.format("%s失败，请重新操作",

@@ -56,6 +56,8 @@ public class SendCardActivity extends BaseActivity {
 	TextView txtRemarkV;
 	Button btnOk;
 
+	private StringBuilder pch = new StringBuilder();	// EPC头
+	private int pchb;	// EPC头状态
 	private String partsCode;
 	private String code;
 	private String typ;
@@ -150,6 +152,7 @@ public class SendCardActivity extends BaseActivity {
 			public void onItemSelected(AdapterView<?> parent, View view,int position, long id) {
 				String factorySelected = adapterPartsFactory.getItem(position).toString();
 				String factoryCodeSelected = factorySelected.split(" ")[0];
+				Object o;
 
 				listPartsSort.clear();
 				List<TbCodeEntity> listCodeSort = SqliteHelper
@@ -163,26 +166,44 @@ public class SendCardActivity extends BaseActivity {
 					}
 				}
 				adapterPartsSort.notifyDataSetChanged();
-				if (listPartsSort.size() > 0) {
-					sortCodeSelected = listPartsSort.get(0).toString()
-							.split(" ")[0];
+				try {
+					o = sprPartsSort.getSelectedItem();
+					if (o != null) {
+						sortCodeSelected = o.toString().split(" ")[0];
+					}
+				} catch (Exception e) {}
+
+				listPartsHost.clear();
+				List<TbCodeEntity> listCodeHost = SqliteHelper
+						.queryDbCodeByType("08");
+				for (TbCodeEntity entityName : listCodeHost) {
+					if (UtilityHelper.IsExsitCodeBeyond(
+							entityName.dbCodeBeyond, sortCodeSelected)) {
+						listPartsHost.add(entityName.dbCode + " "
+								+ entityName.dbName);
+					}
 				}
+				adapterPartsHost.notifyDataSetChanged();
+				try {
+					o = sprPartsHost.getSelectedItem();
+					if (o != null) {
+						hostCodeSelected = o.toString().split(" ")[0];
+					}
+				} catch (Exception e) {}
 
 				listPartsName.clear();
 				List<TbCodeEntity> listCodeName = SqliteHelper
 						.queryDbCodeByType("09");
 				for (TbCodeEntity entityName : listCodeName) {
-
-					if (entityName.dbCodeBeyond.indexOf(hostCodeSelected) == 0) {
-						String s = sortCodeSelected;
-						int d = entityName.dbCodeBeyond.indexOf(s);
-						if (d > 0) {
-							listPartsName.add(entityName.dbCode + " "
-									+ entityName.dbName);
-						}
+					if (UtilityHelper.IsExsitCodeBeyond(
+							entityName.dbCodeBeyond, sortCodeSelected,
+							hostCodeSelected)) {
+						listPartsName.add(entityName.dbCode + " "
+								+ entityName.dbName);
 					}
 				}
 				adapterPartsName.notifyDataSetChanged();
+				getPch();
 			}
 
 			// 没有选中时的处理
@@ -222,6 +243,12 @@ public class SendCardActivity extends BaseActivity {
 					}
 				}
 				adapterPartsHost.notifyDataSetChanged();
+				try {
+					Object o = sprPartsHost.getSelectedItem();
+					if (o != null) {
+						hostCodeSelected = o.toString().split(" ")[0];
+					}
+				} catch (Exception e) {}
 
 				listPartsName.clear();
 				List<TbCodeEntity> listCodeName = SqliteHelper
@@ -235,6 +262,7 @@ public class SendCardActivity extends BaseActivity {
 					}
 				}
 				adapterPartsName.notifyDataSetChanged();
+				getPch();
 			}
 
 			// 没有选中时的处理
@@ -272,6 +300,7 @@ public class SendCardActivity extends BaseActivity {
 					}
 				}
 				adapterPartsName.notifyDataSetChanged();
+				getPch();
 			}
 
 			// 没有选中时的处理
@@ -298,6 +327,15 @@ public class SendCardActivity extends BaseActivity {
 		adapterPartsName = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, listPartsName);
 		adapterPartsName.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
 		sprPartsName.setAdapter(adapterPartsName);
+		sprPartsName.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+				getPch();
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> adapterView) {}
+		});
 
 		// 单位选项改为下拉列表，从数据库中读取所有单位选项 单位类型编号：01
 		sprDw = (Spinner) findViewById(R.id.sprDw);
@@ -379,6 +417,60 @@ public class SendCardActivity extends BaseActivity {
 			builder.show();
 		}
 	};
+
+	// 更新编码，设置序列号
+	private void getPch () {
+		// 组织epc头部
+		pch.setLength(0);	// 清空
+		pchb = 0;
+		Object o;
+		try {
+			o = sprPartsT5.getSelectedItem();
+			if (o == null) {
+				pchb = 1;
+			} else {
+				pch.append(o.toString().substring(0, 2));
+				o = sprPartsFactory.getSelectedItem();
+				if (o == null) {
+					pchb = 2;
+				} else {
+					pch.append(o.toString().substring(0, 2));
+					o = sprPartsSort.getSelectedItem();
+					if (o == null) {
+						pchb = 3;
+					} else {
+						pch.append(o.toString().substring(0, 1));
+						o = sprPartsHost.getSelectedItem();
+						if (o == null) {
+							pchb = 4;
+						} else {
+							pch.append(o.toString().substring(0, 2));
+							o = sprPartsName.getSelectedItem();
+							if (o == null) {
+								pchb = 5;
+							} else {
+								pch.append(o.toString().substring(0, 3));
+							}
+						}
+					}
+				}
+			}
+
+			if (pchb == 0) {
+				int sn = SqliteHelper.queryPartsNumByType(pch.toString());
+//Log.i("---", pchb + " , " + pch.toString() + "-" + sn);
+				if (sn < 20001) {
+					sn = 20001;
+				} else {
+					sn ++;
+				}
+				String s = "" + sn;
+				txtSqe.setText(s);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	// 写标签
 	private void writeCard(boolean isNew) {
@@ -537,87 +629,55 @@ public class SendCardActivity extends BaseActivity {
 
 	private void StartRead() {
 		btnOk.setVisibility(View.GONE);
-		if (!lockRd) {
-			StringBuilder sb = new StringBuilder();
-
-			// 组织epc头部
-			Object o;
-			o = sprPartsT5.getSelectedItem();
-			if (o == null) {
-				showToast("请选择编码");
-				return;
-			} else {
-				sb.append(o.toString().substring(0, 2));
-			}
-
-			o = sprPartsFactory.getSelectedItem();
-			if (o == null) {
-				showToast("请选择厂家");
-				return;
-			} else {
-				sb.append(o.toString().substring(0, 2));
-			}
-
-			o = sprPartsSort.getSelectedItem();
-			if (o == null) {
-				showToast("请选择产品型号");
-				return;
-			} else {
-				sb.append(o.toString().substring(0, 1));
-			}
-
-			o = sprPartsHost.getSelectedItem();
-			if (o == null) {
-				showToast("请选择部件类别");
-				return;
-			} else {
-				sb.append(o.toString().substring(0, 2));
-			}
-
-			o = sprPartsName.getSelectedItem();
-			if (o == null) {
-				showToast("请选择部件名称");
-				return;
-			} else {
-				sb.append(o.toString().substring(0, 3));
-			}
-//Log.i("---", sb.toString());
-
-			// 检查序列号格式
-			String sn = txtSqe.getText().toString();
-			if (sn.length() == 5 && UtilityHelper.isNum(sn)) {
-				// 检查数据库中有无相同序列号
-				sb.append(sn);
-				if (SqliteHelper.queryOnePart(sb.toString()) != null) {
-					showToast("序列号重名");
+		if (pchb == 0) {
+			if (!lockRd) {
+				// 检查序列号格式
+				String sn = txtSqe.getText().toString();
+				if (sn.length() == 5 && UtilityHelper.isNum(sn)) {
+					// 检查数据库中有无相同序列号
+					sn = pch.toString() + sn;
+					if (SqliteHelper.queryOnePart(sn) != null) {
+						showToast("序列号重名");
+						return;
+					} else {
+						partsCode = sn;
+					}
+				} else {
+					showToast("序列号必须为5位数字");
 					return;
 				}
-			} else {
-				showToast("序列号必须为5位数字");
-				return;
+
+				fc = txtFd.getText().toString();	// 原厂编码
+				setRate(true);	// 最小功率
+
+				isReading = true;
+				listEPCEntity.clear();
+				ReadTag readTag = new ReadTag(ReadMemoryBank.EPC_TID_UserData_6C);
+				boolean result = reader.send(readTag);
+
+				Message readMessage = new Message();
+				readMessage.what = START_READ;
+				readMessage.obj = result;
+				cardOperationHandler.sendMessage(readMessage);
 			}
-
-			// 检查原厂编码
-			sn = txtFd.getText().toString();
-			if (sn.length() == 0) {
-				showToast("请输入原厂编码");
-				return;
-			} else {
-				fc = sn;
+		} else {
+			switch (pchb) {
+				case 1:
+					showToast("请选择编码");
+					break;
+				case 2:
+					showToast("请选择厂家");
+					break;
+				case 3:
+					showToast("请选择产品型号");
+					break;
+				case 4:
+					showToast("请选择部件类别");
+					break;
+				case 5:
+					showToast("请选择部件名称");
+					break;
 			}
-
-			setRate(true);	// 最小功率
-
-			partsCode = sb.toString();
-			isReading = true;
-			listEPCEntity.clear();
-			ReadTag readTag = new ReadTag(ReadMemoryBank.EPC_TID_UserData_6C);
-			boolean result = reader.send(readTag);
-
-			Message readMessage = new Message();
-			readMessage.what = START_READ;
-			readMessage.obj = result;
-			cardOperationHandler.sendMessage(readMessage);
 		}
 	}
 

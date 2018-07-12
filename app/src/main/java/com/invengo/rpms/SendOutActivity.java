@@ -336,18 +336,22 @@ public class SendOutActivity extends BaseActivity {
 				|| keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT || keyCode == KeyEvent.KEYCODE_SOFT_RIGHT)
 				&& event.getRepeatCount() <= 0 && isConnected) {
 
-			if (!cbxComfirmSendOut.isChecked()) {
-				InvengoLog.i(TAG, "INFO.Start/Stop read tag.");
-				if (isReading == false) {
-					StartRead();
-				} else if (isReading == true) {
-					StopRead();
-				}
+			if (sprTakeUser.getSelectedItem() == null) {	// 保证领料人不为空
+				showToast("领料人不能为空！");
 			} else {
-				if (isReading == true) {
-					StopRead();
+				if (!cbxComfirmSendOut.isChecked()) {
+					InvengoLog.i(TAG, "INFO.Start/Stop read tag.");
+					if (isReading == false) {
+						StartRead();
+					} else if (isReading == true) {
+						StopRead();
+					}
+				} else {
+					if (isReading == true) {
+						StopRead();
+					}
+					SendOutOP();
 				}
-				SendOutOP();
 			}
 			return true;
 		}

@@ -1024,7 +1024,6 @@ public class SqliteHelper {
 			e.printStackTrace();
 		}
 
-		r ++;
 		return r;
 	}
 
