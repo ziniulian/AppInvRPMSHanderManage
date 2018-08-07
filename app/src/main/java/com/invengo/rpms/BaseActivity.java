@@ -260,6 +260,7 @@ public class BaseActivity extends Activity implements
 			byte[] d = {len, ant, Byte.parseByte(rat)};
 			SysConfig_800 sc = new SysConfig_800(pm, d);
 			r = reader.send(sc);
+//Log.i("----", "..." + r);
 		}
 		return r;
 	}
