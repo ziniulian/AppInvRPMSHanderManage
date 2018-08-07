@@ -20,7 +20,7 @@
     <string name="ReadTip">提示：扣动扳机读取</string>
     <string name="connecting">连接中&#8230;</string>
     <string name="readerStatus">状态:</string>
-    <string name="softVesion">V1.0.21</string>
+    <string name="softVesion">V1.0.22</string>
     <string name="dataVesion">V1.0.0.3</string>
     <string name="sendFail">发送读取指令失败</string>
     <string name="stopFail">停止读取失败</string>
@@ -99,7 +99,22 @@
     <string name="pairsBackFactoryTipInfo">1.对准待返厂配件扣动扳机读取\n2.确认后勾选上确认框，然后对准待返厂配件扣动扳机完成返厂记录\n注意：如果读到非本次返厂配件，点击该配件信息后面删除图标清除</string>
     <string name="pairsScrapTipInfo">1.对准待报废配件扣动扳机读取\n2.确认后勾选上确认框，然后对准待报废配件扣动扳机完成报废\n注意：如果读到非本次报废配件，点击该配件信息后面删除图标清除</string>
     <string name="pairsBackTipInfo">1.对准待恢复配件扣动扳机读取\n2.确认后勾选上确认框，然后对准待恢复配件扣动扳机完成恢复\n注意：如果读到非本次恢复配件，点击该配件信息后面删除图标清除</string>
-    
+    <string name="pairsSendCardTipInfo">
+        1.选择状态\n
+        2.选择配件类型\n
+        3.输入序列号\n
+        4.对准欲写入的标签扣动扳机
+    </string>
+    <string name="pairsStationSendCardTipInfo">
+        1.选择要写入的站点\n
+        2.对准欲写入的站点标签扣动扳机
+    </string>
+    <string name="pairsFindTipInfo">
+        1.对准站点标签扣动扳机\n
+        2.再次扣动扳机扫描该站点已启用的所有配件\n
+        3.扫描到的配件都将显示OK字样
+    </string>
+
     <string name="checkTip">点击盘点单列表进入盘点操作</string>
     <string name="TakeUser">领料人</string>
     <string name="TakeDept">领料单位</string>

@@ -3,6 +3,7 @@ package com.invengo.rpms;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import com.invengo.rpms.entity.PartsEntity;
 import com.invengo.rpms.entity.StationEntity;
 import com.invengo.rpms.entity.TbCodeEntity;
 import com.invengo.rpms.util.Btn001;
+import com.invengo.rpms.util.HelpClick;
 import com.invengo.rpms.util.SqliteHelper;
 import com.invengo.rpms.util.UtilityHelper;
 import com.invengo.rpms.util.WrtRa;
@@ -56,6 +58,7 @@ public class SendCardActivity extends BaseActivity {
 	TextView txtRemarkV;
 	Button btnOk;
 
+	private Context con = this;
 	private StringBuilder pch = new StringBuilder();	// EPC头
 	private int pchb;	// EPC头状态
 	private String partsCode;
@@ -107,7 +110,7 @@ public class SendCardActivity extends BaseActivity {
 		});
 
 		btnConfig = (Button) findViewById(R.id.btnConfig);
-		btnConfig.setOnClickListener(btnConfigClickListener);
+		btnConfig.setOnClickListener(new HelpClick(con, getResources().getString(R.string.pairsSendCardTipInfo)));
 
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
 		btnBack.setOnTouchListener(new Btn001());
@@ -404,19 +407,6 @@ public class SendCardActivity extends BaseActivity {
 			}
 		});
 	}
-
-	private OnClickListener btnConfigClickListener = new OnClickListener() {
-		public void onClick(View v) {
-
-			AlertDialog.Builder builder = new Builder(SendCardActivity.this,
-					R.style.AppTheme);
-			builder.setTitle("温馨提示");
-			builder.setMessage(getResources().getString(
-					R.string.pairsStockOutTipInfo));
-			builder.setPositiveButton("关闭", null);
-			builder.show();
-		}
-	};
 
 	// 更新编码，设置序列号
 	private void getPch () {

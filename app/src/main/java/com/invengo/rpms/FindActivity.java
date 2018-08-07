@@ -67,8 +67,7 @@ public class FindActivity extends Activity {
 
 		// 帮助按钮
 		btn = (Button) findViewById(R.id.btnConfig);
-//		btn.setOnTouchListener(new Btn001());
-		btn.setOnClickListener(new HelpClick(con, getResources().getString(R.string.pairsStockOutTipInfo)));
+		btn.setOnClickListener(new HelpClick(con, getResources().getString(R.string.pairsFindTipInfo)));
 
 		// 退出按钮
 		btn = (Button) findViewById(R.id.btnBack);

@@ -90,7 +90,7 @@ public class StationSendCardActivity extends Activity {
 
 		// 帮助按钮
 		btn = (Button) findViewById(R.id.btnHelp);
-		btn.setOnClickListener(new HelpClick(con, "1. 选择要写入的站点。\n2. 对准欲写入的站点标签扣动扳机。"));
+		btn.setOnClickListener(new HelpClick(con, getResources().getString(R.string.pairsStationSendCardTipInfo)));
 
 		// 退出按钮
 		btn = (Button) findViewById(R.id.btnBack);
