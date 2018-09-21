@@ -2,6 +2,8 @@ package com.invengo.rpms;
 
 import android.app.Activity;
 import android.content.Context;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,6 +26,7 @@ import com.invengo.rpms.util.UtilityHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,11 +54,18 @@ public class FindActivity extends Activity {
 	private Map<String, HashMap<String, String>> dat = null;	// 数据
 	private List<HashMap<String, String>> adpdat = new ArrayList<HashMap<String, String>>();	// 适配器数据
 	private SimpleAdapter adp;
+	private SoundPool sp;
+	private int music1;
+	private int music2;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_find);
+
+		sp = new SoundPool(3, AudioManager.STREAM_SYSTEM, 5);// 第一个参数为同时播放数据流的最大个数，第二数据流类型，第三为声音质量
+		music1 = sp.load(this, R.raw.click, 2); // 把你的声音素材放到res/raw里，第2个参数即为资源文件，第3个为音乐的优先级
+		music2 = sp.load(this, R.raw.right, 2); // 把你的声音素材放到res/raw里，第2个参数即为资源文件，第3个为音乐的优先级
 
 		initView();
 		initRd();
@@ -112,9 +122,10 @@ public class FindActivity extends Activity {
 						HashMap<String, String> m = dat.get(s);
 						if (m.get("ok").length() == 0) {
 							num ++;
-							m.put("ok", "OK");
+							m.put("ok", "√");
 //Log.i("--OK--", s);
 							sendMsg(FIND_FLUSH);
+							sp.play(music2, 1, 1, 0, 0, 1);
 						}
 					}
 				}
@@ -130,20 +141,90 @@ public class FindActivity extends Activity {
 //Log.i("--c--", e.name());
 				if (e == EmCb.Stopped && cod != null && dat == null) {
 					dat = SqliteHelper.queryPartsInStation(cod);	// 查询数据库
-					HashMap<String, String> m;
-					for (String s: dat.keySet()) {
-						PartsEntity entity = UtilityHelper.GetPairEntityByCode(s);
-						m = dat.get(s);
-						m.put("ok", "");
-						m.put("txt", String.format(
-								"厂家：%s\n型号：%s\n类别：%s\n名称：%s\n序列号：%s",
-								entity.FactoryName,
-								entity.PartsType,
-								entity.BoxType,
-								entity.PartsName,
-								entity.SeqNo
-						));
-						adpdat.add(m);
+					if (!dat.isEmpty()) {
+						PartsEntity pe;
+						Map<String, Map<String, List<PartsEntity>>> ps = new LinkedHashMap<String, Map<String, List<PartsEntity>>>();
+						Map<String, List<PartsEntity>> ms;
+						List<PartsEntity> ls;
+						String bc, pc;
+
+						// 顺序列表
+						ms = new LinkedHashMap<String, List<PartsEntity>>();
+						ps.put("ZJ", ms);
+						ms.put("IOK", new ArrayList<PartsEntity>());
+						ms.put("ADK", new ArrayList<PartsEntity>());
+						ms.put("MOX", new ArrayList<PartsEntity>());
+						ms = new LinkedHashMap<String, List<PartsEntity>>();
+						ps.put("KZ", ms);
+						ms.put("CTB", new ArrayList<PartsEntity>());
+						ms.put("WTB", new ArrayList<PartsEntity>());
+						ms.put("WZB", new ArrayList<PartsEntity>());
+						ms.put("NZB", new ArrayList<PartsEntity>());
+						ms.put("LKB", new ArrayList<PartsEntity>());
+						ms.put("GKB", new ArrayList<PartsEntity>());
+						ms.put("TZJ", new ArrayList<PartsEntity>());
+						ms.put("DTB", new ArrayList<PartsEntity>());
+						ms = new LinkedHashMap<String, List<PartsEntity>>();
+						ps.put("DY", ms);
+						ms.put("XYB", new ArrayList<PartsEntity>());
+						ms.put("TYB", new ArrayList<PartsEntity>());
+						ms.put("LYB", new ArrayList<PartsEntity>());
+						ms.put("GYB", new ArrayList<PartsEntity>());
+						ms = new LinkedHashMap<String, List<PartsEntity>>();
+						ps.put("YC", ms);
+						ms.put("JKB", new ArrayList<PartsEntity>());
+						ms.put("DYB", new ArrayList<PartsEntity>());
+						ms = new LinkedHashMap<String, List<PartsEntity>>();
+						ps.put("TT", ms);
+						ms.put("GZT", new ArrayList<PartsEntity>());
+						ms.put("RMT", new ArrayList<PartsEntity>());
+
+						for (String s: dat.keySet()) {
+							pe = UtilityHelper.GetPairEntityByCode(s);
+							bc = s.substring(5, 7);
+							pc = s.substring(7, 10);
+							if (ps.containsKey(bc)) {
+								ms = ps.get(bc);
+							} else {
+								ms = new LinkedHashMap<String, List<PartsEntity>>();
+								ps.put(bc, ms);
+							}
+							if (ms.containsKey(pc)) {
+								ls = ms.get(pc);
+							} else {
+								ls = new ArrayList<PartsEntity>();
+								ms.put(pc, ls);
+							}
+							ls.add(pe);
+						}
+
+						HashMap<String, String> m;
+						boolean b;
+						for (Map.Entry<String, Map<String, List<PartsEntity>>> eps : ps.entrySet()) {
+							b = true;
+							for (Map.Entry<String, List<PartsEntity>> ems : eps.getValue().entrySet()) {
+								ls = ems.getValue();
+								for (int i = 0; i < ls.size(); i ++) {
+									pe = ls.get(i);
+									if (b) {
+										m = new HashMap<String, String>();
+										m.put("ok", "");
+										m.put("txt", "--- " + pe.BoxType + " ---");
+										adpdat.add(m);
+										b = false;
+									}
+									m = dat.get(pe.PartsCode);
+									m.put("ok", "");
+									m.put("txt", String.format(
+											"名称：%s\n" + "序列号：%s\n型号：%s",
+											pe.PartsName,
+											pe.SeqNo,
+											pe.PartsType
+									));
+									adpdat.add(m);
+								}
+							}
+						}
 					}
 					sendMsg(FIND_SNAM);
 					sendMsg(FIND_FLUSH);
@@ -210,6 +291,7 @@ public class FindActivity extends Activity {
 						snamTv.setText(cod);
 					}
 					totalTv.setText(String.valueOf(dat.size()));
+					sp.play(music1, 1, 1, 0, 0, 1);
 //Log.i("-------", "999");
 					break;
 			}

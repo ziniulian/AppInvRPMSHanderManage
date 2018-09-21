@@ -114,6 +114,12 @@
         2.再次扣动扳机扫描该站点已启用的所有配件\n
         3.扫描到的配件都将显示OK字样
     </string>
+    <string name="pairsMultiQueryTipInfo">
+        1.扣动扳机扫描标签\n
+        2.所有扫描到的信息都会显示在屏幕上\n
+        3.点击列表项可查看详情\n
+        4.点击清空按钮可清除屏幕信息
+    </string>
 
     <string name="checkTip">点击盘点单列表进入盘点操作</string>
     <string name="TakeUser">领料人</string>

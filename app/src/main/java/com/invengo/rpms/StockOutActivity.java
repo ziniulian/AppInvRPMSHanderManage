@@ -3,41 +3,31 @@ package com.invengo.rpms;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
-import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.os.SystemClock;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.invengo.lib.diagnostics.InvengoLog;
 import com.invengo.rpms.entity.OpType;
 import com.invengo.rpms.entity.PartsEntity;
 import com.invengo.rpms.entity.PartsStorageLocationEntity;
 import com.invengo.rpms.entity.TbCodeEntity;
 import com.invengo.rpms.util.Btn001;
-import com.invengo.rpms.util.ReaderMessageHelper;
 import com.invengo.rpms.util.SqliteHelper;
 import com.invengo.rpms.util.UtilityHelper;
+import com.invengo.rpms.util.WrtUdRa;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,11 +38,12 @@ import java.util.Map;
 import invengo.javaapi.core.BaseReader;
 import invengo.javaapi.core.IMessageNotification;
 import invengo.javaapi.core.Util;
-import invengo.javaapi.protocol.IRP1.PowerOff;
 import invengo.javaapi.protocol.IRP1.RXD_TagData;
 import invengo.javaapi.protocol.IRP1.ReadTag;
 import invengo.javaapi.protocol.IRP1.ReadTag.ReadMemoryBank;
-import invengo.javaapi.protocol.IRP1.WriteUserData_6C;
+
+import static com.invengo.rpms.util.WrtRa.WRT_OK;
+import static com.invengo.rpms.util.WrtRa.WRT_UD_ERR;
 
 public class StockOutActivity extends BaseActivity {
 
@@ -65,10 +56,15 @@ public class StockOutActivity extends BaseActivity {
 	EditText edtNum;
 	Button btnQuery;
 	Button btnConfig;
-	TextView txtInfo;
+	Button btnOk;
+	TextView outNumV;
+	int otn = 0;
+	int sid = 0;
+	String user;
+	boolean isOut = false;
 
 	private ListView mEpcListView;
-	private PartsAdapter mListAdapter;
+	private SimpleAdapter mListAdapter;
 	private List<Map<String, Object>> listPartsData = new ArrayList<Map<String, Object>>();
 	private PartsEntity PartsEntityCur;
 	private List<PartsStorageLocationEntity> listInfoAll=new ArrayList<PartsStorageLocationEntity>();
@@ -91,22 +87,41 @@ public class StockOutActivity extends BaseActivity {
 		reader.onMessageNotificationReceived.clear();
 		reader.onMessageNotificationReceived.add(StockOutActivity.this);
 
+		user = myApp.getUserId();
+
 		txtStatus = (TextView) findViewById(R.id.txtStatus);
-		txtInfo = (TextView) findViewById(R.id.txtInfo);
+		outNumV = (TextView) findViewById(R.id.outNum);
 
 		btnQuery = (Button) findViewById(R.id.btnQuery);
-		btnQuery.setOnTouchListener(btnQueryTouchListener);
 		btnQuery.setOnClickListener(btnQueryClickListener);
 
 		btnConfig = (Button) findViewById(R.id.btnConfig);
-//		btnConfig.setOnTouchListener(btnConfigTouchListener);
 		btnConfig.setOnClickListener(btnConfigClickListener);
+
+		btnOk = (Button) findViewById(R.id.btnOK);
+		btnOk.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				if (setRate()) {	// 最大功率
+					sid = listPartsData.size() - 1;
+					if (sid >= 0) {
+						isReading = true;
+						txtStatus.setText("正在出库，请稍候 ...");
+						isOut = false;
+						sop();
+					} else {
+						sendMsg(WRT_UD_ERR, null);
+					}
+				} else {
+					sendMsg(WRT_UD_ERR, null);
+				}
+			}
+		});
 
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
 		btnBack.setOnTouchListener(new Btn001());
 		btnBack.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				boolean result=saveResult();
 				if (isReading) {
 					showToast("请先停止读取");
 				} else {
@@ -150,8 +165,7 @@ public class StockOutActivity extends BaseActivity {
 			public void onItemSelected(AdapterView<?> parent, View view,
 					int position, long id) {
 
-				String factorySelected = adapterPartsFactory.getItem(position)
-						.toString();
+				String factorySelected = adapterPartsFactory.getItem(position).toString();
 				String factoryCodeSelected = factorySelected.split(" ")[0];
 
 				listPartsSort.clear();
@@ -216,8 +230,7 @@ public class StockOutActivity extends BaseActivity {
 			public void onItemSelected(AdapterView<?> parent, View view,
 					int position, long id) {
 
-				String sortSelected = adapterPartsSort.getItem(position)
-						.toString();
+				String sortSelected = adapterPartsSort.getItem(position).toString();
 				sortCodeSelected = sortSelected.split(" ")[0];
 
 				listPartsHost.clear();
@@ -270,8 +283,7 @@ public class StockOutActivity extends BaseActivity {
 			public void onItemSelected(AdapterView<?> parent, View view,
 					int position, long id) {
 
-				String hostSelected = adapterPartsHost.getItem(position)
-						.toString();
+				String hostSelected = adapterPartsHost.getItem(position).toString();
 				hostCodeSelected = hostSelected.split(" ")[0];
 
 				listPartsName.clear();
@@ -317,18 +329,24 @@ public class StockOutActivity extends BaseActivity {
 
 		mEpcListView = (ListView) this.findViewById(R.id.lstPartsStockOutView);
 		// 创建SimpleAdapter适配器将数据绑定到item显示控件上
-		mListAdapter = new PartsAdapter(this, listPartsData,
-				R.layout.listview_parts_item, new String[] { "sqeNo",
-						"partsCode", "partsInfo", "delIcon" }, new int[] {
-						R.id.sqeNo, R.id.partsCode, R.id.partsInfo,
-						R.id.delImage });
-		mListAdapter.setViewBinder(new ViewBinder() {
+		mListAdapter = new SimpleAdapter(this, listPartsData,
+				R.layout.listview_out_item,
+				new String[] { "sqeNo", "partsCode", "partsInfo", "inTim", "tim", "self" },
+				new int[] { R.id.sqeNo, R.id.partsCode, R.id.partsInfo, R.id.inTim, R.id.tim, R.id.sec });
+		mListAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
 			@Override
-			public boolean setViewValue(View view, Object data,
-					String textRepresentation) {
-				if (view instanceof ImageView && data instanceof Drawable) {
-					ImageView iv = (ImageView) view;
-					iv.setImageDrawable((Drawable) data);
+			public boolean setViewValue(View view, Object data, String textRepresentation) {
+				if (view instanceof CheckBox && data instanceof CsdListener) {
+					CheckBox v = (CheckBox) view;
+					CsdListener cl = (CsdListener) data;
+					Map<String, Object> mo = cl.getMo();
+
+					if(!v.isEnabled() && (((Integer) mo.get("tim")) > 0)) {
+						v.setEnabled(true);
+					}
+
+					v.setOnCheckedChangeListener(cl);
+					v.setChecked((Boolean)mo.get("sec"));
 					return true;
 				}
 				return false;
@@ -339,70 +357,14 @@ public class StockOutActivity extends BaseActivity {
 		mEpcListView.setAdapter(mListAdapter);
 	}
 
-	private OnTouchListener btnConfigTouchListener = new OnTouchListener() {
-		public boolean onTouch(View v, MotionEvent event) {
-			switch (event.getAction()) {
-
-			case MotionEvent.ACTION_DOWN: {
-				// 按住事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_MOVE: {
-				// 移动事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_UP: {
-				// 松开事件发生后执行代码的区域
-				btnConfig.setBackgroundResource(R.color.yellow);
-				break;
-			}
-			default:
-
-				break;
-			}
-			return false;
-		}
-	};
-
 	private OnClickListener btnConfigClickListener = new OnClickListener() {
 		public void onClick(View v) {
-
-			AlertDialog.Builder builder = new Builder(StockOutActivity.this,
-					R.style.AppTheme);
+			AlertDialog.Builder builder = new Builder(StockOutActivity.this, R.style.AppTheme);
 			builder.setTitle("温馨提示");
 			builder.setMessage(getResources().getString(
 					R.string.pairsStockOutTipInfo));
 			builder.setPositiveButton("关闭", null);
 			builder.show();
-		}
-	};
-
-	private OnTouchListener btnQueryTouchListener = new OnTouchListener() {
-		public boolean onTouch(View v, MotionEvent event) {
-			switch (event.getAction()) {
-
-			case MotionEvent.ACTION_DOWN: {
-				// 按住事件发生后执行代码的区域
-				btnQuery.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_MOVE: {
-				// 移动事件发生后执行代码的区域
-				btnQuery.setBackgroundResource(R.color.lightwhite);
-				break;
-			}
-			case MotionEvent.ACTION_UP: {
-				// 松开事件发生后执行代码的区域
-				btnQuery.setBackgroundResource(R.color.yellow);
-				break;
-			}
-			default:
-
-				break;
-			}
-			return false;
 		}
 	};
 
@@ -454,97 +416,34 @@ public class StockOutActivity extends BaseActivity {
 			String key = partsT5Str + partsFactoryStr + partsSortStr
 					+ partsHostStr + partsNameStr;
 			List<PartsStorageLocationEntity> listInfo = SqliteHelper.queryPartsStorageLocation(key, num);
+
 			if (listInfo.size() > 0) {
-				listPartsEntity.clear();
 				int no = listPartsData.size() + 1;
 				for (PartsStorageLocationEntity partsEntity : listInfo) {
-
-					boolean isExsit = false;
-					for (Map<String, Object> item : listPartsData) {
-						if (item.get("partsCode").equals(partsEntity.PartsCode)) {
-							isExsit = true;
-							break;
-						}
-					}
-					if (!isExsit) {
-						listInfoAll.add(partsEntity);
+					Map<String, Object> mo = getMo(partsEntity.PartsCode);
+					if (mo == null) {
 						Map<String, Object> item = new HashMap<String, Object>();
 						item.put("sqeNo", no);
 						item.put("partsCode", partsEntity.PartsCode);
-						item.put("partsInfo", String.format("库位:%s    入库：%s",
-								partsEntity.StorageLocationCode,
-								f.format(partsEntity.StockinTime)));
-						 Drawable delDr = getResources().getDrawable(
-						 R.drawable.delete);
-						 item.put("delIcon", delDr);
-						item.put("isfocus", false);
+						item.put("partsInfo", partsEntity.StorageLocationCode);
+						item.put("inTim", f.format(partsEntity.StockinTime));
+						item.put("tim", 0);
+						item.put("sec", false);
+						item.put("self", new CsdListener(item));
 						listPartsData.add(item);
 						no++;
+					} else {
+						mo.put("tim", 0);
 					}
 				}
-				mListAdapter.notifyDataSetChanged();
 			} else {
-
 				showToast(String.format("没有满足条件待%s%s", getResources()
 						.getString(R.string.stockOut), getResources()
 						.getString(R.string.parts)));
 			}
+			mListAdapter.notifyDataSetChanged();
 		}
 	};
-
-	private boolean StockOutOP(PartsEntity partsEntiry) {
-
-		// 写入标签用户数据
-		WriteUserData_6C msg = ReaderMessageHelper.GetWriteUserData_6C(
-				partsEntiry.Epc, OpType.StockOut);
-
-		//listPartsCodeSucess.clear();
-		boolean isSucess = false;
-		//int count = 0;
-		//while (count < writeUserDataCount) {
-			SystemClock.sleep(100);
-			boolean result = reader.send(msg);
-			if (result) {
-				listPartsCodeSucess.add(partsEntiry.PartsCode);
-				isSucess = true;
-				//break;
-			}
-			//count++;
-		//}
-
-		/*
-		if(isSucess)
-		{
-		boolean resultSave = saveResult();
-		if (!resultSave) {
-			return false;
-		}
-		}
-*/
-		return isSucess;
-	}
-
-	private boolean saveResult() {
-		if (listPartsCodeSucess.size() > 0) {
-
-			// 保存操作记录
-			String user = myApp.getUserId();
-			String opTime = f.format(new Date());
-			String remark = "";
-			String info = user + "," + opTime + "," + remark;
-			boolean result = SqliteHelper.SaveOpRecord(listPartsCodeSucess,
-					OpType.StockOut, info, listInfoAll, user);
-
-			if (result) {
-				listPartsCodeSucess.clear();
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		return true;
-	}
 
 	@Override
 	public void messageNotificationReceivedHandle(BaseReader reader,
@@ -565,26 +464,13 @@ public class StockOutActivity extends BaseActivity {
 						if (IsValidEpc(epc, true)) {
 							String partsCode = UtilityHelper.GetCodeByEpc(epc);
 							if (partsCode.length() > 0) {
-
-								boolean isExsit = false;
-								for (PartsEntity entity : listPartsEntity) {
-									if (entity.PartsCode.equals(partsCode)) {
-										isExsit = true;
-										break;
+								Map<String, Object> mo = getMo(partsCode);
+								if (mo != null) {
+									if (!mo.containsKey("tid")) {
+										mo.put("tid", Util.convertByteArrayToHexString(data.getReceivedMessage().getTID()));
+										mo.put("oud", userData.substring(0, 4));
 									}
-								}
-
-								if (!isExsit) {
-
-									PartsEntityCur = UtilityHelper
-											.GetPairEntityByCode(partsCode);
-									PartsEntityCur.Epc = epc;
-									listPartsEntity.add(PartsEntityCur);
-
-									Message dataArrivedMsg = new Message();
-									dataArrivedMsg.what = DATA_ARRIVED_PAIRS;
-									cardOperationHandler
-											.sendMessage(dataArrivedMsg);
+									sendMsg(DATA_ARRIVED_PAIRS, mo);
 								}
 							}
 						}
@@ -598,16 +484,17 @@ public class StockOutActivity extends BaseActivity {
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-
-		InvengoLog.i(TAG, "INFO.onKeyDown().");
 		if (keyCode == KeyEvent.KEYCODE_BACK && !backDown) {
-			boolean result=saveResult();
-			backDown = true;
+			if (isReading) {
+				showToast("请先停止读取");
+				return true;
+			} else {
+				backDown = true;
+			}
 		} else if ((keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
 				|| keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT || keyCode == KeyEvent.KEYCODE_SOFT_RIGHT)
 				&& event.getRepeatCount() <= 0 && isConnected) {
 
-			InvengoLog.i(TAG, "INFO.Start/Stop read tag.");
 			if (isReading == false) {
 				StartRead();
 			} else if (isReading == true) {
@@ -621,30 +508,117 @@ public class StockOutActivity extends BaseActivity {
 	}
 
 	private void StartRead() {
+		setRate(true);	// 最小功率
+
 		isReading = true;
 		listEPCEntity.clear();
 		ReadTag readTag = new ReadTag(ReadMemoryBank.EPC_TID_UserData_6C);
 		boolean result = reader.send(readTag);
 
-		Message readMessage = new Message();
-		readMessage.what = START_READ;
-		readMessage.obj = result;
-		cardOperationHandler.sendMessage(readMessage);
+		sendMsg(START_READ, result);
 	}
 
 	private void StopRead() {
 		isReading = false;
-		boolean result = reader.send(new PowerOff());
-		Message powerOffMsg = new Message();
-		powerOffMsg.what = STOP_READ;
-		powerOffMsg.obj = result;
-		cardOperationHandler.sendMessage(powerOffMsg);
+		boolean result = setRate();	// 最大功率;
+
+		sendMsg(STOP_READ, result);
+	}
+
+	private Map<String, Object> getMo (String cod) {
+		for (int i = 0; i < listPartsData.size(); i++) {
+			if (listPartsData.get(i).get("partsCode").equals(cod)) {
+				return listPartsData.get(i);
+			}
+		}
+		return null;
+	}
+
+	private void sendMsg (int w, Object o) {
+		cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(w, o));
+	}
+
+	private void writeCard(String[] sa, int a1, int a2) {
+		WrtUdRa r = new WrtUdRa(
+				reader,
+				sa,
+				cardOperationHandler,
+				a1,
+				a2
+		);
+		new Thread(r).start();
+	}
+
+	private void sop () {
+		if (isReading) {
+			Map<String, Object> mo = listPartsData.get(sid);
+			Boolean b = (Boolean) mo.get("sec");
+			if (b) {
+				writeCard(new String[] {mo.get("tid").toString(), "", "0300"}, 0, sid);
+			} else if (sid > 0) {
+				sid --;
+				sop();
+			} else if (isOut) {
+				sendMsg(DATA_ARRIVED_STATION, null);
+			} else {
+				sendMsg(WRT_UD_ERR, null);
+			}
+		}
+	}
+
+	// 更新数据库
+	private void upDb (Map<String, Object> mo) {
+		String opTime = f.format(new Date());
+		String remark = "";
+		String info = mo.get("partsInfo") + "," + user + "," + opTime + "," + remark;
+		List<String> listSql = new ArrayList<String>();
+
+		// 保存OP操作
+		String sql = "insert into TbPartsOp values('"
+				+ mo.get("partsCode") + "', '"
+				+ OpType.StockOut + "', '"
+				+ info + "')";
+		listSql.add(sql);
+
+		// 修改本地数据库信息
+		sql = "update TbParts set Status='S',Code=null,"
+				+ "LastOpTime='" + SqliteHelper.f.format(new Date())
+				+ "',OpUser='" + user
+				+ "' where PartsCode='" + mo.get("partsCode") + "'";
+		listSql.add(sql);
+
+		SqliteHelper.ExceSql(listSql);
+	}
+
+	private class CsdListener implements CompoundButton.OnCheckedChangeListener {
+		private Map<String, Object> mo;
+
+		CsdListener (Map<String, Object> m) {
+			this.mo = m;
+		}
+
+		Map<String, Object> getMo() {
+			return mo;
+		}
+
+		@Override
+		public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+//			if (b) {
+//				otn ++;
+//			} else {
+//				otn --;
+//			}
+//			outNumV.setText(otn + "");
+//Log.i("----", otn + "");
+			mo.put("sec", b);
+		}
 	}
 
 	@SuppressLint("HandlerLeak")
 	private Handler cardOperationHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			int what = msg.what;
+			Map<String, Object> mo;
 			switch (what) {
 			case START_READ:// 开始读卡
 				boolean start = (Boolean) msg.obj;
@@ -666,28 +640,37 @@ public class StockOutActivity extends BaseActivity {
 				}
 				break;
 			case DATA_ARRIVED_PAIRS:// 接收配件数据
-				for (Map<String, Object> entity : listPartsData) {
-					if (entity.get("partsCode").toString()
-							.equals(PartsEntityCur.PartsCode)
-							&& entity.get("isfocus").toString().equals("false")) {
-						StopRead();
-						boolean result = StockOutOP(PartsEntityCur);
-						if (result) {
-							entity.put("isfocus", true);
-							mListAdapter.notifyDataSetChanged();
-							sp.play(music1, 1, 1, 0, 0, 1);
-
-							stockOutCount++;
-							showToast("出库成功");
-							txtInfo.setText(String.format("已出库数:%s",
-									stockOutCount));
-						} else {
-							listPartsEntity.remove(PartsEntityCur);
-							showToast("出库失败，请重试");
-							sp.play(music2, 1, 1, 0, 0, 1);
-						}
-						break;
-					}
+				mo = (Map<String, Object>) msg.obj;
+				mo.put("sec", true);
+				int n = (Integer) mo.get("tim");
+				n ++;
+				mo.put("tim", n);
+				mListAdapter.notifyDataSetChanged();
+				sp.play(music2, 1, 1, 0, 0, 1);
+				break;
+			case WRT_UD_ERR:	// 用户区写入失败
+				isReading = false;
+				showToast("出库失败!");
+				txtStatus.setText("出库失败!");
+				sp.play(music3, 1, 1, 0, 0, 1);
+				break;
+			case DATA_ARRIVED_STATION:
+				isReading = false;
+				showToast("出库成功!");
+				txtStatus.setText("出库成功!");
+				sp.play(music1, 1, 1, 0, 0, 1);
+				break;
+			case WRT_OK:// 接收配件数据
+				otn ++;
+				outNumV.setText(otn + "");
+				isOut = true;
+				upDb(listPartsData.remove(msg.arg2));
+				mListAdapter.notifyDataSetChanged();
+				if (sid > 0) {
+					sid --;
+					sop();
+				} else {
+					sendMsg(DATA_ARRIVED_STATION, null);
 				}
 				break;
 			case CONNECT:// 读写器连接
@@ -705,75 +688,6 @@ public class StockOutActivity extends BaseActivity {
 			default:
 				break;
 			}
-		};
+		}
 	};
-
-	public class PartsAdapter extends SimpleAdapter {
-		List<Map<String, Object>> mdata;
-
-		public PartsAdapter(Context context, List<Map<String, Object>> data,
-				int resource, String[] from, int[] to) {
-			super(context, data, resource, from, to);
-			this.mdata = data;
-		}
-
-		@Override
-		public int getCount() {
-			return mdata.size();
-		}
-
-		@Override
-		public Map<String, Object> getItem(int position) {
-			return mdata.get(position);
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(final int position, View convertView,
-				ViewGroup parent) {
-			if (convertView == null) {
-				convertView = LinearLayout.inflate(getBaseContext(),
-						R.layout.listview_parts_item, null);
-			}
-
-			Boolean isFocus = (Boolean) mdata.get(position).get("isfocus");
-			if (isFocus) {
-				convertView.setBackgroundColor(Color.YELLOW);
-			} else {
-				convertView.setBackgroundColor(Color.WHITE);
-			}
-
-			ImageView imgDel = (ImageView) convertView
-					.findViewById(R.id.delImage);
-			// 设置回调监听
-			imgDel.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-
-					Map<String, Object> entity = listPartsData.get(position);
-					final String partsCodeSelected = entity.get("partsCode")
-							.toString();
-
-					for (PartsEntity partsEntiry : listPartsEntity) {
-						if (partsEntiry.PartsCode.equals(partsCodeSelected)) {
-							listPartsEntity.remove(partsEntiry);
-							break;
-						}
-					}
-
-					listPartsData.remove(position);
-					mListAdapter.notifyDataSetChanged();
-
-				}
-
-			});
-
-			return super.getView(position, convertView, parent);
-		}
-	}
 }

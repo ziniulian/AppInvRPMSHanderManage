@@ -40,7 +40,13 @@
             android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
         </activity>
         <activity
-            android:name="com.invengo.rpms.QueryTagActivity"
+            android:name="com.invengo.rpms.MultiQueryActivity"
+            android:label="@string/tagQuety"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.invengo.rpms.MultiQueryOneActivity"
             android:label="@string/tagQuety"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >

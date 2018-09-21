@@ -102,8 +102,7 @@ public class SendCardActivity extends BaseActivity {
 		btnOk.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				Intent intent = new Intent(SendCardActivity.this,
-						QueryTagActivity.class);
+				Intent intent = new Intent(SendCardActivity.this, MultiQueryActivity.class);
 				startActivity(intent);
 				finish();
 			}
@@ -447,10 +446,16 @@ public class SendCardActivity extends BaseActivity {
 			}
 
 			if (pchb == 0) {
+				int t = Integer.parseInt(myApp.getDeptCode());
+				if (t < 10) {
+					// 此判断在规范部门代码后将不再需要。
+					t += 20;
+				}
+				t = t * 1000 + 1;
 				int sn = SqliteHelper.queryPartsNumByType(pch.toString());
 //Log.i("---", pchb + " , " + pch.toString() + "-" + sn);
-				if (sn < 20001) {
-					sn = 20001;
+				if (sn < t) {
+					sn = t;
 				} else {
 					sn ++;
 				}
@@ -628,12 +633,14 @@ public class SendCardActivity extends BaseActivity {
 					sn = pch.toString() + sn;
 					if (SqliteHelper.queryOnePart(sn) != null) {
 						showToast("序列号重名");
+						sp.play(music3, 1, 1, 0, 0, 1);
 						return;
 					} else {
 						partsCode = sn;
 					}
 				} else {
 					showToast("序列号必须为5位数字");
+					sp.play(music3, 1, 1, 0, 0, 1);
 					return;
 				}
 
@@ -668,6 +675,7 @@ public class SendCardActivity extends BaseActivity {
 					showToast("请选择部件名称");
 					break;
 			}
+			sp.play(music3, 1, 1, 0, 0, 1);
 		}
 	}
 
@@ -717,6 +725,7 @@ public class SendCardActivity extends BaseActivity {
 			case GET_PAIRS:	// 读取配件标签
 				StopRead();
 				txtStatus.setText(getResources().getString(R.string.memo_GET_PAIRS));
+				sp.play(music1, 1, 1, 0, 0, 1);
 				switch (msg.arg1) {
 					case 1:	// 库位
 						s = (String) msg.obj;
@@ -802,10 +811,12 @@ public class SendCardActivity extends BaseActivity {
 				lockRd = false;		// 释放锁
 				txtStatus.setText(getResources().getString(R.string.memo_WRT_OK));
 				btnOk.setVisibility(View.VISIBLE);
+				sp.play(music2, 1, 1, 0, 0, 1);
 				break;
 			case WrtRa.WRT_EPC_ERR:
 				lockRd = false;		// 释放锁
 				txtStatus.setText(getResources().getString(R.string.memo_WRT_ERR));
+				sp.play(music3, 1, 1, 0, 0, 1);
 				break;
 			case CONNECT:// 读写器连接
 				boolean result = (Boolean) msg.obj;

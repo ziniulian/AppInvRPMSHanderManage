@@ -212,7 +212,8 @@ public class MainActivity extends BaseActivity {
 
 				if (title.equals(getResources().getString(R.string.tagQuety))) {
 					Intent intent = new Intent(MainActivity.this,
-							QueryTagActivity.class);
+//							QueryTagActivity.class);
+							MultiQueryActivity.class);
 					startActivity(intent);
 				} else if (title.equals(getResources().getString(
 						R.string.pairsStockIn))) {

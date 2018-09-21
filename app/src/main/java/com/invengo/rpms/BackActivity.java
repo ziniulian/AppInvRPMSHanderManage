@@ -63,7 +63,7 @@ public class BackActivity extends BaseActivity {
 
 		btnConfig = (Button) findViewById(R.id.btnConfig);
 		btnConfig.setOnClickListener(btnConfigClickListener);
-		
+
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
 		btnBack.setOnTouchListener(new Btn001());
 		btnBack.setOnClickListener(new OnClickListener() {

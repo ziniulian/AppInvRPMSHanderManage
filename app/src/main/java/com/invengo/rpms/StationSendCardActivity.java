@@ -3,6 +3,8 @@ package com.invengo.rpms;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -57,11 +59,18 @@ public class StationSendCardActivity extends Activity {
 	private String cod;		// 站点EPC
 	private int stu = 0;	// 状态
 	private String tid;
+	private SoundPool sp;
+	private int music2;
+	private int music3;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_stationsendcard);
+
+		sp = new SoundPool(3, AudioManager.STREAM_SYSTEM, 5);// 第一个参数为同时播放数据流的最大个数，第二数据流类型，第三为声音质量
+		music2 = sp.load(this, R.raw.right, 2); // 把你的声音素材放到res/raw里，第2个参数即为资源文件，第3个为音乐的优先级
+		music2 = sp.load(this, R.raw.right, 2); // 把你的声音素材放到res/raw里，第2个参数即为资源文件，第3个为音乐的优先级
 
 		initView();
 		initRd();
@@ -82,7 +91,7 @@ public class StationSendCardActivity extends Activity {
 		btno.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				Intent intent = new Intent(con, QueryTagActivity.class);
+				Intent intent = new Intent(con, MultiQueryActivity.class);
 				startActivity(intent);
 				finish();
 			}
@@ -281,11 +290,13 @@ public class StationSendCardActivity extends Activity {
 				case SSD_ERR:
 					close();
 					Toast.makeText(con, "写入失败", Toast.LENGTH_SHORT).show();
+					sp.play(music3, 1, 1, 0, 0, 1);
 					break;
 				case SSD_OK:
 					close();
 					btno.setVisibility(View.VISIBLE);
 					Toast.makeText(con, "写入成功", Toast.LENGTH_SHORT).show();
+					sp.play(music2, 1, 1, 0, 0, 1);
 					break;
 				case SSD_FLUSH:
 					asch.notifyDataSetChanged();

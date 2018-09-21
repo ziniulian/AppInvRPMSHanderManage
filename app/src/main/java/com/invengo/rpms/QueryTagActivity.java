@@ -186,12 +186,17 @@ public class QueryTagActivity extends BaseActivity {
 		StringBuilder r = new StringBuilder();
 		if (ud.length() >= 4) {
 			byte[] bs = Util.convertHexStringToByteArray(ud);
+			HashMap<String, String> m = SqliteHelper.queryOnePart(cod);
+
+			if (m != null) {
+				r.append("\n\n原厂编码：");
+				r.append(m.get("FactoryCode"));
+			}
+
 			r.append("\n\n状态：");
 			if (bs[1] == 0x01) {
 				r.append("已报废");
 			} else {
-				HashMap<String, String> m = SqliteHelper.queryOnePart(cod);
-
 				// 状态
 				switch (bs[0]) {
 					case 0x01:
@@ -204,9 +209,11 @@ public class QueryTagActivity extends BaseActivity {
 						r.append("在所（已出库）");
 						break;
 					case 0x04:
-					case 0x06:
-					case 0x07:
 						r.append("在段");
+					case 0x06:
+						r.append("在段（已停用）");
+					case 0x07:
+						r.append("在段（已恢复）");
 						break;
 					case 0x05:
 						r.append("已启用");
@@ -290,8 +297,7 @@ public class QueryTagActivity extends BaseActivity {
 				break;
 			case DATA_ARRIVED_STORAGE_LOCATION:// 接收库位数据
 				StopRead();
-				txtTagInfo
-						.setText(String.format("库位编码：%s\n%s", storageLocationStr,UtilityHelper.getStorageLocationInfo(storageLocationStr)));
+				txtTagInfo.setText(String.format("库位编码：%s\n%s", storageLocationStr,UtilityHelper.getStorageLocationInfo(storageLocationStr)));
 				break;
 			case DATA_ARRIVED_STATION:// 接收站点数据
 				StopRead();
