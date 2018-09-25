@@ -50,6 +50,7 @@ public class BackFactoryActivity extends BaseActivity {
 	private ListView mEpcListView;
 	private PartsAdapter mListAdapter;
 	private List<Map<String, Object>> listPartsData = new ArrayList<Map<String, Object>>();
+	private String cupcd;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -150,6 +151,7 @@ public class BackFactoryActivity extends BaseActivity {
 
 								if (!isExsit) {
 									String tid = Util.convertByteArrayToHexString(data.getReceivedMessage().getTID());
+									cupcd = partsCode;
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(DATA_ARRIVED_PAIRS, 0, 0, new String[] {tid, epc, "0C00", partsCode, userData.substring(0, 4)}));
 								}
 							}
@@ -222,6 +224,7 @@ public class BackFactoryActivity extends BaseActivity {
 	private Handler cardOperationHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			int what = msg.what;
+			String[] sa;
 			switch (what) {
 			case START_READ:// 开始读卡
 				boolean start = (Boolean) msg.obj;
@@ -243,7 +246,11 @@ public class BackFactoryActivity extends BaseActivity {
 				}
 				break;
 			case DATA_ARRIVED_PAIRS:// 接收配件数据
-				writeCard((String[]) msg.obj, 0, 0);
+				StopRead();
+				sa = (String[]) msg.obj;
+				if (cupcd.equals(sa[3])) {
+					writeCard(sa, 0, 0);
+				}
 				break;
 			case WRT_UD_ERR:	// 用户区写入失败
 				if (msg.arg1 == 1) {
@@ -255,7 +262,8 @@ public class BackFactoryActivity extends BaseActivity {
 				}
 				break;
 			case WRT_OK:// 接收配件数据
-				String[] sa = (String[]) msg.obj;
+				StopRead();
+				sa = (String[]) msg.obj;
 				if (msg.arg1 == 1) {
 					// 数据删除成功
 					Map<String, Object> m = listPartsData.get(msg.arg2);
@@ -268,7 +276,6 @@ public class BackFactoryActivity extends BaseActivity {
 					}
 					mListAdapter.notifyDataSetChanged();
 					txtInfo.setText(String.format("数量:%s", listPartsData.size()));
-					StopRead();
 				} else {
 					PartsEntity pe = UtilityHelper.GetPairEntityByCode(sa[3]);
 					pe.Epc = sa[1];
@@ -286,7 +293,6 @@ public class BackFactoryActivity extends BaseActivity {
 					mListAdapter.notifyDataSetChanged();
 					txtInfo.setText(String.format("数量:%s", listPartsData.size()));
 					sp.play(music1, 1, 1, 0, 0, 1);
-					StartRead();
 				}
 				break;
 			case CONNECT:// 读写器连接

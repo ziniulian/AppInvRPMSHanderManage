@@ -7,7 +7,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -55,6 +54,7 @@ public class RunActivity extends BaseActivity {
 	private PartsAdapter mListAdapter;
 	private List<Map<String, Object>> listPartsData = new ArrayList<Map<String, Object>>();
 	private String stationCodeStr = "";
+	private String cupcd;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -177,6 +177,7 @@ public class RunActivity extends BaseActivity {
 
 								if (!isExsit) {
 									String tid = Util.convertByteArrayToHexString(data.getReceivedMessage().getTID());
+									cupcd = partsCode;
 									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(DATA_ARRIVED_PAIRS, 0, 0, new String[] {tid, epc, "0500", partsCode, userData.substring(0, 4)}));
 								}
 							}
@@ -254,6 +255,7 @@ public class RunActivity extends BaseActivity {
 	private Handler cardOperationHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
 			int what = msg.what;
+			String[] sa;
 			switch (what) {
 			case START_READ:// 开始读卡
 				boolean start = (Boolean) msg.obj;
@@ -275,13 +277,16 @@ public class RunActivity extends BaseActivity {
 				}
 				break;
 			case DATA_ARRIVED_PAIRS:// 接收配件数据
-//				StopRead();
-//				sa = (String[]) msg.obj;
-//				SqliteHelper.addRecover(sa[3], sa[4]);	// 保存恢复记录
-				writeCard((String[]) msg.obj, 0, 0);
+				StopRead();
+				sa = (String[]) msg.obj;
+				if (cupcd.equals(sa[3])) {
+//					SqliteHelper.addRecover(sa[3], sa[4]);	// 保存恢复记录
+					writeCard(sa, 0, 0);
+				}
 				break;
 			case WRT_OK:	// 用户区写入成功
-				String[] sa = (String[]) msg.obj;
+				StopRead();
+				sa = (String[]) msg.obj;
 				if (msg.arg1 == 1) {
 					// 数据删除成功
 					Map<String, Object> m = listPartsData.get(msg.arg2);
@@ -294,7 +299,6 @@ public class RunActivity extends BaseActivity {
 					}
 					mListAdapter.notifyDataSetChanged();
 					txtInfo.setText(String.format("数量:%s", listPartsData.size()));
-					StopRead();
 				} else {
 					PartsEntity pe = UtilityHelper.GetPairEntityByCode(sa[3]);
 					pe.Epc = sa[1];
@@ -312,7 +316,6 @@ public class RunActivity extends BaseActivity {
 					mListAdapter.notifyDataSetChanged();
 					txtInfo.setText(String.format("数量:%s", listPartsData.size()));
 					sp.play(music1, 1, 1, 0, 0, 1);
-					StartRead();
 				}
 				break;
 			case WRT_UD_ERR:	// 用户区写入失败

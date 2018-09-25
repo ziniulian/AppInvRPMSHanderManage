@@ -15,7 +15,8 @@
         android:layout_weight="0.18"
         android:gravity="center_vertical"
         android:textColor="#313031"
-        android:textSize="16sp" />
+        android:textStyle="bold"
+        android:textSize="22sp" />
 
     <RelativeLayout
         android:layout_width="260dp"
@@ -34,7 +35,9 @@
                 android:layout_height="30dp"
                 android:layout_weight="0.82"
                 android:gravity="left"
-                android:singleLine="true"
+                android:maxLines="1"
+                android:textStyle="bold"
+                android:textSize="20sp"
                 android:text="编码：" /> 
 
             <TextView
@@ -43,7 +46,9 @@
                 android:layout_height="30dp"
                 android:layout_weight="0.82"
                 android:gravity="left"
-                android:singleLine="true" />
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:maxLines="1" />
         </LinearLayout>
 
         <LinearLayout
@@ -60,7 +65,9 @@
                 android:layout_height="30dp"
                 android:layout_weight="0.82"
                 android:gravity="left"
-                android:singleLine="true" />
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:maxLines="1" />
         </LinearLayout>
     </RelativeLayout>
 
