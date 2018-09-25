@@ -97,9 +97,9 @@ public class BackFactoryActivity extends BaseActivity {
 				ps.add(partsEntiry.PartsCode);
 				listSql.add("update TbParts set Status='F',"
 						+ "LastOpTime='" + SqliteHelper.f.format(new Date())
-//						+ "',Code='" + stationCodeStr
 						+ "',OpUser='" + user
-						+ "' where PartsCode='" + partsEntiry.PartsCode + "'");
+						+ "',Code=null"
+						+ " where PartsCode='" + partsEntiry.PartsCode + "'");
 			}
 			String opTime = f.format(new Date());
 			String remark = "";
@@ -249,6 +249,7 @@ public class BackFactoryActivity extends BaseActivity {
 				StopRead();
 				sa = (String[]) msg.obj;
 				if (cupcd.equals(sa[3])) {
+					cupcd = "";
 					writeCard(sa, 0, 0);
 				}
 				break;
@@ -256,7 +257,7 @@ public class BackFactoryActivity extends BaseActivity {
 				if (msg.arg1 == 1) {
 					// 数据删除失败
 					showToast("删除失败");
-					StopRead();
+					sp.play(music3, 1, 1, 0, 0, 1);
 				} else {
 					StartRead();
 				}
@@ -292,7 +293,7 @@ public class BackFactoryActivity extends BaseActivity {
 
 					mListAdapter.notifyDataSetChanged();
 					txtInfo.setText(String.format("数量:%s", listPartsData.size()));
-					sp.play(music1, 1, 1, 0, 0, 1);
+					sp.play(music2, 1, 1, 0, 0, 1);
 				}
 				break;
 			case CONNECT:// 读写器连接

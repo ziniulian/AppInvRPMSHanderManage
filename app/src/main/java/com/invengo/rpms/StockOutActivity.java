@@ -581,10 +581,11 @@ public class StockOutActivity extends BaseActivity {
 		listSql.add(sql);
 
 		// 修改本地数据库信息
-		sql = "update TbParts set Status='S',Code=null,"
+		sql = "update TbParts set Status='S',"
 				+ "LastOpTime='" + SqliteHelper.f.format(new Date())
 				+ "',OpUser='" + user
-				+ "' where PartsCode='" + mo.get("partsCode") + "'";
+				+ "',Code=null"
+				+ " where PartsCode='" + mo.get("partsCode") + "'";
 		listSql.add(sql);
 
 		SqliteHelper.ExceSql(listSql);

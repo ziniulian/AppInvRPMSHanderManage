@@ -116,8 +116,8 @@ public class StockInActivity extends BaseActivity {
 				ps.add(partsEntiry.PartsCode);
 				listSql.add("update TbParts set Status='W',"
 						+ "LastOpTime='" + SqliteHelper.f.format(new Date())
-						+ "',Code='" + storageLocationStr
 						+ "',OpUser='" + user
+						+ "',Code='" + storageLocationStr
 						+ "' where PartsCode='" + partsEntiry.PartsCode + "'");
 			}
 			String opTime = f.format(new Date());
@@ -268,10 +268,10 @@ public class StockInActivity extends BaseActivity {
 				&& event.getRepeatCount() <= 0 && isConnected) {
 
 			InvengoLog.i(TAG, "INFO.Start/Stop read tag.");
-			if (!isReading) {
-				StartRead();
-			} else {
+			if (isReading) {
 				StopRead();
+			} else {
+				StartRead();
 			}
 
 			return true;
@@ -346,6 +346,7 @@ public class StockInActivity extends BaseActivity {
 				StopRead();
 				sa = (String[]) msg.obj;
 				if (cupcd.equals(sa[3])) {
+					cupcd = "";
 					pe = UtilityHelper.GetPairEntityByCode(sa[3]);
 					// 判断库位是否能存放
 					if (canStockIn(storageLocationStr, pe)) {
@@ -386,7 +387,6 @@ public class StockInActivity extends BaseActivity {
 					}
 					mListAdapter.notifyDataSetChanged();
 					txtInfo.setText(String.format("已入库数：%s", listPartsData.size()));
-					sp.play(music1, 1, 1, 0, 0, 1);
 				} else {
 					pe = UtilityHelper.GetPairEntityByCode(sa[3]);
 					pe.Epc = sa[1];

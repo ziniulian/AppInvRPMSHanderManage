@@ -3,30 +3,6 @@
     tools:context=".MainActivity" >
 
     <LinearLayout
-        android:id="@+id/connect_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:visibility="gone" >
-
-        <ProgressBar
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/connecting"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-    </LinearLayout>
-
-    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@drawable/background2"
@@ -71,77 +47,69 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="465dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:orientation="vertical" >
 
-            <LinearLayout
+            <ListView
+                android:id="@+id/lstPartsSendOutView"
                 android:layout_width="match_parent"
-                android:layout_height="320dp"
-                android:background="@color/listviewbg"
-                android:orientation="vertical" >
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_margin="1dp"
+                android:listSelector="@drawable/list_item_shape" >
+            </ListView>
 
-                <ListView
-                    android:id="@+id/lstPartsSendOutView"
-                    android:layout_width="match_parent"
-                    android:layout_height="290dp"
-                    android:layout_margin="1dp"
-                    android:listSelector="@drawable/list_item_shape" >
-                </ListView>
-
-                <TextView
-                    android:id="@+id/txtInfo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/txtInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginLeft="5dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="50dp"
-                android:layout_marginTop="10dp"
                 android:orientation="horizontal" >
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
                     android:text="@string/TakeDept" />
 
                 <Spinner
                     android:id="@+id/sprTakeDept"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
                     android:layout_height="40dp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="50dp"
                 android:orientation="horizontal" >
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
                     android:text="@string/TakeUser" />
 
                 <Spinner
                     android:id="@+id/sprTakeUser"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
                     android:layout_height="40dp" />
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:orientation="horizontal" >
-
-                <CheckBox
-                    android:id="@+id/cbxComfirmSendOut"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ComfirmSendOut" />
-            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout

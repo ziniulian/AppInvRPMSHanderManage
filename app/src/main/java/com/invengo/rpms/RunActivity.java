@@ -112,8 +112,8 @@ public class RunActivity extends BaseActivity {
 				ps.add(partsEntiry.PartsCode);
 				listSql.add("update TbParts set Status='U',"
 						+ "LastOpTime='" + SqliteHelper.f.format(new Date())
-						+ "',Code='" + stationCodeStr
 						+ "',OpUser='" + user
+						+ "',Code='" + stationCodeStr
 						+ "' where PartsCode='" + partsEntiry.PartsCode + "'");
 			}
 			String opTime = f.format(new Date());
