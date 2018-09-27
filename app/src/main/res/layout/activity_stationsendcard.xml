@@ -54,6 +54,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
+                android:textStyle="bold"
+                android:textSize="20sp"
                 android:text="请选择站点："/>
 
             <Spinner
@@ -89,6 +91,8 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="10dp"
                         android:padding="10dp"
+                        android:textStyle="bold"
+                        android:textSize="20sp"
                         android:text="取消"
                         android:background="@drawable/ybtn"/>
 
@@ -99,6 +103,8 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="10dp"
                         android:padding="10dp"
+                        android:textStyle="bold"
+                        android:textSize="20sp"
                         android:text="确定"
                         android:background="@drawable/ybtn"/>
                 </LinearLayout>
@@ -111,9 +117,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:padding="10dp"
+                android:textStyle="bold"
+                android:textSize="20sp"
                 android:background="@drawable/ybtn"
                 android:layout_gravity="center"
-                android:text="发卡成功，可点此跳至查询页" />
+                android:text="发卡成功" />
 
             <EditText
                 android:id="@+id/search"
@@ -121,6 +129,8 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:maxLines="1"
+                android:textStyle="bold"
+                android:textSize="20sp"
                 android:inputType="text"
                 android:imeOptions="actionSearch"
                 android:hint="请输入关键字进行搜索"/>

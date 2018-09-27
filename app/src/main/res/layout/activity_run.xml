@@ -88,6 +88,8 @@
                 android:id="@+id/txtInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="20sp"
                 android:text="数量:0"
                 android:layout_marginLeft="5dp" />
 
@@ -101,12 +103,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
                     android:text="站点：" />
 
                 <TextView
                     android:id="@+id/txtNam"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
                     android:layout_weight="1"/>
 
                 <Button
@@ -115,6 +121,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="重选站点"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
                     android:background="@color/yellow"
                     android:padding="10dp" />
             </LinearLayout>

@@ -45,20 +45,25 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_margin="10dp"
                     android:orientation="horizontal" >
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
                         android:text="@string/serviceIp" />
 
                     <EditText
                         android:id="@+id/edtServiceIp"
-                        android:layout_width="200dp"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="40dp"
                         android:maxLength="15"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginLeft="10dp"
                         android:background="@drawable/editsharp" >
                     </EditText>
                 </LinearLayout>
@@ -66,20 +71,25 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_margin="10dp"
                     android:orientation="horizontal" >
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
                         android:text="@string/port" />
 
                     <EditText
                         android:id="@+id/edtServiceCom"
-                        android:layout_width="100dp"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="40dp"
                         android:maxLength="4"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginLeft="10dp"
                         android:background="@drawable/editsharp" >
                     </EditText>
                 </LinearLayout>
@@ -87,21 +97,26 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_margin="10dp"
                     android:orientation="horizontal" >
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
                         android:text="最大功率" />
 
                     <EditText
                         android:id="@+id/maxRate"
-                        android:layout_width="100dp"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="40dp"
                         android:inputType="number"
                         android:maxLength="2"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginLeft="10dp"
                         android:text="30"
                         android:background="@drawable/editsharp" >
                     </EditText>
@@ -110,21 +125,26 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_margin="10dp"
                     android:orientation="horizontal" >
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
                         android:text="最小功率" />
 
                     <EditText
                         android:id="@+id/minRate"
-                        android:layout_width="100dp"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="40dp"
                         android:inputType="number"
                         android:maxLength="2"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginLeft="10dp"
                         android:text="5"
                         android:background="@drawable/editsharp" >
                     </EditText>
@@ -146,8 +166,10 @@
                         android:paddingRight="30dp"
                         android:paddingTop="15dp"
                         android:paddingBottom="15dp"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
                         android:background="@color/yellow"
-                        android:text="保存" >
+                        android:text="保 存" >
                     </Button>
 
                     <TextView

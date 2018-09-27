@@ -143,6 +143,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
                     android:text="序列号："/>
 
                 <EditText
@@ -152,6 +154,8 @@
                     android:layout_weight="1"
                     android:layout_margin="10dp"
                     android:inputType="number"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
                     android:hint="请输入序列号"
                     android:background="@color/open"/>
             </LinearLayout>
@@ -166,6 +170,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
                     android:text="原厂编码："/>
 
                 <EditText
@@ -176,6 +182,8 @@
                     android:maxLines="1"
                     android:inputType="text"
                     android:imeOptions="actionDone"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
                     android:hint="请输入原厂编码"
                     android:background="@color/open"/>
 
@@ -190,6 +198,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
                     android:text="状态：" />
 
                 <Spinner
@@ -208,6 +218,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/txtRemark"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
                     android:text="库位:" />
 
                 <TextView
@@ -224,14 +236,16 @@
 
             <Button
                 android:id="@+id/btnOK"
-                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:layout_marginTop="10dp"
                 android:padding="10dp"
+                android:textStyle="bold"
+                android:textSize="20sp"
                 android:background="@color/yellow"
                 android:layout_gravity="center"
-                android:text="发卡成功，可点此跳至配件查询页" />
+                android:text="发卡成功" />
         </LinearLayout>
 
         <LinearLayout

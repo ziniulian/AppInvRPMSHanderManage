@@ -5,56 +5,99 @@
     android:background="@drawable/background_login"
     android:orientation="vertical" >
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/login_logo"/>
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:src="@drawable/login_title"/>
+
+    <LinearLayout
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="用户名 : "/>
         <EditText
             android:id="@+id/edtUserId"
-            android:layout_width="180dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:layout_marginTop="210dp"
-            android:layout_marginLeft="30dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
             android:background="@color/open"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="250dp"
+        android:layout_height="1dp"
+        android:layout_gravity="center"
+        android:background="@color/black"/>
 
+    <LinearLayout
+        android:layout_width="250dp"
+        android:layout_marginTop="20dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="密    码 : "/>
         <EditText
             android:id="@+id/edtPassword"
-            android:layout_width="180dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:layout_marginTop="17dp"
-            android:layout_marginLeft="30dp"
-            android:background="@color/open"
-            android:inputType="textPassword"/>
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:background="@color/open"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="250dp"
+        android:layout_height="1dp"
+        android:layout_gravity="center"
+        android:background="@color/black"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
-            android:gravity="center_horizontal">
+    <LinearLayout
+        android:layout_width="250dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="60dp"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal">
 
-            <Button
-                android:id="@+id/btnLogin"
-                android:layout_width="106dp"
-                android:layout_height="wrap_content"
-                android:textColor="@color/white"
-                android:textStyle="bold"
-                android:textSize="20sp"
-                android:background="@color/open"
-                android:text="@string/button_login"/>
+        <Button
+            android:id="@+id/btnLogin"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:background="@drawable/login_btnl"
+            android:text="@string/button_login"/>
 
-            <Button
-                android:id="@+id/btnConfig"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:background="@color/open"
-                android:text="@string/menu_settings" />
-
-        </LinearLayout>
+        <Button
+            android:id="@+id/btnConfig"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:background="@drawable/login_btnr"
+            android:text="@string/menu_settings" />
 
     </LinearLayout>
+
 
 </LinearLayout>

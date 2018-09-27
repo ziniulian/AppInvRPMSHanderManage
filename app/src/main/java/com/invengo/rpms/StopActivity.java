@@ -7,10 +7,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -68,7 +66,6 @@ public class StopActivity extends BaseActivity {
 		edtRemark = (EditText) findViewById(R.id.edtRemark);
 
 		btnSav = (Button) findViewById(R.id.btnSav);
-		btnSav.setOnTouchListener(btnSavTouchListener);
 		btnSav.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -94,29 +91,6 @@ public class StopActivity extends BaseActivity {
 		layoutRepair = (LinearLayout) findViewById(R.id.layoutRepair);
 		FaultType_CheckBoxList = (LinearLayout) findViewById(R.id.FaultType_CheckBoxList);
 	}
-	
-	private OnTouchListener btnSavTouchListener = new OnTouchListener() {
-		public boolean onTouch(View v, MotionEvent event) {
-			switch (event.getAction()) {
-				case MotionEvent.ACTION_DOWN: {
-					// 按住事件发生后执行代码的区域
-					btnSav.setBackgroundResource(R.color.lightwhite);
-					break;
-				}
-				case MotionEvent.ACTION_MOVE: {
-					// 移动事件发生后执行代码的区域
-					btnSav.setBackgroundResource(R.color.lightwhite);
-					break;
-				}
-				case MotionEvent.ACTION_UP: {
-					// 松开事件发生后执行代码的区域
-					btnSav.setBackgroundResource(R.color.yellow);
-					break;
-				}
-			}
-			return false;
-		}
-	};
 
 	private OnClickListener btnConfigClickListener = new OnClickListener() {
 		public void onClick(View v) {
@@ -144,6 +118,7 @@ public class StopActivity extends BaseActivity {
 		}
 		if (faultCodeStr.length() == 0) {
 			showToast(String.format("请选择%s", getResources().getString(R.string.FaultType)));
+			sp.play(music3, 1, 1, 0, 0, 1);
 			return;
 		}
 
@@ -184,11 +159,14 @@ public class StopActivity extends BaseActivity {
 				// 清空页面
 				txtTagInfo.setText("");
 				layoutRepair.setVisibility(View.GONE);
+				sp.play(music2, 1, 1, 0, 0, 1);
 			} else {
 				showToast(String.format("%s失败，请重新操作", getResources().getString(R.string.pairsStop)));
+				sp.play(music3, 1, 1, 0, 0, 1);
 			}
 		} else {
 			showToast(String.format("%s失败，请重新操作", getResources().getString(R.string.pairsStop)));
+			sp.play(music3, 1, 1, 0, 0, 1);
 		}
 	}
 

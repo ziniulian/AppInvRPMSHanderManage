@@ -126,6 +126,7 @@
                         android:gravity="top"
                         android:textSize="20sp"
                         android:textStyle="bold"
+                        android:inputType="textMultiLine"
                         android:background="@drawable/editsharp" >
                     </EditText>
 
@@ -146,6 +147,7 @@
                         android:gravity="top"
                         android:textSize="20sp"
                         android:textStyle="bold"
+                        android:inputType="textMultiLine"
                         android:background="@drawable/editsharp" >
                     </EditText>
                 </LinearLayout>
