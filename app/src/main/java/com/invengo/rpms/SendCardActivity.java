@@ -69,6 +69,7 @@ public class SendCardActivity extends BaseActivity {
 	private String tid;
 	private String fc;
 	private String dpc;
+	private String cupcd = "";
 
 	private static final int GET_STATION = 101;		// 先读取站点标签
 	private static final int GET_STORAGE_LOCATION = 102;	// 先读取库位标签
@@ -493,6 +494,7 @@ public class SendCardActivity extends BaseActivity {
 							.getReceivedMessage().getUserData());
 					tid = Util.convertByteArrayToHexString(data
 							.getReceivedMessage().getTID());
+					cupcd = tid;
 //Log.i("----", epc);
 
 					int p = (int)sprPartsStatus.getSelectedItemId();
@@ -680,6 +682,7 @@ public class SendCardActivity extends BaseActivity {
 	}
 
 	private void StopRead() {
+		isReading = false;
 		Message powerOffMsg = new Message();
 		powerOffMsg.what = STOP_READ;
 		powerOffMsg.obj = setRate();	// 最大功率
@@ -750,53 +753,56 @@ public class SendCardActivity extends BaseActivity {
 				}
 				break;
 			case READY_WRITE:	// 准备写入
-				lockRd = true;
 				StopRead();
 				String[] sa = (String[]) msg.obj;
-				tid = sa[0];
-				if (msg.arg2 == 1) {
+				if (cupcd.equals(sa[0])) {
+					lockRd = true;
+					cupcd = "";
+					tid = sa[0];
+					if (msg.arg2 == 1) {
 //Log.i("epc", sa[1]);
-					s = UtilityHelper.GetCodeByEpc(sa[1]);
-					PartsEntity entity = UtilityHelper.GetPairEntityByCode(s);
-					String info = String.format(
-							"编码：%s\n厂家：%s\n型号：%s\n类别：%s\n名称： %s\n序列号：%s\n状态：%s",
-							entity.PartsCode,
-							entity.FactoryName,
-							entity.PartsType,
-							entity.BoxType,
-							entity.PartsName,
-							entity.SeqNo,
-							UtilityHelper.GetPairStatus(sa[2])
-					);
+						s = UtilityHelper.GetCodeByEpc(sa[1]);
+						PartsEntity entity = UtilityHelper.GetPairEntityByCode(s);
+						String info = String.format(
+								"编码：%s\n厂家：%s\n型号：%s\n类别：%s\n名称： %s\n序列号：%s\n状态：%s",
+								entity.PartsCode,
+								entity.FactoryName,
+								entity.PartsType,
+								entity.BoxType,
+								entity.PartsName,
+								entity.SeqNo,
+								UtilityHelper.GetPairStatus(sa[2])
+						);
 
-					AlertDialog.Builder builder = new Builder(SendCardActivity.this, R.style.AppTheme);
-					builder.setTitle("温馨提示");
-					builder.setMessage("该标签已经写入配件信息，确定重新该标签吗?配件信息\n\n" + info);
-					dpc = entity.PartsCode;
-					builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							SqliteHelper.delOnePart(dpc);
-							writeCard(false);
-						}
-					});
-					builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							lockRd = false;
-							txtStatus.setText(getResources().getString(R.string.memo_GET_PAIRS));
-						}
-					});
-					builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface dialogInterface) {
-							lockRd = false;
-							txtStatus.setText(getResources().getString(R.string.memo_GET_PAIRS));
-						}
-					});
-					builder.show();
-				} else {
-					writeCard(true);
+						AlertDialog.Builder builder = new Builder(SendCardActivity.this, R.style.AppTheme);
+						builder.setTitle("温馨提示");
+						builder.setMessage("该标签已经写入配件信息，确定重新该标签吗?配件信息\n\n" + info);
+						dpc = entity.PartsCode;
+						builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								SqliteHelper.delOnePart(dpc);
+								writeCard(false);
+							}
+						});
+						builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								lockRd = false;
+								txtStatus.setText(getResources().getString(R.string.memo_GET_PAIRS));
+							}
+						});
+						builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface dialogInterface) {
+								lockRd = false;
+								txtStatus.setText(getResources().getString(R.string.memo_GET_PAIRS));
+							}
+						});
+						builder.show();
+					} else {
+						writeCard(true);
+					}
 				}
 				break;
 			case WrtRa.WRT_PWD_ERR:

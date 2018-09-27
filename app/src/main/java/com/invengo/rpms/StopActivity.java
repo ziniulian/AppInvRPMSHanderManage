@@ -153,6 +153,7 @@ public class StopActivity extends BaseActivity {
 		String remark = se.Remark.replace(",","+++");
 
 		// 写入标签用户数据
+		setRate();
 		WriteUserData_6C msg = ReaderMessageHelper.GetWriteUserData_6C(partsEpc, OpType.Stop);
 		boolean result = reader.send(msg);
 
@@ -169,9 +170,9 @@ public class StopActivity extends BaseActivity {
 				List<String> listSql = new ArrayList<String>();
 				listSql.add("update TbParts set Status='T',"
 						+ "LastOpTime='" + SqliteHelper.f.format(new Date())
-//						+ "',Code='" + stationCodeStr
 						+ "',OpUser='" + user
-						+ "' where PartsCode='" + partsCode + "'");
+						+ "',Code=null"
+						+ " where PartsCode='" + partsCode + "'");
 				listSql.add("insert into TbSendRepair values('', '"		// TODO: 2018/6/12 测试用功能，实际发布后，无需在此处保存故障信息。
 						+ partsCode + "', '"
 						+ se.FaultCode + "', '"
@@ -179,6 +180,10 @@ public class StopActivity extends BaseActivity {
 						+ se.Remark + "')");
 				SqliteHelper.ExceSql(listSql);	// 更新本地数据库信息
 				showToast(String.format("%s成功", getResources().getString(R.string.pairsStop)));
+
+				// 清空页面
+				txtTagInfo.setText("");
+				layoutRepair.setVisibility(View.GONE);
 			} else {
 				showToast(String.format("%s失败，请重新操作", getResources().getString(R.string.pairsStop)));
 			}
@@ -231,8 +236,6 @@ public class StopActivity extends BaseActivity {
 				|| keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT || keyCode == KeyEvent.KEYCODE_SOFT_RIGHT)
 				&& event.getRepeatCount() <= 0 && isConnected) {
 
-			txtTagInfo.setText("");
-			layoutRepair.setVisibility(View.GONE);
 			if (isReading == false) {
 				StartRead();
 			} else if (isReading == true) {

@@ -37,7 +37,6 @@ import java.util.List;
 import invengo.javaapi.core.BaseReader;
 import invengo.javaapi.core.IMessageNotification;
 import invengo.javaapi.core.Util;
-import invengo.javaapi.protocol.IRP1.PowerOff;
 import invengo.javaapi.protocol.IRP1.RXD_TagData;
 import invengo.javaapi.protocol.IRP1.ReadTag;
 import invengo.javaapi.protocol.IRP1.ReadTag.ReadMemoryBank;
@@ -47,7 +46,6 @@ public class RepairActivity extends BaseActivity {
 
 	LinearLayout layoutRepair;
 	LinearLayout FaultType_CheckBoxList;
-	CheckBox cbxComfirmRepair;
 	TextView txtStatus;
 	TextView txtTagInfo;
 	EditText edtFaultDes;
@@ -57,11 +55,13 @@ public class RepairActivity extends BaseActivity {
 	EditText edtCheckResult;
 	EditText edtCheckGroupUser;
 	Button btnConfig;
+	Button btnSav;
 
 	private List<CheckBox> checkBoxList = new ArrayList<CheckBox>();
 	private String partsCode = "";
 	private String id="";
 	private String repairOpition = "";
+	private String stro = "";
 	private String partsEpc = "";
 	private boolean isGetFault=false;
 
@@ -69,16 +69,22 @@ public class RepairActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_repair);
 
-		cbxComfirmRepair = (CheckBox) findViewById(R.id.cbxComfirmRepair);
 		txtStatus = (TextView) findViewById(R.id.txtStatus);
 		txtTagInfo = (TextView) findViewById(R.id.txtTagInfo);
 
 		edtFaultDes = (EditText) findViewById(R.id.edtFaultDes);
 		edtFaultDes.setEnabled(false);
 		edtRemark = (EditText) findViewById(R.id.edtRemark);
-		
+
+		btnSav = (Button) findViewById(R.id.btnSav);
+		btnSav.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				CheckOP();
+			}
+		});
+
 		btnConfig = (Button) findViewById(R.id.btnConfig);
-//		btnConfig.setOnTouchListener(btnConfigTouchListener);
 		btnConfig.setOnClickListener(btnConfigClickListener);
 		
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
@@ -200,17 +206,17 @@ public class RepairActivity extends BaseActivity {
 		if (repairOpition.equals(getResources().getString(
 				R.string.CheckOpition_BackFactory))) {
 			opType = OpType.Repair_B;
-			repairOpition="C";
+			stro="C";
 		}
 		if (repairOpition.equals(getResources().getString(
 				R.string.CheckOpition_RepairWell))) {
 			opType = OpType.Repair_O;
-			repairOpition="Z";
+			stro="Z";
 		}
 		if (repairOpition.equals(getResources().getString(
 				R.string.CheckOpition_RepairScrap))) {
 			opType = OpType.Repair_S;
-			repairOpition="B";
+			stro="B";
 		}
 		if (opType == 0) {
 			showToast(String.format("请选择%s",
@@ -219,6 +225,7 @@ public class RepairActivity extends BaseActivity {
 		}
 
 		// 写入标签用户数据
+		setRate();
 		WriteUserData_6C msg = ReaderMessageHelper.GetWriteUserData_6C(
 				partsEpc, opType);
 
@@ -237,29 +244,39 @@ public class RepairActivity extends BaseActivity {
 			// 保存操作记录
 			String user = myApp.getUserId();
 			String checkTime = f.format(new Date());
-			String info =id + ","+ repairOpition + "," + checkResult + ","
-					+ checkGroupUser + "," + user + "," + checkTime;
+			String info =id + ","+ stro + "," + checkResult + "," + checkGroupUser + "," + user + "," + checkTime;
 			List<String> listPartsCodeSucess = new ArrayList<String>();
 			listPartsCodeSucess.add(partsCode);
 
-			result = SqliteHelper.SaveOpRecord(listPartsCodeSucess, OpType.Repair,
-					info);
+			result = SqliteHelper.SaveOpRecord(listPartsCodeSucess, OpType.Repair, info);
 
 			if (result) {
-				showToast(String.format("%s成功",
-						getResources().getString(R.string.repaircheck)));
-				
+				List<String> listSql = new ArrayList<String>();
+				listSql.add("update TbParts set Status='S',"
+						+ "LastOpTime='" + SqliteHelper.f.format(new Date())
+						+ "',OpUser='" + user
+						+ "',Code=null"
+						+ " where PartsCode='" + partsCode + "'");
+				SqliteHelper.ExceSql(listSql);	// 更新本地数据库信息
+				showToast(String.format("%s成功", getResources().getString(R.string.repaircheck)));
+
+				// 清空页面
+				txtTagInfo.setText("");
+				layoutRepair.setVisibility(View.GONE);
+				llayoutCheck.setVisibility(View.GONE);
+
+				sp.play(music2, 1, 1, 0, 0, 1);
+
 				//删除故障记录信息
 //				SqliteHelper.DeteleSendRepair(listPartsCodeSucess);        // TODO: 2018/7/12 如果此处删除故障记录，将导致返厂回来后的配件无法再次检修。所以暂不进行删除操作，待后续研究决定如何处理。
-				
 			} else {
-				showToast(String.format("%s失败，请重新操作",
-						getResources().getString(R.string.repaircheck)));
+				showToast(String.format("%s失败，请重新操作", getResources().getString(R.string.repaircheck)));
+				sp.play(music3, 1, 1, 0, 0, 1);
 			}
 
 		} else {
-			showToast(String.format("%s失败，请重新操作",
-					getResources().getString(R.string.repaircheck)));
+			showToast(String.format("%s失败，请重新操作", getResources().getString(R.string.repaircheck)));
+			sp.play(music3, 1, 1, 0, 0, 1);
 		}
 	}
 
@@ -286,9 +303,7 @@ public class RepairActivity extends BaseActivity {
 
 								Message dataArrivedMsg = new Message();
 								dataArrivedMsg.what = DATA_ARRIVED_PAIRS;
-								cardOperationHandler
-										.sendMessage(dataArrivedMsg);
-								sp.play(music1, 1, 1, 0, 0, 1);
+								cardOperationHandler.sendMessage(dataArrivedMsg);
 							}
 						}
 					}
@@ -308,15 +323,10 @@ public class RepairActivity extends BaseActivity {
 				|| keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT || keyCode == KeyEvent.KEYCODE_SOFT_RIGHT)
 				&& event.getRepeatCount() <= 0 && isConnected) {
 
-			if (cbxComfirmRepair.isChecked()) {
-				CheckOP();
+			if (isReading) {
+				StopRead();
 			} else {
-				InvengoLog.i(TAG, "INFO.Start/Stop read tag.");
-				if (isReading == false) {
-					StartRead();
-				} else if (isReading == true) {
-					StopRead();
-				}
+				StartRead();
 			}
 			return true;
 		}
@@ -324,6 +334,8 @@ public class RepairActivity extends BaseActivity {
 	}
 
 	private void StartRead() {
+		setRate(true);	// 最小功率
+
 		isReading = true;
 		listEPCEntity.clear();
 		ReadTag readTag = new ReadTag(ReadMemoryBank.EPC_TID_UserData_6C);
@@ -336,11 +348,9 @@ public class RepairActivity extends BaseActivity {
 	}
 
 	private void StopRead() {
-		isReading = false;
-		boolean result = reader.send(new PowerOff());
 		Message powerOffMsg = new Message();
 		powerOffMsg.what = STOP_READ;
-		powerOffMsg.obj = result;
+		powerOffMsg.obj = setRate();	// 最大功率
 		cardOperationHandler.sendMessage(powerOffMsg);
 	}
 
@@ -378,15 +388,17 @@ public class RepairActivity extends BaseActivity {
 				layoutRepair.setVisibility(View.VISIBLE);
 				llayoutCheck.setVisibility(View.VISIBLE);
 
-				SendRepairEntity entitySendRepair = SqliteHelper
-						.querySendRepaiByCode(partsCode);
+				SendRepairEntity entitySendRepair = SqliteHelper.querySendRepaiByCode(partsCode);
 				if (entitySendRepair != null) {
 					id=entitySendRepair.ID;
 					String faultCodes = entitySendRepair.FaultCode;
+					for (CheckBox checkBox : checkBoxList) {
+						checkBox.setEnabled(false);
+						checkBox.setChecked(false);
+					}
 					while (faultCodes.length() > 1) {
 						String faultCode=faultCodes.substring(0,2);
 						for (CheckBox checkBox : checkBoxList) {
-							checkBox.setEnabled(false);
 							if (checkBox.getTag().toString().equals(faultCode)) {
 								checkBox.setChecked(true);
 								break;
@@ -394,16 +406,18 @@ public class RepairActivity extends BaseActivity {
 						}
 						faultCodes=faultCodes.substring(2,faultCodes.length());
 					}
-					
+
 					edtFaultDes.setText(entitySendRepair.FaultDes);
 					edtFaultDes.setEnabled(false);
 					edtRemark.setText(entitySendRepair.Remark);
 					edtRemark.setEnabled(false);
 					isGetFault=true;
+					sp.play(music1, 1, 1, 0, 0, 1);
 				}
 				else
 				{
 					showToast("未查询到故障信息，请先下载配件故障信息");
+					sp.play(music3, 1, 1, 0, 0, 1);
 					isGetFault=false;
 				}
 				break;

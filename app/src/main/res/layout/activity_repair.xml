@@ -70,7 +70,8 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="465dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:scrollbars="vertical" >
 
             <LinearLayout
@@ -78,17 +79,12 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-
-               <LinearLayout
+                <TextView
+                    android:id="@+id/txtTagInfo"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="20dp" >
-
-                    <TextView
-                        android:id="@+id/txtTagInfo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
+                    android:layout_height="wrap_content"/>
 
                 <LinearLayout
                     android:id="@+id/layoutRepair"
@@ -96,65 +92,62 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical" >
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:orientation="horizontal" >
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/FaultType" />
-
-                        <LinearLayout
-                            android:id="@+id/FaultType_CheckBoxList"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical" >
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:orientation="horizontal" >
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/FaultDes" />
-
-                        <EditText
-                            android:id="@+id/edtFaultDes"
-                            android:layout_width="160dp"
-                            android:layout_height="80dp"
-                            android:gravity="top"
-                            android:background="@drawable/editsharp" >
-                        </EditText>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
                         android:layout_marginTop="10dp"
                         android:layout_marginLeft="10dp"
-                        android:orientation="horizontal" >
+                        android:text="@string/FaultType" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/Remark" />
-
-                        <EditText
-                            android:id="@+id/edtRemark"
-                            android:layout_width="160dp"
-                            android:layout_height="80dp"
-                            android:gravity="top"
-                            android:background="@drawable/editsharp" >
-                        </EditText>
+                    <LinearLayout
+                        android:id="@+id/FaultType_CheckBoxList"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="50dp"
+                        android:orientation="vertical" >
                     </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:text="@string/FaultDes" />
+
+                    <EditText
+                        android:id="@+id/edtFaultDes"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:layout_margin="10dp"
+                        android:gravity="top"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:background="@drawable/editsharp" >
+                    </EditText>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:text="@string/Remark" />
+
+                    <EditText
+                        android:id="@+id/edtRemark"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:layout_margin="10dp"
+                        android:gravity="top"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:background="@drawable/editsharp" >
+                    </EditText>
                 </LinearLayout>
 
                 <LinearLayout
@@ -162,64 +155,67 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:background="@color/white"
                     android:orientation="vertical" >
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="10dp"
                         android:layout_marginLeft="10dp"
-                        android:orientation="horizontal" >
+                        android:text="@string/CheckOpition" />
 
-                        <TextView
+                    <RadioGroup
+                        android:id="@+id/radioGroupCheckOpition"
+                        android:layout_marginLeft="50dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <RadioButton
+                            android:id="@+id/rbtRepairWell"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/CheckOpition" />
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:text="@string/CheckOpition_RepairWell" />
 
-                        <RadioGroup
-                            android:id="@+id/radioGroupCheckOpition"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" >
-
-                            <RadioButton
-                                android:id="@+id/rbtRepairWell"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/CheckOpition_RepairWell" />
-
-                            <RadioButton
-                                android:id="@+id/rbtBackFactory"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/CheckOpition_BackFactory" />
-
-                            <RadioButton
-                                android:id="@+id/rbtScrap"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/CheckOpition_RepairScrap" />
-                        </RadioGroup>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:orientation="horizontal" >
-
-                        <TextView
+                        <RadioButton
+                            android:id="@+id/rbtBackFactory"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/CheckResult" />
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:text="@string/CheckOpition_BackFactory" />
 
-                        <EditText
-                            android:id="@+id/edtCheckResult"
-                            android:layout_width="160dp"
-                            android:layout_height="80dp"
-                            android:gravity="top"
-                            android:background="@drawable/editsharp" >
-                        </EditText>
-                    </LinearLayout>
+                        <RadioButton
+                            android:id="@+id/rbtScrap"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:text="@string/CheckOpition_RepairScrap" />
+                    </RadioGroup>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:text="@string/CheckResult" />
+
+                    <EditText
+                        android:id="@+id/edtCheckResult"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:layout_margin="10dp"
+                        android:gravity="top"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:background="@drawable/editsharp" >
+                    </EditText>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -242,19 +238,30 @@
                         </EditText>
                     </LinearLayout>
 
-                    <LinearLayout
+                    <Button
+                        android:id="@+id/btnSav"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="20dp"
-                        android:orientation="horizontal" >
+                        android:layout_margin="10dp"
+                        android:padding="10dp"
+                        android:background="@drawable/ybtn"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:text="保 存"/>
 
-                        <CheckBox
-                            android:id="@+id/cbxComfirmRepair"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/ComfirmRepair" />
-                    </LinearLayout>
+                    <!--<LinearLayout-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_marginLeft="10dp"-->
+                        <!--android:layout_marginTop="20dp"-->
+                        <!--android:orientation="horizontal" >-->
+
+                        <!--<CheckBox-->
+                            <!--android:id="@+id/cbxComfirmRepair"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:text="@string/ComfirmRepair" />-->
+                    <!--</LinearLayout>-->
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>
