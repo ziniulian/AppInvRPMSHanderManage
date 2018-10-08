@@ -70,6 +70,12 @@
             android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
         </activity>
         <activity
+            android:name="com.invengo.rpms.SendGroupActivity"
+            android:label="班组流转"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|stateAlwaysHidden" >
+        </activity>
+        <activity
             android:name="com.invengo.rpms.CheckActivity"
             android:label="@string/check"
             android:launchMode="standard"

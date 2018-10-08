@@ -156,8 +156,10 @@ public class UtilityHelper {
 				return true;
 			} else if (opType == OpType.SendOut && (status.equals("03"))) {
 				return true;
+			} else if (opType == OpType.SendGroup && (status.equals("04") || status.equals("0D"))) {
+				return true;
 			} else if (opType == OpType.Use
-					&& (status.equals("04") || status.equals("07"))
+					&& (status.equals("04") || status.equals("07") || status.equals("0D"))
 					&& isScrap.equals("00")) {
 				return true;
 			} else if (opType == OpType.Stop && status.equals("05")

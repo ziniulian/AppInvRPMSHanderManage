@@ -17,4 +17,5 @@ public class OpType {
 	public static final int Scrap =13;// 报废
 	public static final int Del =14;// 删除一个配件标签
 	public static final int New =15;// 新增一个配件标签
+	public static final int SendGroup=16; //表示发组
 }

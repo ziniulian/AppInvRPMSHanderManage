@@ -157,11 +157,14 @@ public class MultiQueryOneActivity extends Activity {
 					break;
 				case 0x0B:
 					r.append("在所（待报废）");
+				case 0x0D:
+					r.append("到组");
 					break;
 			}
 
 			if (m != null) {
 				r.append("\n\n位置：");
+				TbCodeEntity ce;
 				switch (stu) {
 					case 0x01:
 					case 0x03:
@@ -178,7 +181,7 @@ public class MultiQueryOneActivity extends Activity {
 					case 0x04:
 					case 0x06:
 					case 0x07:
-						TbCodeEntity ce = SqliteHelper.queryDbCodeByType("01", m.get("Code"));
+						ce = SqliteHelper.queryDbCodeByType("01", m.get("Code"));
 						if (ce != null) {
 							r.append("单位_");
 							r.append(ce.dbName);
@@ -189,6 +192,13 @@ public class MultiQueryOneActivity extends Activity {
 						if (entityStation != null) {
 							r.append("站点_");
 							r.append(entityStation.StationName);
+						}
+						break;
+					case 0x0D:
+						ce = SqliteHelper.queryDbCodeByType("02", m.get("Code"));
+						if (ce != null) {
+							r.append("班组_");
+							r.append(ce.dbName);
 						}
 						break;
 				}

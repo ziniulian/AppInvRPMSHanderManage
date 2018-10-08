@@ -110,6 +110,7 @@ public class MainActivity extends BaseActivity {
 				getResources().getString(R.string.pairsStockIn),
 				getResources().getString(R.string.pairsStockOut),
 				getResources().getString(R.string.pairsSendOut),
+				getResources().getString(R.string.pairsSendGroup),
 				getResources().getString(R.string.pairsCheck),
 				getResources().getString(R.string.pairsRun),
 				getResources().getString(R.string.pairsStop),
@@ -127,6 +128,7 @@ public class MainActivity extends BaseActivity {
 				R.drawable.hom_tagquery,
 				R.drawable.hom_partstockin,
 				R.drawable.hom_partsstockout,
+				R.drawable.hom_parthandout,
 				R.drawable.hom_parthandout,
 				R.drawable.hom_partscheck,
 				R.drawable.hom_partstart,
@@ -229,6 +231,11 @@ public class MainActivity extends BaseActivity {
 						R.string.pairsSendOut))) {
 					Intent intent = new Intent(MainActivity.this,
 							SendOutActivity.class);
+					startActivity(intent);
+				} else if (title.equals(getResources().getString(
+						R.string.pairsSendGroup))) {
+					Intent intent = new Intent(MainActivity.this,
+							SendGroupActivity.class);
 					startActivity(intent);
 				} else if (title.equals(getResources().getString(
 						R.string.pairsCheck))) {

@@ -20,7 +20,7 @@
     <string name="ReadTip">提示：扣动扳机读取</string>
     <string name="connecting">连接中&#8230;</string>
     <string name="readerStatus">状态:</string>
-    <string name="softVesion">V1.0.27</string>
+    <string name="softVesion">V1.0.28</string>
     <string name="dataVesion">V1.0.0.3</string>
     <string name="sendFail">发送读取指令失败</string>
     <string name="stopFail">停止读取失败</string>
@@ -56,6 +56,7 @@
     <string name="pairsStockIn">配件入库</string>
     <string name="pairsStockOut">配件出库</string>
     <string name="pairsSendOut">配件发料</string>
+    <string name="pairsSendGroup">班组流转</string>
     <string name="pairsCheck">配件盘点</string>
     <string name="pairsRun">配件启用</string>
     <string name="pairsStop">配件停用</string>

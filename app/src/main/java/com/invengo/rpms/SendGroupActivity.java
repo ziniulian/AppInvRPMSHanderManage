@@ -11,8 +11,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -47,7 +45,7 @@ import invengo.javaapi.protocol.IRP1.ReadTag.ReadMemoryBank;
 import static com.invengo.rpms.util.WrtRa.WRT_OK;
 import static com.invengo.rpms.util.WrtRa.WRT_UD_ERR;
 
-public class SendOutActivity extends BaseActivity {
+public class SendGroupActivity extends BaseActivity {
 
 	TextView txtStatus;
 	Spinner sprTakeDept;
@@ -63,10 +61,10 @@ public class SendOutActivity extends BaseActivity {
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_sendout);
+		setContentView(R.layout.activity_sendgroup);
 		
 		reader.onMessageNotificationReceived.clear();
-		reader.onMessageNotificationReceived.add(SendOutActivity.this);
+		reader.onMessageNotificationReceived.add(SendGroupActivity.this);
 
 		txtStatus = (TextView) findViewById(R.id.txtStatus);
 		txtInfo = (TextView) findViewById(R.id.txtInfo);
@@ -89,11 +87,11 @@ public class SendOutActivity extends BaseActivity {
 		sprTakeDept = (Spinner) findViewById(R.id.sprTakeDept);
 
 		List<String> listDept = new ArrayList<String>();
-		List<TbCodeEntity> listCode = SqliteHelper.queryDbCodeByType("01");
+		List<TbCodeEntity> listCode = SqliteHelper.queryDbCodeByType("02");
 		int did = -1;
 		for (int i = 0; i < listCode.size(); i ++) {
 			TbCodeEntity entity = listCode.get(i);
-			if (entity.dbCode.equals(myApp.getDeptCode())) {
+			if (entity.dbCode.equals(myApp.getGroupCode())) {
 				did = i;
 			}
 			listDept.add(entity.dbCode + "-" + entity.dbName);
@@ -102,32 +100,32 @@ public class SendOutActivity extends BaseActivity {
 		final ArrayAdapter<String> adapterDept = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, listDept);
 		adapterDept.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
 		sprTakeDept.setAdapter(adapterDept);
-		sprTakeDept.setOnItemSelectedListener(new OnItemSelectedListener() {
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				String deptSelected = adapterDept.getItem(position).toString();
-				String deptIdSelected = deptSelected.split("-")[0];
-
-				listUserName.clear();
-				List<UserEntity> listUser = SqliteHelper.queryUser();
-				for (UserEntity entity : listUser) {
-					if (entity.deptCode.equals(deptIdSelected)) {
-						listUserName.add(entity.userId + "-" + entity.userName);
-					}
-				}
-				adapterUser.notifyDataSetChanged();
-			}
-
-			// 没有选中时的处理
-			public void onNothingSelected(AdapterView<?> parent) {
-			}
-		});
+//		sprTakeDept.setOnItemSelectedListener(new OnItemSelectedListener() {
+//			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//				String deptSelected = adapterDept.getItem(position).toString();
+//				String deptIdSelected = deptSelected.split("-")[0];
+//
+//				listUserName.clear();
+//				List<UserEntity> listUser = SqliteHelper.queryUser();
+//				for (UserEntity entity : listUser) {
+//					if (entity.deptCode.equals(deptIdSelected)) {
+//						listUserName.add(entity.userId + "-" + entity.userName);
+//					}
+//				}
+//				adapterUser.notifyDataSetChanged();
+//			}
+//
+//			// 没有选中时的处理
+//			public void onNothingSelected(AdapterView<?> parent) {
+//			}
+//		});
 		if (did != -1) {
 			sprTakeDept.setSelection(did);
 		}
 
 		sprTakeUser = (Spinner) findViewById(R.id.sprTakeUser);
-		String deptSelected = adapterDept.getItem(0).toString();
-		String deptIdSelected = deptSelected.split("-")[0];
+//		String deptSelected = adapterDept.getItem(0).toString();
+		String deptIdSelected = myApp.getDeptCode();
 		listUserName.clear();
 		List<UserEntity> listUser = SqliteHelper.queryUser();
 		did = -1;
@@ -168,7 +166,7 @@ public class SendOutActivity extends BaseActivity {
 
 			for (PartsEntity partsEntiry : listPartsEntity) {
 				ps.add(partsEntiry.PartsCode);
-				listSql.add("update TbParts set Status='D',"
+				listSql.add("update TbParts set Status='G',"
 						+ "LastOpTime='" + SqliteHelper.f.format(new Date())
 						+ "',OpUser='" + user
 						+ "',Code='" + takeDeptStr
@@ -179,7 +177,7 @@ public class SendOutActivity extends BaseActivity {
 			String remark = "";
 			String info = takeUserStr + "," + takeDeptStr + "," + remark + "," + user + "," + opTime;
 
-			SqliteHelper.SaveOpRecord(ps, OpType.SendOut, info);	// 保存操作记录
+			SqliteHelper.SaveOpRecord(ps, OpType.SendGroup, info);	// 保存操作记录
 			SqliteHelper.ExceSql(listSql);	// 更新本地数据库信息
 		}
 
@@ -188,7 +186,7 @@ public class SendOutActivity extends BaseActivity {
 
 	private OnClickListener btnConfigClickListener = new OnClickListener() {
 		public void onClick(View v) {
-			AlertDialog.Builder builder = new Builder(SendOutActivity.this, R.style.AppTheme);
+			AlertDialog.Builder builder = new Builder(SendGroupActivity.this, R.style.AppTheme);
 			builder.setTitle("温馨提示");
 			builder.setMessage(getResources().getString(
 					R.string.pairsSendOutTipInfo));
@@ -209,7 +207,7 @@ public class SendOutActivity extends BaseActivity {
 							.getReceivedMessage().getUserData());
 
 					// 找到配件信息并且验证是否允许发料
-					if (UtilityHelper.CheckEpc(epc) == 0 && UtilityHelper.CheckUserData(userData, OpType.SendOut)) {
+					if (UtilityHelper.CheckEpc(epc) == 0 && UtilityHelper.CheckUserData(userData, OpType.SendGroup)) {
 						if (IsValidEpc(epc, false)) {
 							String partsCode = UtilityHelper.GetCodeByEpc(epc);
 							if (partsCode.length() > 0) {
@@ -224,7 +222,7 @@ public class SendOutActivity extends BaseActivity {
 								if (!isExsit) {
 									String tid = Util.convertByteArrayToHexString(data.getReceivedMessage().getTID());
 									cupcd = partsCode;
-									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(DATA_ARRIVED_PAIRS, 0, 0, new String[] {tid, epc, "0400", partsCode, userData.substring(0, 4)}));
+									cardOperationHandler.sendMessage(cardOperationHandler.obtainMessage(DATA_ARRIVED_PAIRS, 0, 0, new String[] {tid, epc, "0D00", partsCode, userData.substring(0, 4)}));
 								}
 							}
 						}
