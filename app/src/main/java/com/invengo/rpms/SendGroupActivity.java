@@ -62,7 +62,7 @@ public class SendGroupActivity extends BaseActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_sendgroup);
-		
+
 		reader.onMessageNotificationReceived.clear();
 		reader.onMessageNotificationReceived.add(SendGroupActivity.this);
 
@@ -71,7 +71,7 @@ public class SendGroupActivity extends BaseActivity {
 
 		btnConfig = (Button) findViewById(R.id.btnConfig);
 		btnConfig.setOnClickListener(btnConfigClickListener);
-		
+
 		final Button btnBack = (Button) findViewById(R.id.btnBack);
 		btnBack.setOnTouchListener(new Btn001());
 		btnBack.setOnClickListener(new OnClickListener() {
@@ -100,31 +100,11 @@ public class SendGroupActivity extends BaseActivity {
 		final ArrayAdapter<String> adapterDept = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, listDept);
 		adapterDept.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
 		sprTakeDept.setAdapter(adapterDept);
-//		sprTakeDept.setOnItemSelectedListener(new OnItemSelectedListener() {
-//			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//				String deptSelected = adapterDept.getItem(position).toString();
-//				String deptIdSelected = deptSelected.split("-")[0];
-//
-//				listUserName.clear();
-//				List<UserEntity> listUser = SqliteHelper.queryUser();
-//				for (UserEntity entity : listUser) {
-//					if (entity.deptCode.equals(deptIdSelected)) {
-//						listUserName.add(entity.userId + "-" + entity.userName);
-//					}
-//				}
-//				adapterUser.notifyDataSetChanged();
-//			}
-//
-//			// 没有选中时的处理
-//			public void onNothingSelected(AdapterView<?> parent) {
-//			}
-//		});
 		if (did != -1) {
 			sprTakeDept.setSelection(did);
 		}
 
 		sprTakeUser = (Spinner) findViewById(R.id.sprTakeUser);
-//		String deptSelected = adapterDept.getItem(0).toString();
 		String deptIdSelected = myApp.getDeptCode();
 		listUserName.clear();
 		List<UserEntity> listUser = SqliteHelper.queryUser();
